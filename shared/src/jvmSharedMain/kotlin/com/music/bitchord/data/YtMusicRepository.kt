@@ -6,6 +6,7 @@ import com.music.bitchord.data.innertube.InnertubeParser
 import com.music.bitchord.data.model.Account
 import com.music.bitchord.data.model.AccountChannel
 import com.music.bitchord.data.model.isExactArtistMatch
+import com.music.bitchord.data.model.isEpisode
 import com.music.bitchord.data.model.isPodcastShow
 import com.music.bitchord.data.model.normalizedArtistName
 import com.music.bitchord.data.model.ArtistPage
@@ -257,6 +258,8 @@ object YtMusicRepository {
                     thumbnailUrl = it.thumbnailUrl,
                     videoId = it.videoId,
                     browseId = null,
+                    // An episode in the history is not music: Home's speed dial leaves it out.
+                    isPodcastEpisode = it.isEpisode,
                 )
             },
         )

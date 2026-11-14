@@ -32,6 +32,10 @@ object HomeDiskCache {
                         thumbnailUrl = entry.optNullableString("thumb"),
                         videoId = entry.optNullableString("video"),
                         browseId = entry.optNullableString("browse"),
+                        isVideo = entry.optBoolean("isVideo", false),
+                        durationText = entry.optNullableString("duration"),
+                        // Home's speed dial leaves out an episode; see [ShelfItem.isPodcast].
+                        isPodcastEpisode = entry.optBoolean("podcast", false),
                     )
                 },
                 subtitle = o.optString("subtitle"),
@@ -53,7 +57,10 @@ object HomeDiskCache {
                             .put("subtitle", item.subtitle)
                             .put("thumb", item.thumbnailUrl ?: JSONObject.NULL)
                             .put("video", item.videoId ?: JSONObject.NULL)
-                            .put("browse", item.browseId ?: JSONObject.NULL),
+                            .put("browse", item.browseId ?: JSONObject.NULL)
+                            .put("isVideo", item.isVideo)
+                            .put("duration", item.durationText ?: JSONObject.NULL)
+                            .put("podcast", item.isPodcastEpisode),
                     )
                 }
                 json.put(

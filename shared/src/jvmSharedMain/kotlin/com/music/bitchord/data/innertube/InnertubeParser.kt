@@ -1864,8 +1864,14 @@ object InnertubeParser {
             browseId = resolvedBrowseId,
             isVideo = isVideo,
             // A "Listen again" card for an episode states its type in its play
-            // action; the music dial leaves it out.
-            isPodcastEpisode = videoId != null && renderer.isPodcastEpisode(),
+            // action, or opens the episode's own page (MPED, a "non-music audio
+            // track"), or is billed as one; the music dial leaves it out.
+            isPodcastEpisode = videoId != null && (
+                renderer.isPodcastEpisode() ||
+                    browseId?.startsWith("MPED") == true ||
+                    endpoint.findString("pageType") == NON_MUSIC_AUDIO_PAGE ||
+                    subtitle.substringBefore(" • ").trim().equals("Episode", ignoreCase = true)
+                ),
         )
     }
 
@@ -1984,6 +1990,9 @@ private fun JsonObject.isPodcastEpisode(): Boolean =
     findString("musicVideoType") == PODCAST_EPISODE_TYPE
 
 private const val PODCAST_EPISODE_TYPE = "MUSIC_VIDEO_TYPE_PODCAST_EPISODE"
+
+/** The page type of an episode's own page, which an MPED card opens. */
+private const val NON_MUSIC_AUDIO_PAGE = "MUSIC_PAGE_TYPE_NON_MUSIC_AUDIO_TRACK_PAGE"
 
 /** "489K views", "1.2M views", "1 view", "12,345 views": the count is group 1. */
 private val ENGLISH_VIEWS = Regex("""([\d.,]+\s?[KMB]?)\s+views?""", RegexOption.IGNORE_CASE)

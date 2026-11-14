@@ -2537,7 +2537,8 @@ private fun BitChordApp(
                 isVideo = item.isVideo,
                 // Only a podcast episode's card states one.
                 durationText = item.durationText,
-                episode = item.durationText?.let { EpisodeInfo() },
+                // An episode plays as one, and so stays off the speed dial.
+                episode = if (item.durationText != null || item.isPodcastEpisode) EpisodeInfo() else null,
             )
         }
     }

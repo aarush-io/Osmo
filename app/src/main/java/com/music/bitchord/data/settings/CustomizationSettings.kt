@@ -4,7 +4,7 @@ import android.content.SharedPreferences
 import com.music.bitchord.data.model.HomeShelf
 import com.music.bitchord.data.model.ShelfItem
 import com.music.bitchord.data.model.isPodcastShow
-import com.music.bitchord.data.model.isPodcast
+import com.music.bitchord.data.podcasts.isPodcastTile
 import com.music.bitchord.data.podcasts.PodcastSource
 import com.music.bitchord.ui.components.DialTileStyle
 import com.music.bitchord.ui.components.GlassTint
@@ -671,7 +671,9 @@ object CustomizationSettings {
                     .put("subtitle", pin.subtitle)
                     .put("thumb", pin.thumbnailUrl ?: JSONObject.NULL)
                     .put("video", pin.videoId ?: JSONObject.NULL)
-                    .put("browse", pin.browseId ?: JSONObject.NULL),
+                    .put("browse", pin.browseId ?: JSONObject.NULL)
+                    // So that a saved dial still knows an episode from a track.
+                    .put("podcast", pin.isPodcastEpisode || pin.durationText != null),
             )
         }
         return json.toString()
@@ -728,7 +730,7 @@ object CustomizationSettings {
      */
     fun assembleDial(pins: List<ShelfItem>, picks: List<ShelfItem>): List<ShelfItem> {
         val hidden = hiddenFromDial.value
-        return (pins + picks.filterNot { it.isPodcast })
+        return (pins + picks.filterNot { it.isPodcastTile })
             .filter { it.speedDialId != null && it.speedDialId !in hidden }
             .distinctBy { it.speedDialId }
             .take(SPEED_DIAL_SIZE)
@@ -751,6 +753,7 @@ object CustomizationSettings {
                     thumbnailUrl = o.optStringOrNull("thumb"),
                     videoId = o.optStringOrNull("video"),
                     browseId = o.optStringOrNull("browse"),
+                    isPodcastEpisode = o.optBoolean("podcast", false),
                 )
             }
         }.getOrDefault(emptyList())
