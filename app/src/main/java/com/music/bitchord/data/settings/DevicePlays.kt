@@ -3,6 +3,8 @@ package com.music.bitchord.data.settings
 import android.content.SharedPreferences
 import com.music.bitchord.data.model.ShelfItem
 import com.music.bitchord.data.model.Song
+import com.music.bitchord.data.model.isEpisode
+import com.music.bitchord.data.podcasts.KnownEpisodes
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.json.JSONArray
 import org.json.JSONObject
@@ -84,6 +86,8 @@ object DevicePlays {
                         recent[song.videoId] = ShelfItem(song.title, song.artist, song.thumbnailUrl, song.videoId, null)
                     }
                 }
+                // An episode played before episodes were kept off the speed dial.
+                recent.keys.removeAll { KnownEpisodes.contains(it) }
             }
         }
     }
@@ -96,7 +100,12 @@ object DevicePlays {
             times.remove(id)
             times[id] = System.currentTimeMillis()
             while (times.size > MAX_TIMES) times.remove(times.keys.first())
-            if (song.title.isNotBlank()) {
+            // A queue put back after a restart can lose what says a song is an episode.
+            if (song.isEpisode || KnownEpisodes.contains(id)) {
+                // The speed dial is music: an episode is on the Podcasts page's dial.
+                KnownEpisodes.add(id)
+                recent.remove(id)
+            } else if (song.title.isNotBlank()) {
                 recent.remove(id)
                 recent[id] = ShelfItem(song.title, song.artist, song.thumbnailUrl, id, null, isVideo = song.isVideo)
                 while (recent.size > MAX_RECENT) recent.remove(recent.keys.first())

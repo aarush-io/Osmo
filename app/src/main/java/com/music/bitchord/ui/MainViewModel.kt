@@ -2796,11 +2796,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     /** This app's own Replay chart for the month — Top Picks' second opinion, and all it has signed out. */
     private suspend fun localTaste(): TopPicks.LocalTaste {
+        // "For you" is music: the chart and the history count podcast
+        // episodes and their shows too, which are left out.
+        val episodes = com.music.bitchord.data.podcasts.EpisodeProgress.episodeIds() +
+            com.music.bitchord.data.podcasts.KnownEpisodes.snapshot()
         val month = runCatching { ListeningStats.summary(ReplayPeriod.THIS_MONTH) }.getOrNull()
-            ?: return TopPicks.LocalTaste()
-        // "For you" is music: the chart counts podcast episodes and their
-        // shows too, which are left out here.
-        val episodes = com.music.bitchord.data.podcasts.EpisodeProgress.episodeIds()
+            ?: return TopPicks.LocalTaste(episodes = episodes)
         val shows = month.songs.filter { it.song.videoId in episodes }.mapTo(HashSet()) { it.song.artist.lowercase() }
         return TopPicks.LocalTaste(
             artists = month.artists
@@ -2812,6 +2813,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 .filterNot { it.song.videoId in episodes || it.song.artistId?.startsWith(PODCAST_SHOW_PREFIX) == true }
                 .take(5).map { it.song },
             genres = month.genres.take(3).map { it.title },
+            episodes = episodes,
         )
     }
 

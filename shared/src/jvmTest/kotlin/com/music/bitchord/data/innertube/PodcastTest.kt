@@ -1,6 +1,7 @@
 package com.music.bitchord.data.innertube
 
 import com.music.bitchord.data.model.isEpisode
+import com.music.bitchord.data.model.isPodcast
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
@@ -358,6 +359,44 @@ class PodcastTest {
         assertEquals("FEmusic_top_non_music_audio_episodes", shelves[0].moreBrowseId)
         assertEquals("MPSPPLccc", shelves[1].items.single().browseId)
         assertNull(InnertubeParser.continuationToken(page))
+    }
+
+    @Test
+    fun listenAgain_knowsAnEpisodeCardThatOpensItsOwnPage() {
+        fun card(title: String, subtitle: String, endpoint: String) = """
+            { "musicTwoRowItemRenderer": {
+              "title": { "runs": [ { "text": "$title" } ] },
+              "subtitle": { "runs": [ { "text": "$subtitle" } ] },
+              "navigationEndpoint": $endpoint
+            } }"""
+        val home = json(
+            """
+            { "contents": { "singleColumnBrowseResultsRenderer": { "tabs": [ { "tabRenderer": { "content": {
+              "sectionListRenderer": { "contents": [
+                ${carousel(
+                "Listen again",
+                card(
+                    "An episode", "Some Show",
+                    """{ "browseEndpoint": { "browseId": "MPEDTPXdcOJRmRc",
+                      "browseEndpointContextSupportedConfigs": { "browseEndpointContextMusicConfig": {
+                        "pageType": "MUSIC_PAGE_TYPE_NON_MUSIC_AUDIO_TRACK_PAGE"
+                      } } } }""",
+                ) + "," + card(
+                    "Billed as one", "Episode • Other Show",
+                    """{ "watchEndpoint": { "videoId": "eYSOabR3YP0" } }""",
+                ) + "," + card(
+                    "A song", "Song • A Singer",
+                    """{ "watchEndpoint": { "videoId": "dQw4w9WgXcQ" } }""",
+                ),
+            )}
+              ] }
+            } } } ] } } }
+            """,
+        )
+        val items = InnertubeParser.parseHome(home).single { it.title == "Listen again" }.items
+        assertEquals(listOf("TPXdcOJRmRc", "eYSOabR3YP0", "dQw4w9WgXcQ"), items.map { it.videoId })
+        // Home's speed dial is music: it leaves out the two episodes, and keeps the song.
+        assertEquals(listOf(true, true, false), items.map { it.isPodcast })
     }
 
     @Test

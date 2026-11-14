@@ -1,6 +1,7 @@
 package com.music.bitchord
 
 import com.music.bitchord.data.model.ShelfItem
+import com.music.bitchord.data.podcasts.KnownEpisodes
 import com.music.bitchord.data.settings.SpeedDialPicker
 import com.music.bitchord.data.settings.SpeedDialSource
 import org.junit.Assert.assertEquals
@@ -32,6 +33,27 @@ class SpeedDialPickerTest {
         assertEquals(listOf("s1", "s2", "s3"), ids(picks.items))
         val fromHistory = SpeedDialPicker.pick(SpeedDialSource.HISTORY, listOf(show, song("s1"), episode), size = 3)
         assertEquals(listOf("s1"), ids(fromHistory.items))
+    }
+
+    @Test
+    fun anEpisodeThatWasSeenStaysOffTheDialWhenItsCardDoesNotSayIt() {
+        // A saved dial, the device's own plays and the cached Home feed keep
+        // only the id: the list of episodes seen is what tells them apart.
+        KnownEpisodes.clearForTest()
+        try {
+            KnownEpisodes.add("ep1")
+            val picks = SpeedDialPicker.pick(
+                SpeedDialSource.YOUTUBE,
+                history = listOf(song("s2")),
+                official = listOf(song("ep1"), song("s1")),
+                size = 3,
+            )
+            assertEquals(listOf("s1", "s2"), ids(picks.items))
+            val fromHistory = SpeedDialPicker.pick(SpeedDialSource.HISTORY, listOf(song("ep1"), song("s1")), size = 3)
+            assertEquals(listOf("s1"), ids(fromHistory.items))
+        } finally {
+            KnownEpisodes.clearForTest()
+        }
     }
 
     @Test

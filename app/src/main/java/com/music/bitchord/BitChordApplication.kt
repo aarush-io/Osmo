@@ -164,6 +164,8 @@ class BitChordApplication : Application(), SingletonImageLoader.Factory, Configu
         LastPlayed.init(this)
         com.music.bitchord.playback.BoundedContextPersistence.init(this)
         com.music.bitchord.data.settings.PlayedCollections.init(this)
+        // Before the device's plays: the episodes among them come off the speed dial.
+        com.music.bitchord.data.podcasts.KnownEpisodes.init(this)
         com.music.bitchord.data.settings.DevicePlays.init(this)
         // Only told where its file is: it is read when a show's page or playback first needs it.
         com.music.bitchord.data.podcasts.EpisodeProgress.init(this)

@@ -57,6 +57,8 @@ object EpisodeProgress {
     fun know(ids: Collection<String>) {
         if (ids.isEmpty()) return
         synchronized(lock) { known.addAll(ids) }
+        // And Home's speed dial leaves them out, in this run and the next.
+        KnownEpisodes.add(ids)
     }
 
     /**
@@ -139,5 +141,5 @@ object EpisodeProgress {
     /** What the row shows: the larger of YouTube's percent and this app's. */
     fun shown(fromYouTube: Int, fromApp: Int?): Int = maxOf(fromYouTube, fromApp ?: 0).coerceIn(0, 100)
 
-    private const val PREFS_NAME = "episode_progress"
+    internal const val PREFS_NAME = "episode_progress"
 }
