@@ -2,7 +2,16 @@ package com.music.bitchord
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.ui.unit.Dp
+import com.music.bitchord.ui.components.liquidGlass
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -25,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,7 +65,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import coil3.SingletonImageLoader
+import com.music.bitchord.ui.screens.SpeedDialIntro
+import com.music.bitchord.ui.screens.speedDialArtRequest
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Locale
@@ -96,6 +111,7 @@ internal object HomeCategory {
     /** The chips the last Home read carried, kept for the next launch to show at once. */
     private var savedChips by mutableStateOf<List<HomeChip>>(emptyList())
     private var prefs: SharedPreferences? = null
+    private var appContext: Context? = null
 
     /** Selects [chip], or, when it is the one selected, goes back to the whole of Home. */
     fun toggle(chip: HomeChip) {
@@ -112,6 +128,9 @@ internal object HomeCategory {
     fun clear() {
         job?.cancel()
         moreJob?.cancel()
+        // The whole of Home's dial comes back in the same sweep; its art is
+        // still in memory from before.
+        if (selected != null) SpeedDialIntro.requestSweep()
         selected = null
         feed = UiState.Loading
         continuation = null
@@ -133,20 +152,38 @@ internal object HomeCategory {
         moreJob?.cancel()
         loadingMore = false
         job = scope.launch {
-            YtMusicRepository.homeCategory(chip.params)
-                .onSuccess { page ->
-                    if (selected?.params != chip.params) return@onSuccess
-                    seenTitles.clear()
-                    val shelves = page.shelves.filter { seenTitles.add(it.title.lowercase(Locale.ROOT)) }
-                    continuation = page.continuation
-                    feed = UiState.Success(shelves)
+            val page = YtMusicRepository.homeCategory(chip.params).getOrElse { failure ->
+                if (selected?.params == chip.params && feed !is UiState.Success) {
+                    feed = UiState.Error(failure.message ?: failure.javaClass.simpleName)
                 }
-                .onFailure { failure ->
-                    if (selected?.params != chip.params) return@onFailure
-                    if (feed !is UiState.Success) {
-                        feed = UiState.Error(failure.message ?: failure.javaClass.simpleName)
-                    }
-                }
+                return@launch
+            }
+            if (selected?.params != chip.params) return@launch
+            val seen = HashSet<String>()
+            val shelves = page.shelves.filter { seen.add(it.title.lowercase(Locale.ROOT)) }
+            // The dial's first page of art into memory before the dial shows,
+            // so its tiles all come in together, in one sweep.
+            preloadDialArt(shelves)
+            if (selected?.params != chip.params) return@launch
+            seenTitles.clear()
+            seenTitles.addAll(seen)
+            continuation = page.continuation
+            SpeedDialIntro.requestSweep()
+            feed = UiState.Success(shelves)
+        }
+    }
+
+    private suspend fun preloadDialArt(shelves: List<HomeShelf>) {
+        val context = appContext ?: return
+        if (!CustomizationSettings.speedDials.value) return
+        val firstPage = (arrange(UiState.Success(shelves), speedDialsOn = true) as? UiState.Success)
+            ?.data?.firstOrNull()?.items.orEmpty()
+            .take(SPEED_DIAL_COLUMNS * CustomizationSettings.speedDialRows.value)
+        val loader = SingletonImageLoader.get(context)
+        withTimeoutOrNull(DIAL_ART_WAIT_MS) {
+            coroutineScope {
+                firstPage.forEach { item -> launch { loader.execute(speedDialArtRequest(context, item.thumbnailUrl)) } }
+            }
         }
     }
 
@@ -172,6 +209,7 @@ internal object HomeCategory {
     /** Reads the chips saved by the last launch, once. */
     fun attach(context: Context) {
         if (prefs != null) return
+        appContext = context.applicationContext
         val p = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         prefs = p
         savedChips = readChips(p.getString(KEY_CHIPS, null))
@@ -234,6 +272,10 @@ internal object HomeCategory {
     }
 
     private const val PREFS = "home_categories"
+    private const val SPEED_DIAL_COLUMNS = 3
+
+    /** The longest the dial waits for its art before it comes in anyway. */
+    private const val DIAL_ART_WAIT_MS = 2_500L
     private const val KEY_CHIPS = "chips"
 }
 
@@ -259,15 +301,37 @@ internal fun rememberCategoryHome(account: Any?, speedDialsOn: Boolean, hidden: 
 }
 
 /** Home's category chips, beside the mark: for [com.music.bitchord.ui.screens.HomeScreen]'s mark row. */
-internal val HomeCategoryRow: @Composable () -> Unit = { HomeCategoryChips() }
+internal val HomeCategoryRow: @Composable () -> Unit = { HomeCategoryChips(floating = false) }
+
+/**
+ * The category chips again, held under the top bar while Home is scrolled
+ * down into its feed (the "For You" part, or the category's): drawn over the
+ * pages, as the mark is. [inFeed] says whether the list is down there.
+ */
+@Composable
+internal fun BoxScope.HomeCategoryPinnedRow(inFeed: () -> Boolean, top: Dp) {
+    val latest by rememberUpdatedState(inFeed)
+    val shown by remember { derivedStateOf { latest() } }
+    AnimatedVisibility(
+        visible = shown,
+        enter = fadeIn(tween(220)) + slideInVertically(tween(280)) { -it / 3 },
+        exit = fadeOut(tween(160)) + slideOutVertically(tween(220)) { -it / 3 },
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .padding(top = top),
+    ) {
+        HomeCategoryChips(floating = true)
+    }
+}
 
 /**
  * The row of category chips: scrolls sideways, in the app style (Glass,
  * Frost or Solid). The selected chip is filled with the accent and gives a
- * small spring as it is chosen.
+ * small spring as it is chosen. [floating]: the row held over the pages,
+ * under the top bar, rather than the one in Home's list.
  */
 @Composable
-private fun HomeCategoryChips() {
+private fun HomeCategoryChips(floating: Boolean) {
     val context = LocalContext.current
     remember(context) { HomeCategory.attach(context) }
     val live by YtMusicRepository.homeChips.collectAsStateWithLifecycle()
@@ -277,10 +341,14 @@ private fun HomeCategoryChips() {
     val selected = HomeCategory.selected
     val haptics = rememberHaptics()
     val rowState = rememberLazyListState()
-    // The chosen chip is brought fully into view.
+    // The chosen chip is brought into view: the held row puts it first.
     LaunchedEffect(selected?.params) {
         val at = chips.indexOfFirst { it.params == selected?.params }
         if (at < 0) return@LaunchedEffect
+        if (floating) {
+            rowState.scrollToItem(at)
+            return@LaunchedEffect
+        }
         val shown = rowState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == at }
         val end = rowState.layoutInfo.viewportEndOffset
         if (shown == null || shown.offset < 0 || shown.offset + shown.size > end) rowState.animateScrollToItem(at)
@@ -289,13 +357,14 @@ private fun HomeCategoryChips() {
         state = rowState,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        contentPadding = PaddingValues(end = PAGE_GUTTER),
+        contentPadding = PaddingValues(start = if (floating) PAGE_GUTTER else 0.dp, end = PAGE_GUTTER),
         modifier = Modifier.fillMaxWidth(),
     ) {
         items(chips, key = { it.params }) { chip ->
             CategoryChip(
                 title = chip.title,
                 selected = chip.params == selected?.params,
+                floating = floating,
                 onClick = {
                     haptics.play(Haptic.Select)
                     HomeCategory.toggle(chip)
@@ -306,7 +375,7 @@ private fun HomeCategoryChips() {
 }
 
 @Composable
-private fun CategoryChip(title: String, selected: Boolean, onClick: () -> Unit) {
+private fun CategoryChip(title: String, selected: Boolean, floating: Boolean, onClick: () -> Unit) {
     // The accent the tab bar's selected tab wears.
     val accent = LocalAmbientAccent.current ?: LocalNowPlayingTint.current ?: MaterialTheme.colorScheme.primary
     val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
@@ -346,10 +415,18 @@ private fun CategoryChip(title: String, selected: Boolean, onClick: () -> Unit) 
                 scaleX = scale.value
                 scaleY = scale.value
             }
-            // No backdrop is sampled: the chips are in Home's list, which is
-            // what the bars' glass samples. Glass gives the bars' tint, light
-            // and rim; Frost a see-through veil; Solid the theme's fill.
-            .lightweightLiquidGlass(CHIP_SHAPE, fallbackColor = surface)
+            .then(
+                if (floating) {
+                    // Over the pages, as the bars are: the real glass (or
+                    // frost, or solid fill) of the page scrolling under it.
+                    Modifier.liquidGlass(CHIP_SHAPE, carriesText = true)
+                } else {
+                    // In Home's list, which is what the bars' glass samples,
+                    // so nothing is sampled here: Glass gives the bars' tint,
+                    // light and rim; Frost a see-through veil; Solid the fill.
+                    Modifier.lightweightLiquidGlass(CHIP_SHAPE, fallbackColor = surface)
+                },
+            )
             .background(fill, CHIP_SHAPE)
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 8.dp),

@@ -5949,6 +5949,25 @@ private fun BitChordApp(
                 }
                 }
 
+                // Scrolled down into Home's feed, the category chips are held
+                // under the top bar, over the pages as the mark is.
+                Box(
+                    Modifier
+                        .matchParentSize()
+                        .graphicsLayer {
+                            alpha = HomeMark.alpha
+                            scaleX = HomeMark.scale
+                            scaleY = HomeMark.scale
+                        },
+                ) {
+                    HomeCategoryPinnedRow(
+                        inFeed = {
+                            homeRoot && homePage == HomePage.EXPLORE && homeListState.firstVisibleItemIndex > 0
+                        },
+                        top = topBarContentPadding(),
+                    )
+                }
+
                 // The Podcasts page's mark, in the same place and by the same rules.
                 PodcastsMarkLayer(
                     visible = podcastsRoot,

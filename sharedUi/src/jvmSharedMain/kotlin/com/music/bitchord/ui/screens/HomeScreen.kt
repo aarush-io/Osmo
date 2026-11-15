@@ -361,8 +361,8 @@ fun HomeScreen(
                     if (logoRowContent == null) {
                         Spacer(Modifier.height(HOME_LOGO_RESERVE))
                     } else {
-                        // Level with the mark at rest: it sits HOME_TITLE_LIFT
-                        // less 20dp below the list's top, HOME_LOGO_LARGE high.
+                        // Beside the mark at rest: it sits HOME_TITLE_LIFT less
+                        // 20dp below the list's top, HOME_LOGO_LARGE high.
                         val above = HOME_TITLE_LIFT - 20.dp
                         Box(
                             Modifier
@@ -373,7 +373,8 @@ fun HomeScreen(
                                     bottom = HOME_LOGO_RESERVE - HOME_LOGO_LARGE - above,
                                     start = PAGE_GUTTER + HOME_LOGO_WIDTH + 14.dp,
                                 ),
-                            contentAlignment = Alignment.CenterStart,
+                            // The chips' foot on the mark's.
+                            contentAlignment = Alignment.BottomStart,
                         ) {
                             logoRowContent()
                         }
