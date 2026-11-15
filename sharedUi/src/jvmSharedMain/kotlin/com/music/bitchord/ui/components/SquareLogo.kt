@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -209,6 +210,9 @@ val HOME_LOGO_LARGE = 60.dp
 /** And pinned, once the list has been scrolled. */
 val HOME_LOGO_SMALL = 34.dp
 
+/** The mark's width at rest: [HOME_LOGO_LARGE] high, in the logo's 3:4 grid. */
+val HOME_LOGO_WIDTH = HOME_LOGO_LARGE * SQUARE_LOGO_ASPECT
+
 /** Space the list reserves at its top for the mark, so the first section clears it. */
 val HOME_LOGO_RESERVE = 72.dp
 
@@ -250,6 +254,11 @@ fun HomeStickyLogo(
     refreshing: Boolean,
     pullFraction: () -> Float,
     modifier: Modifier = Modifier,
+    /**
+     * A tap on the mark, or null for none. Home's mark takes one only while a
+     * category filters the page: the tap goes back to the whole of Home.
+     */
+    onLogoClick: (() -> Unit)? = null,
     /** Drawn beside the mark and moving with it, e.g. the app's name. */
     trailing: @Composable RowScope.() -> Unit = {},
 ) {
@@ -287,7 +296,19 @@ fun HomeStickyLogo(
             color = LocalNowPlayingTint.current ?: MaterialTheme.colorScheme.onBackground,
             refreshing = refreshing,
             pullFraction = pullFraction,
-            modifier = Modifier.fillMaxHeight(),
+            modifier = Modifier
+                .fillMaxHeight()
+                .then(
+                    if (onLogoClick != null) {
+                        Modifier.clickable(
+                            interactionSource = null,
+                            indication = null,
+                            onClick = onLogoClick,
+                        )
+                    } else {
+                        Modifier
+                    },
+                ),
         )
         trailing()
     }

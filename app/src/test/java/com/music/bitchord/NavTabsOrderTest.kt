@@ -14,7 +14,12 @@ import org.junit.Test
 class NavTabsOrderTest {
 
     private fun read(stored: String?): List<Pair<NavPage, Boolean>> =
-        CustomizationSettings.readOrdered(stored, NavPage.pillPages, NavPage.defaultPill.toSet()) { name ->
+        CustomizationSettings.readOrdered(
+            stored,
+            NavPage.pillPages,
+            NavPage.defaultPill.toSet(),
+            defaultOrder = NavPage.defaultOrder,
+        ) { name ->
             NavPage.entries.firstOrNull { it.name == name }
         }.map { it.item to it.enabled }
 
@@ -27,9 +32,19 @@ class NavTabsOrderTest {
     }
 
     @Test
-    fun nothingSaved_showsHomeExplorePodcastsLibrary() {
-        assertEquals(listOf(NavPage.HOME, NavPage.EXPLORE, NavPage.PODCASTS, NavPage.LIBRARY), shown(null))
-        assertEquals(NavPage.PLAYLISTS to false, read(null).last())
+    fun nothingSaved_showsHomePlaylistsPodcastsLibrary() {
+        assertEquals(listOf(NavPage.HOME, NavPage.PLAYLISTS, NavPage.PODCASTS, NavPage.LIBRARY), shown(null))
+        // Explore is still there to switch on, last and off.
+        assertEquals(NavPage.EXPLORE to false, read(null).last())
+    }
+
+    @Test
+    fun aSavedChoiceKeepsExploreAndItsOrder() {
+        // A listener who set the bar before keeps it as set: Explore stays on.
+        assertEquals(
+            listOf(NavPage.HOME, NavPage.EXPLORE, NavPage.PODCASTS, NavPage.LIBRARY),
+            shown("HOME:1,EXPLORE:1,PODCASTS:1,LIBRARY:1,PLAYLISTS:0"),
+        )
     }
 
     @Test

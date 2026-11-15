@@ -88,6 +88,8 @@ import com.music.bitchord.data.settings.LibraryViewType
 import com.music.bitchord.ui.components.HERO_CARD_RATIO
 import com.music.bitchord.ui.components.MessageState
 import com.music.bitchord.ui.components.HOME_LOGO_RESERVE
+import com.music.bitchord.ui.components.HOME_LOGO_LARGE
+import com.music.bitchord.ui.components.HOME_LOGO_WIDTH
 import com.music.bitchord.ui.components.PAGE_GUTTER
 import com.music.bitchord.ui.components.RowMoreButton
 import com.music.bitchord.ui.components.PlayingAccent
@@ -228,6 +230,12 @@ fun HomeScreen(
      * shown by a caller that passes this.
      */
     onMoodClick: ((TopPickMood, String) -> Unit)? = null,
+    /**
+     * Drawn in the mark's row at the top of the list, to the right of the
+     * mark (which the caller draws over the list): Home's category chips.
+     * It scrolls away with the list, as the dials do.
+     */
+    logoRowContent: (@Composable () -> Unit)? = null,
 ) {
     val recentsViewType by AppUi.host.homeRecentsViewType.collectAsStateWithLifecycle()
     var showAllMoods by remember { mutableStateOf(false) }
@@ -349,7 +357,28 @@ fun HomeScreen(
             if (title != null) {
                 // The mark itself is drawn above the top bar, by the caller; this
                 // is only the room it leaves in the list.
-                item(key = "home-logo-space") { Spacer(Modifier.height(HOME_LOGO_RESERVE)) }
+                item(key = "home-logo-space") {
+                    if (logoRowContent == null) {
+                        Spacer(Modifier.height(HOME_LOGO_RESERVE))
+                    } else {
+                        // Level with the mark at rest: it sits HOME_TITLE_LIFT
+                        // less 20dp below the list's top, HOME_LOGO_LARGE high.
+                        val above = HOME_TITLE_LIFT - 20.dp
+                        Box(
+                            Modifier
+                                .fillMaxWidth()
+                                .height(HOME_LOGO_RESERVE)
+                                .padding(
+                                    top = above,
+                                    bottom = HOME_LOGO_RESERVE - HOME_LOGO_LARGE - above,
+                                    start = PAGE_GUTTER + HOME_LOGO_WIDTH + 14.dp,
+                                ),
+                            contentAlignment = Alignment.CenterStart,
+                        ) {
+                            logoRowContent()
+                        }
+                    }
+                }
             }
             // Under the dial when it leads, so it never pushes the dial about.
             if (!dialLeads) bannerItem()

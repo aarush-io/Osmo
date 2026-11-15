@@ -11,6 +11,7 @@ import com.music.bitchord.data.model.isPodcastShow
 import com.music.bitchord.data.model.normalizedArtistName
 import com.music.bitchord.data.model.ArtistPage
 import com.music.bitchord.data.model.BrowseType
+import com.music.bitchord.data.model.HomeChip
 import com.music.bitchord.data.model.HomeFeed
 import com.music.bitchord.data.model.HomeShelf
 import com.music.bitchord.data.model.LibraryPage
@@ -34,6 +35,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
@@ -105,7 +109,26 @@ object YtMusicRepository {
      */
     suspend fun home(): Result<HomeFeed> = call("home") {
         val home = Innertube.browse("FEmusic_home")
+        InnertubeParser.parseHomeChips(home).takeIf { it.isNotEmpty() }?.let { _homeChips.value = it }
         HomeFeed(InnertubeParser.parseHome(home), InnertubeParser.continuationToken(home))
+    }
+
+    private val _homeChips = MutableStateFlow<List<HomeChip>>(emptyList())
+
+    /**
+     * The category chips the last [home] answer carried, for the account it
+     * was read for. Empty until Home has been read once.
+     */
+    val homeChips: StateFlow<List<HomeChip>> = _homeChips.asStateFlow()
+
+    /**
+     * Home under one of its category chips ([homeChips]): the account's own
+     * mixes, quick picks and playlists for that category. More of it follows
+     * with [moreHome] and the continuation it gives.
+     */
+    suspend fun homeCategory(params: String): Result<HomeFeed> = call("home:chip") {
+        val response = Innertube.browse("FEmusic_home", params)
+        HomeFeed(InnertubeParser.parseHome(response), InnertubeParser.continuationToken(response))
     }
 
     /** Recently played is rendered independently, at the top of the Play page. */
