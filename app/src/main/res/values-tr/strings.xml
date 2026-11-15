@@ -528,7 +528,7 @@
     <string name="sources_order_header">Kaynaklar, bu sırayla denenir</string>
     <string name="sources_quality_capped">Bu bağlantı Yüksek kalitenin altına ayarlandığından, akışlar bu sınıra uyacak şekilde yeniden kodlanır. İndirmeler etkilenmez.</string>
     <string name="jiosaavn_mismatch_warning">Bir şarkının yanlış sürümünü eşleştirebilir. Riski sana ait olmak üzere etkinleştir.</string>
-    <string name="monochrome_source_detail">Kayıpsız FLAC. Monochrome\'da olmayan bir şarkı YouTube Music\'ten çalar.</string>
+    <string name="monochrome_source_detail">Kayıpsız FLAC.</string>
     <string name="enable_jiosaavn">JioSaavn etkinleştirilsin mi?</string>
     <string name="enable_anyway">Yine de etkinleştir</string>
     <string name="sources_subtitle">Sesin nereden geldiği ve kullanılan sıra</string>

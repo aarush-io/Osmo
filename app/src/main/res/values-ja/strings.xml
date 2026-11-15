@@ -470,7 +470,7 @@
     <string name="sources_order_header">ソース（この順番で試行）</string>
     <string name="sources_quality_capped">この接続は「高音質」より低く設定されているため、ストリームはその上限に合わせてトランスコードされます。ダウンロードには影響しません。</string>
     <string name="jiosaavn_mismatch_warning">曲の別バージョンに一致してしまうことがあります。自己責任で有効にしてください。</string>
-    <string name="monochrome_source_detail">ロスレス FLAC。Monochrome にない曲は YouTube Music で再生します。</string>
+    <string name="monochrome_source_detail">ロスレス FLAC。</string>
     <string name="enable_jiosaavn">JioSaavnを有効にしますか？</string>
     <string name="enable_anyway">有効にする</string>
     <string name="sources_subtitle">音声の取得元と使用する順序</string>

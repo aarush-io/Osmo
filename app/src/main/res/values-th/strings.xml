@@ -513,7 +513,7 @@
     <string name="sources_order_header">แหล่งข้อมูล เรียงตามลำดับที่ลอง</string>
     <string name="sources_quality_capped">การเชื่อมต่อนี้ตั้งไว้ต่ำกว่าคุณภาพสูง สตรีมจึงถูกแปลงให้พอดีกับขีดจำกัดนั้น การดาวน์โหลดไม่ได้รับผลกระทบ</string>
     <string name="jiosaavn_mismatch_warning">อาจจับคู่กับเพลงผิดเวอร์ชัน เปิดใช้โดยยอมรับความเสี่ยงเอง</string>
-    <string name="monochrome_source_detail">FLAC แบบไม่สูญเสีย หาก Monochrome ไม่มีเพลง จะเล่นจาก YouTube Music</string>
+    <string name="monochrome_source_detail">FLAC แบบไม่สูญเสีย</string>
     <string name="enable_jiosaavn">เปิดใช้ JioSaavn หรือไม่</string>
     <string name="enable_anyway">เปิดใช้ต่อไป</string>
     <string name="sources_subtitle">เสียงมาจากที่ใดและลำดับที่ใช้</string>

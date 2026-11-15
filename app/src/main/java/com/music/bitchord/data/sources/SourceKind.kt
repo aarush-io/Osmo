@@ -145,7 +145,7 @@ enum class SourceKind(
      */
     MONOCHROME(
         label = "Monochrome",
-        detail = "Lossless FLAC from Monochrome. No account. A song Monochrome does not have plays from YouTube Music.",
+        detail = "Lossless FLAC from Monochrome. No account.",
         labels = listOf("FLAC", "Lossless", "No account"),
         needsServer = false,
         canServeLossless = true,
