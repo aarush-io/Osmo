@@ -1,7 +1,9 @@
 package com.music.bitchord.ui.screens
 
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
@@ -15,6 +17,9 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.lerp
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.sin
 import androidx.compose.animation.core.spring
@@ -51,6 +56,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -90,6 +96,9 @@ import coil3.PlatformContext
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.Animatable
 import androidx.compose.runtime.SideEffect
+import com.music.bitchord.ui.components.ShimmerBox
+import com.music.bitchord.ui.components.dialTileLayer
+import androidx.compose.runtime.mutableStateMapOf
 import com.music.bitchord.data.model.CARD_ART_PX
 import com.music.bitchord.data.model.HomeShelf
 import com.music.bitchord.data.model.ShelfItem
@@ -114,6 +123,10 @@ import kotlin.math.roundToInt
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.layout.onPlaced
@@ -166,9 +179,25 @@ private fun ShelfItem.dialId(): String = videoId ?: browseId ?: title
 
 /**
  * "I'm Feeling Lucky" on the speed dial: a die drawn as a tile, last on the
- * first page. [onRoll] is called on every tap, as the die starts to roll.
+ * first page. [onRoll] is called on every tap, as the die starts to roll, and
+ * is handed what to call once the song it rolled is sounding (or once there
+ * will be none): the die goes on round until then, and lands with the song.
  */
-class SpeedDialLucky(val label: String, val onRoll: () -> Unit)
+class SpeedDialLucky(
+    val label: String,
+    /**
+     * The browse id of the page a tap opens, for a tile that opens one
+     * ("Episodes for later"): the page grows out of the tile and closes back
+     * into it, as an album's does. Null for the die, which plays.
+     */
+    val opens: String? = null,
+    /**
+     * The tile in the die's place is "Episodes for later" (the Podcasts
+     * page's dial): it is drawn as that, and a tap opens it with [onRoll].
+     */
+    val episodesForLater: Boolean = false,
+    val onRoll: (landed: () -> Unit) -> Unit,
+)
 
 /** The die's place in the dial's order: never a real item, only matched on. */
 private val LUCKY_TILE = ShelfItem(
@@ -351,10 +380,18 @@ internal fun SpeedDialShelf(
     // then leaves and pops in afresh, rather than the kept ones sliding over.
     val firstDeal = remember { SpeedDialIntro.deal }
     val deal = remember(shelf.items) { SpeedDialIntro.deal }
+    // Asked for once by the app (Home filtered to a category, or back to the
+    // whole of Home): these tiles come in as one sweep, top left to bottom
+    // right, all at once their art is in. Taken by the shelf that shows them.
+    val sweep = remember(shelf.items) { SpeedDialIntro.sweep != SpeedDialIntro.swept }
+    SideEffect { if (sweep) SpeedDialIntro.swept = SpeedDialIntro.sweep }
     // Each tile's entrance plays once per deal. The pager drops a page once it
     // is swiped away and builds it afresh on the way back, so without this a
     // dealt tile would pop in again on every visit to its page.
     val entered = remember { HashSet<String>() }
+    // The tiles whose art is in, for a sweep to wait on: it starts once every
+    // tile on its page has its art, so all come in whole, rim and art as one.
+    val artIn = remember(deal) { mutableStateMapOf<String, Boolean>() }
 
     // Turn the page while the finger rests at a side.
     LaunchedEffect(edge, dragId) {
@@ -506,6 +543,9 @@ internal fun SpeedDialShelf(
                     modifier = Modifier.fillMaxWidth(),
                 ) { page ->
                     Box(Modifier.fillMaxWidth().height(gridHeight)) {
+                        val pageArt = display.drop(page * perPage).take(perPage).mapNotNull { tile ->
+                            tile?.takeIf { it !== LUCKY_TILE && it !== HISTORY_TILE && it.thumbnailUrl != null }?.dialId()
+                        }
                         display.drop(page * perPage).take(perPage).forEachIndexed { cell, slotItem ->
                             val item = slotItem ?: return@forEachIndexed
                             // Pins, the die and the history tile stay put
@@ -531,6 +571,7 @@ internal fun SpeedDialShelf(
                                     val first = entered.add("$id#$dealt")
                                     first && page == pagerState.currentPage && (
                                         (intro && page == 0) ||
+                                            sweep ||
                                             (shownIds.isNotEmpty() && id !in shownIds) ||
                                             dealt != firstDeal
                                         )
@@ -543,10 +584,32 @@ internal fun SpeedDialShelf(
                                     // on screen. A bouncy spring, so each tile
                                     // grows a little past full size and settles.
                                     snapshotFlow { SpeedDialIntro.canStart }.first { it }
+                                    if (sweep) {
+                                        withTimeoutOrNull(SWEEP_ART_WAIT_MS) {
+                                            snapshotFlow { pageArt.all { artIn[it] == true } }.first { it }
+                                        }
+                                        // On the diagonals: A1, then B1 and A2, then C1, B2, A3 ...
+                                        delay((cell / SPEED_DIAL_COLUMNS + cell % SPEED_DIAL_COLUMNS) * SWEEP_STEP_MS)
+                                        appear.animateTo(1f, tween(SWEEP_FADE_MS, easing = FastOutSlowInEasing))
+                                        return@LaunchedEffect
+                                    }
                                     delay(cell * INTRO_STEP_MS)
                                     appear.animateTo(
                                         1f,
                                         spring(dampingRatio = INTRO_BOUNCE, stiffness = Spring.StiffnessMediumLow),
+                                    )
+                                }
+                                // In a sweep, the loading page's placeholder
+                                // stays in the tile's cell while the tile waits
+                                // for its art and fades in over it, and goes
+                                // once the tile is fully in.
+                                val holdsPlaceholder by remember(id) {
+                                    derivedStateOf { entering && sweep && appear.value < 1f }
+                                }
+                                if (holdsPlaceholder) {
+                                    ShimmerBox(
+                                        modifier = Modifier.offset { offset }.size(tileW, tileH),
+                                        shape = RoundedCornerShape(10.dp),
                                     )
                                 }
                                 val pinnedTile = id in pinnedIds
@@ -555,19 +618,34 @@ internal fun SpeedDialShelf(
                                 val tileModifier = Modifier
                                     .offset { offset }
                                     .size(tileW, tileH)
-                                    .graphicsLayer {
+                                    // Over the whole tile, its reach past the cell
+                                    // included, so a fade does not cut its corners.
+                                    .dialTileLayer {
                                         val shown = appear.value
-                                        var scale = if (entering) {
+                                        var scale = if (entering && sweep) {
+                                            // A fade with the least of a grow: no bounce.
+                                            SWEEP_START_SCALE + (1f - SWEEP_START_SCALE) * shown
+                                        } else if (entering) {
                                             // Grows from smaller, overshooting with
                                             // the spring; opaque well before it lands.
                                             INTRO_START_SCALE + (1f - INTRO_START_SCALE) * shown
                                         } else {
                                             1f
                                         }
+                                        // Faded as one picture, rim and glass with the art,
+                                        // rather than each drawn part on its own.
+                                        compositingStrategy = if (entering && sweep && shown < 1f) {
+                                            CompositingStrategy.Offscreen
+                                        } else {
+                                            CompositingStrategy.Auto
+                                        }
                                         alpha = when {
                                             dragId == id -> 0f
+                                            // "Episodes for later" is out as its list.
+                                            item === LUCKY_TILE && lucky?.opens?.let { DialLaunch.isOut(it) } == true -> 0f
                                             // Out as its page, as an open app's icon is.
                                             DialLaunch.isOut(id) -> 0f
+                                            entering && sweep -> shown.coerceIn(0f, 1f)
                                             entering -> (shown * 2.5f).coerceIn(0f, 1f)
                                             else -> shown.coerceIn(0f, 1f)
                                         }
@@ -585,7 +663,28 @@ internal fun SpeedDialShelf(
                                         cameraDistance = TILT_CAMERA_DISTANCE * this.density
                                     }
                                 val dim = { if (pinnedTile) 0f else WIGGLE_DIM * wiggleLevel }
-                                if (item === LUCKY_TILE && lucky != null) {
+                                if (item === LUCKY_TILE && lucky != null && lucky.episodesForLater) {
+                                    EpisodesForLaterTile(
+                                        label = lucky.label,
+                                        onClick = { lucky.onRoll {} },
+                                        dim = dim,
+                                        modifier = tileModifier,
+                                        // Its list grows out of the tile, as an album's page does.
+                                        onLaunch = lucky.opens?.let { opens ->
+                                            { bounds: Rect, pressedScale: Float, snapshot: ImageBitmap? ->
+                                                DialLaunch.origin = DialOrigin(
+                                                    key = opens,
+                                                    bounds = bounds,
+                                                    pressedScale = pressedScale,
+                                                    thumbnailUrl = null,
+                                                    shelfTitle = shelf.title,
+                                                    page = page,
+                                                    snapshot = snapshot,
+                                                )
+                                            }
+                                        },
+                                    )
+                                } else if (item === LUCKY_TILE && lucky != null) {
                                     LuckyDiceTile(
                                         label = lucky.label,
                                         onRoll = lucky.onRoll,
@@ -604,6 +703,7 @@ internal fun SpeedDialShelf(
                                     SpeedDialTile(
                                         item = item,
                                         spot = tileSpots.getOrPut(id) { TileSpot() },
+                                        launchShelf = shelf.title,
                                         pinned = pinnedTile && showPinIcon,
                                         newRelease = if (id in newReleaseIds) newReleaseLabel else null,
                                         source = if (sourceTags) mixSourceOf(item) else null,
@@ -634,6 +734,7 @@ internal fun SpeedDialShelf(
                                         },
                                         dim = dim,
                                         modifier = tileModifier,
+                                        onArtLoaded = { artIn[id] = true },
                                     )
                                 }
                             }
@@ -726,7 +827,13 @@ private const val ART_WIPE_FEATHER = 0.25f
  * diagonal edge rather than the tile blanking to grey and popping.
  */
 @Composable
-private fun SpeedDialArt(url: String?, contentDescription: String?, modifier: Modifier = Modifier) {
+private fun SpeedDialArt(
+    url: String?,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    /** Once the first art has loaded, or failed to. */
+    onLoaded: (() -> Unit)? = null,
+) {
     val context = LocalPlatformContext.current
     var shownUrl by remember { mutableStateOf(url) }
     // False from the moment the new art takes the bottom layer until that
@@ -752,10 +859,14 @@ private fun SpeedDialArt(url: String?, contentDescription: String?, modifier: Mo
             model = shown,
             contentDescription = contentDescription,
             contentScale = ContentScale.Crop,
-            onSuccess = { settled = true },
+            onSuccess = {
+                settled = true
+                onLoaded?.invoke()
+            },
             onError = {
                 settled = true
                 failed = true
+                onLoaded?.invoke()
             },
             modifier = Modifier.fillMaxSize(),
         )
@@ -806,6 +917,14 @@ private const val INTRO_STEP_MS = 45L
 private const val INTRO_START_SCALE = 0.35f
 private const val INTRO_BOUNCE = 0.5f
 
+/** The sweep: the gap between one diagonal of tiles and the next, each tile's fade, and its start size. */
+private const val SWEEP_STEP_MS = 70L
+private const val SWEEP_FADE_MS = 380
+private const val SWEEP_START_SCALE = 0.94f
+
+/** The longest a sweep waits for its page's art before it starts anyway. */
+private const val SWEEP_ART_WAIT_MS = 1_500L
+
 /**
  * The dial's entrance when the app opens: its first page pops in one tile at
  * a time, row by row. Once per launch; the app resets [played] when the
@@ -818,6 +937,24 @@ object SpeedDialIntro {
 
     /** Moved on by the app each time a pull to refresh deals the dial again. */
     var deal: Int by mutableIntStateOf(0)
+
+    /**
+     * Moved on by the app for the next dial shown to come in as a sweep (see
+     * [requestSweep]); [swept] is the last one a dial took.
+     */
+    var sweep: Int = 0
+        private set
+    var swept: Int = 0
+
+    /**
+     * The next tiles shown come in on the diagonals, top left to bottom right,
+     * in a fade. Also deals them anew, so tiles the dial already shows come
+     * in with the rest. The caller has their art in memory first.
+     */
+    fun requestSweep() {
+        sweep += 1
+        deal += 1
+    }
 }
 
 /** The faint chevron under the dial's page dots: there is more below. */
@@ -855,6 +992,10 @@ private fun SpeedDialTile(
     dim: () -> Float = { 0f },
     /** Where it is and its picture, for whoever needs them: see [TileSpot]. */
     spot: TileSpot = remember { TileSpot() },
+    /** The shelf it is on, for a tile whose page closes back onto it: see [DialLaunch.placed]. */
+    launchShelf: String? = null,
+    /** Once its art has loaded (or failed to): see the dial's sweep. */
+    onArtLoaded: (() -> Unit)? = null,
 ) {
     val shape = RoundedCornerShape(10.dp)
     val press = rememberTilePress()
@@ -865,7 +1006,13 @@ private fun SpeedDialTile(
     Box(
         modifier = modifier
             .dialTileOutset()
-            .onPlaced { spot.coordinates = it }
+            .onPlaced { placed ->
+                spot.coordinates = placed
+                val opens = item.browseId
+                if (launchShelf != null && opens != null) {
+                    DialLaunch.placed(opens, launchShelf, card = false, at = placed)
+                }
+            }
             .tilePress(press)
             .drawWithContent {
                 drawn.record { this@drawWithContent.drawContent() }
@@ -894,7 +1041,7 @@ private fun SpeedDialTile(
             )
             .contextClick(onLongPress),
     ) {
-        SpeedDialArt(item.thumbnailUrl, item.title, Modifier.fillMaxSize())
+        SpeedDialArt(item.thumbnailUrl, item.title, Modifier.fillMaxSize(), onLoaded = onArtLoaded)
         if (showLabel) {
             Box(
                 Modifier
@@ -965,6 +1112,132 @@ private fun NewReleaseTag(label: String, modifier: Modifier = Modifier) {
         )
     }
 }
+
+/**
+ * The "Episodes for later" tile, in the die's place on the Podcasts page's
+ * dial: a stack of cards with a microphone cut out of the front one, white on
+ * a ground that runs from pink to violet. In the dark theme the ground is the
+ * same run of colours, darker. [label] is only read out, not drawn: the
+ * picture says it.
+ */
+@Composable
+private fun EpisodesForLaterTile(
+    label: String,
+    onClick: () -> Unit,
+    dim: () -> Float,
+    modifier: Modifier = Modifier,
+    /**
+     * Called before [onClick] for a tile that opens a page, with where the
+     * tile is, how far in it was pressed and its picture, as [SpeedDialTile]
+     * gives them: for the page to grow out of it.
+     */
+    onLaunch: ((bounds: Rect, pressedScale: Float, snapshot: ImageBitmap?) -> Unit)? = null,
+) {
+    val shape = RoundedCornerShape(10.dp)
+    val press = rememberTilePress()
+    val light = MaterialTheme.colorScheme.surface.luminance() > 0.5f
+    val ground = if (light) LATER_GROUND_LIGHT else LATER_GROUND_DARK
+    // Its picture and its place, for the page it opens to grow out of (see [SpeedDialTile]).
+    val drawn = rememberGraphicsLayer()
+    val placed = remember { arrayOfNulls<LayoutCoordinates>(1) }
+    Box(
+        modifier
+            .dialTileOutset()
+            .onPlaced { placed[0] = it }
+            .tilePress(press)
+            .drawWithContent {
+                drawn.record { this@drawWithContent.drawContent() }
+                drawLayer(drawn)
+            }
+            .clip(shape)
+            .dialTileBorder(shape)
+            .background(Brush.linearGradient(ground))
+            .clickable(
+                interactionSource = press.interactions,
+                indication = null,
+                onClickLabel = label,
+            ) {
+                press.tap {
+                    if (onLaunch != null) {
+                        val bounds = placed[0]?.takeIf { it.isAttached }
+                            ?.let { it.findRootCoordinates().localBoundingBoxOf(it, clipBounds = false) }
+                        if (bounds != null) {
+                            onLaunch(bounds, press.scale, runCatching { drawn.toImageBitmap() }.getOrNull())
+                        }
+                    }
+                    onClick()
+                }
+            },
+    ) {
+        // In a layer of its own, so that the microphone is cut out of the
+        // card down to the ground, and not painted on it.
+        Canvas(
+            Modifier
+                .fillMaxSize()
+                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen },
+        ) {
+            // The picture as it was drawn: on a square of 1200, in the middle of the tile.
+            val unit = size.minDimension / 1200f
+            val left = (size.width - 1200f * unit) / 2f
+            val top = (size.height - 1200f * unit) / 2f
+            fun at(x: Float, y: Float) = Offset(left + x * unit, top + y * unit)
+            fun span(width: Float, height: Float) = Size(width * unit, height * unit)
+            val white = Color.White.copy(alpha = if (light) 1f else 0.92f)
+            // The two cards behind: only their rounded top edges show.
+            listOf(Rect(365f, 188f, 839f, 220f), Rect(312f, 252f, 887f, 284f)).forEach { edge ->
+                val corner = CornerRadius(edge.height * unit)
+                drawPath(
+                    Path().apply {
+                        addRoundRect(
+                            RoundRect(
+                                rect = Rect(at(edge.left, edge.top), span(edge.width, edge.height)),
+                                topLeft = corner,
+                                topRight = corner,
+                            ),
+                        )
+                    },
+                    white,
+                )
+            }
+            // The front card.
+            drawRoundRect(white, at(253f, 317f), span(693f, 693f), CornerRadius(64f * unit))
+            // Cut out of it: the arc over the microphone,
+            drawArc(
+                color = Color.Black,
+                startAngle = 147.4f,
+                sweepAngle = 245.2f,
+                useCenter = false,
+                topLeft = at(602f - 203.5f, 655f - 203.5f),
+                size = span(407f, 407f),
+                style = Stroke(width = 53f * unit, cap = StrokeCap.Round),
+                blendMode = BlendMode.Clear,
+            )
+            // the microphone's head,
+            drawRoundRect(
+                color = Color.Black,
+                topLeft = at(538f, 567.5f),
+                size = span(128f, 218.5f),
+                cornerRadius = CornerRadius(64f * unit),
+                style = Stroke(width = 52f * unit),
+                blendMode = BlendMode.Clear,
+            )
+            // its stem and its foot.
+            drawRect(Color.Black, at(580f, 800f), span(44f, 70f), blendMode = BlendMode.Clear)
+            drawRoundRect(
+                color = Color.Black,
+                topLeft = at(534f, 858f),
+                size = span(136f, 46f),
+                cornerRadius = CornerRadius(23f * unit),
+                blendMode = BlendMode.Clear,
+            )
+        }
+        DimOverlay(dim)
+    }
+}
+
+/** The "Episodes for later" tile's ground, from its upper left to its lower right. */
+private val LATER_GROUND_LIGHT = listOf(Color(0xFFEFAAA6), Color(0xFFC9A8D8), Color(0xFF8478FF))
+private val LATER_GROUND_DARK = listOf(Color(0xFF6B3F52), Color(0xFF4C3F7A), Color(0xFF2F2890))
 
 /** The tile last on a dial's last page: a clock, opening what was played lately. */
 @Composable
@@ -1168,13 +1441,14 @@ private fun DimOverlay(dim: () -> Float) {
  * The "I'm Feeling Lucky" tile: a die of nine squares, like the app's own mark,
  * resting on three, on a dark ground with soft washes of colour drifting in
  * from its edges. In the light theme the ground is light and the lit squares
- * are dark instead. Tapped, its lights chase round the edge like a spinner, then
- * it lands on a face from one to six. [label] is only read out, not drawn.
+ * are dark instead. Tapped, its lights chase round the edge like a spinner, at
+ * one speed until the song is sounding, then slow to a stop and it lands on a
+ * face from one to six. [label] is only read out, not drawn.
  */
 @Composable
 private fun LuckyDiceTile(
     label: String,
-    onRoll: () -> Unit,
+    onRoll: (landed: () -> Unit) -> Unit,
     dim: () -> Float,
     modifier: Modifier = Modifier,
 ) {
@@ -1201,21 +1475,50 @@ private fun LuckyDiceTile(
                 press.tap {}
                 if (rolling) return@clickable
                 rolling = true
-                onRoll()
+                val sounding = CompletableDeferred<Unit>()
+                onRoll { sounding.complete(Unit) }
                 scope.launch {
                     try {
                         spin.snapTo(0f)
-                        settle.animateTo(0f, tween(DICE_FADE_MS))
                         // A light tick each time the spinner's head moves on a
-                        // square, so the bumps race and then slow with it.
+                        // square: an even beat while it goes round, then the
+                        // beats draw apart as it comes to rest.
                         var square = 0
-                        spin.animateTo(DICE_ROLL_STEPS, tween(DICE_ROLL_MS, easing = FastOutSlowInEasing)) {
+                        val tick: Animatable<Float, AnimationVector1D>.() -> Unit = {
                             val now = value.toInt()
                             if (now != square) {
                                 square = now
                                 haptics.play(Haptic.Tick)
                             }
                         }
+                        // The lights go round at one even speed from the tap
+                        // until the song is sounding, however long that is. A
+                        // die that landed first and a song that came after
+                        // read as a button that was slow to answer; so did a
+                        // roll that slowed, then took up speed again to wait.
+                        coroutineScope {
+                            val chase = launch {
+                                spin.animateTo(
+                                    DICE_WAIT_MAX_MS * DICE_SPEED,
+                                    tween(DICE_WAIT_MAX_MS.toInt(), easing = LinearEasing),
+                                    block = tick,
+                                )
+                            }
+                            settle.animateTo(0f, tween(DICE_FADE_MS))
+                            // Not so brief that it is no roll at all, with a
+                            // song that was ready before the tap.
+                            delay(DICE_MIN_MS - DICE_FADE_MS)
+                            withTimeoutOrNull(DICE_WAIT_MAX_MS - DICE_MIN_MS) { sounding.await() }
+                            chase.cancelAndJoin()
+                        }
+                        // And out of that speed to a stop, with no step in it:
+                        // this curve starts at twice its mean speed, so the
+                        // time is set to make that the speed it had.
+                        spin.animateTo(
+                            spin.value + DICE_REST_STEPS,
+                            tween((2 * DICE_REST_STEPS / DICE_SPEED).toInt(), easing = DICE_REST_EASING),
+                            block = tick,
+                        )
                         face = (1..6).random()
                         // And the landing on a face.
                         haptics.play(Haptic.Select)
@@ -1343,11 +1646,24 @@ private val DICE_FACES = listOf(
     setOf(0, 2, 3, 5, 6, 8),
 )
 
-/** Twice round, in this long, with a tail this many squares long. */
-private const val DICE_ROLL_STEPS = 16f
-private const val DICE_ROLL_MS = 950
+/**
+ * The spinner: its speed in squares a millisecond (once round in 720ms), the
+ * least time it turns, how many squares it takes to come to rest and on what
+ * curve, and its tail in squares.
+ */
+private const val DICE_SPEED = 8f / 720f
+private const val DICE_MIN_MS = 450L
+private const val DICE_REST_STEPS = 2f
+private val DICE_REST_EASING = Easing { 1f - (1f - it) * (1f - it) }
 private const val DICE_TAIL = 3.2f
 private const val DICE_FADE_MS = 140
+
+/**
+ * The longest the die waits for the song. Whoever was asked for the song
+ * stops waiting sooner than this; it is here so that a die can never be left
+ * turning.
+ */
+private const val DICE_WAIT_MAX_MS = 12_000L
 
 /** The jiggle while a tile is moved: how far pinned tiles shrink, how far they rock and how fast. */
 private const val WIGGLE_SHRINK = 0.08f

@@ -34,6 +34,15 @@
     <string name="audio_files_on_device">קובצי אודיו במכשיר</string>
     <string name="on_device">במכשיר</string>
     <string name="playlists">פלייליסטים</string>
+    <string name="podcasts">פודקאסטים</string>
+    <string name="podcasts_dial_menu">אפשרויות פודקאסטים</string>
+    <string name="podcast">פודקאסט</string>
+    <string name="read_more">קראו עוד</string>
+    <string name="about_podcast">אודות הפודקאסט</string>
+    <string name="new_episode">פרק חדש</string>
+    <string name="episodes_for_later">פרקים להמשך</string>
+    <string name="podcast_source">תוכניות מומלצות</string>
+    <string name="podcast_source_both">שניהם</string>
     <string name="new_playlist">פלייליסט חדש</string>
     <string name="saved_to_youtube_music">נשמר ל-YouTube Music</string>
     <string name="sign_in">התחברות</string>
@@ -232,6 +241,8 @@
     <string name="hide_volume_bar_subtitle">מסיר את מחוון עוצמת הקול מהנגן הראשי</string>
     <string name="hide_song_status">הסתרת סטטוס השיר</string>
     <string name="hide_song_status_subtitle">מסתיר את הטקסט „מושמע מתוך” או „הושמע על ידי” בנגן הראשי</string>
+    <string name="hide_player_status_bar">הסתרת שורת המצב</string>
+    <string name="hide_player_status_bar_subtitle">מסתיר את שורת המצב ואת הצל העליון בנגן הראשי</string>
     <string name="off">כבוי</string>
     <string name="low">נמוך</string>
     <string name="medium">בינוני</string>
@@ -248,18 +259,21 @@
     <string name="filter_non_music_audio">סנן שמע שאינו מוזיקה</string>
     <string name="filter_non_music_audio_subtitle">מסתיר קטעים קצרים מ-30 שניות, קבצי WAV, הודעות קוליות, הקלטות וצלילי מערכת</string>
     <string name="performance">ביצועים</string>
+    <string name="video_quality">איכות וידאו</string>
+    <string name="video_quality_subtitle">לקליפים ולקליפ שמוצג כ-Canvas של שיר. איכות מרבית משתמשת בעד 4K. היא צורכת הרבה יותר נתונים וסוללה, ועלולה להיות איטית בטלפונים חלשים.</string>
+    <string name="video_quality_mobile">נתונים סלולריים</string>
+    <string name="video_quality_max">איכות מרבית</string>
     <string name="high_performance_mode">מצב ביצועים גבוהים</string>
-    <string name="high_performance_subtitle">משתמש באנימציות מלאות וטשטוש, ומבקש קצב רענון מסך גבוה יותר</string>
+    <string name="high_performance_subtitle">מבקש קצב רענון מסך גבוה יותר</string>
     <string name="high_performance_active">%1$d הרץ התבקש. מערכת אנדרואיד עשויה להפחית זאת במידת הצורך.</string>
     <string name="beta">בטא</string>
     <string name="refresh_rate">קצב רענון</string>
-    <string name="high_performance_before_enabling">לפני ההפעלה</string>
-    <string name="high_performance_battery_warning">תחילה הגדר את השימוש בסוללה של Dial ללא הגבלה. קצבי רענון גבוהים צורכים יותר סוללה, מעבד ומאיץ גרפי, ועשויים לחמם את המכשיר.</string>
-    <string name="open_battery_settings">פתח הגדרות סוללה</string>
-    <string name="enable_high_performance_title">להפעיל מצב ביצועים גבוהים?</string>
-    <string name="enable_high_performance_confirmation">הפעל רק אם השימוש בסוללה של Dial מוגדר ללא הגבלה. אנדרואיד עדיין יכולה להגביל את קצב הרענון כשהמכשיר חם או כשהסוללה חלשה.</string>
+    <string name="high_performance_battery_needed">הגדר את השימוש בסוללה של Dial ללא הגבלה. הקש כאן כדי לפתוח את ההגדרות.</string>
+    <string name="disable_haptics">השבתת משוב רטט</string>
+    <string name="disable_haptics_subtitle">מפסיק את כל משוב הרטט ב-Dial</string>
+    <string name="static_background">צבעי רקע סטטיים</string>
+    <string name="static_background_subtitle">עוצר את תנועת הצבעים שמאחורי דפי האפליקציה</string>
     <string name="enable">הפעל</string>
-    <string name="not_yet">עדיין לא</string>
     <string name="activity">פעילות</string>
     <string name="activity_competing">מתחרה</string>
     <string name="activity_dialog_message">הפועל המוצג מעל הכרטיס.</string>
@@ -551,6 +565,12 @@
     <string name="sort_title_descending">אלפביתי (ת עד א)</string>
     <string name="sort_date_added">תאריך הוספה (מהחדש לישן)</string>
     <string name="sort_date_modified">תאריך שינוי (מהחדש לישן)</string>
+    <string name="sort_alphabetical">אלפביתי</string>
+    <string name="sort_date_modified_toggle">תאריך שינוי</string>
+    <string name="sort_a_to_z">א עד ת</string>
+    <string name="sort_z_to_a">ת עד א</string>
+    <string name="sort_newest_first">מהחדש לישן</string>
+    <string name="sort_oldest_first">מהישן לחדש</string>
     <string name="use_all_audio_folders">השתמש בכל תיקיות השמע</string>
     <string name="use_all_audio_folders_subtitle">מבטל את מגבלת התיקייה וסורק מוזיקה בכל המכשיר</string>
     <string name="album">אלבום</string>
@@ -1185,6 +1205,13 @@
     <string name="search_languages">Search languages</string>
 
     <string name="no_languages_match">No languages match</string>
+    <string name="language_and_location">שפה ומיקום</string>
+    <string name="content_country">מדינה</string>
+    <string name="content_country_subtitle">המלצות, מצעדים ושירים חדשים מגיעים מהמדינה הזו</string>
+    <string name="content_country_description">YouTube Music נותן המלצות, מצעדים ושירים חדשים למדינה הזו. Spotify משתמש במדינה של החשבון שלך.</string>
+    <string name="content_country_automatic">אוטומטי</string>
+    <string name="search_countries">חיפוש מדינות</string>
+    <string name="no_countries_match">אין מדינות תואמות</string>
 
 
 
@@ -1468,4 +1495,19 @@
     <string name="old_app_notice_body">ההגדרות, הספרייה, היסטוריית ההאזנה וההתחברויות מהאפליקציה הישנה לא עוברים מעצמם. באפליקציה הישנה פתחו הגדרות, ואז הנתונים שלך, והקישו על ייצוא נתונים. אחר כך הקישו כאן על ייבוא נתונים ובחרו את הקובץ. תצטרכו להתחבר מחדש.</string>
     <string name="old_app_notice_take_me_there">קח אותי לשם</string>
     <string name="old_app_notice_got_it">הבנתי</string>
+    <string name="episode_info">מידע</string>
+    <string name="episode_play_video">הפעלת וידאו</string>
+    <string name="search_podcasts_hint">חיפוש פודקאסטים</string>
+    <string name="podcast_search_hint">חפשו תוכניות ופרקים.</string>
+    <string name="podcast_search_library_hint">חפשו בתוכניות שאתם עוקבים אחריהן, בתוכניות בחוגה ובפרקים לשמיעה מאוחרת.</string>
+    <string name="podcast_search_failed">לא ניתן לחפש. נסו שוב.</string>
+    <string name="podcast_search_none">אין תוכניות או פרקים עבור “%1$s”.</string>
+    <string name="podcast_search_shows">תוכניות</string>
+    <string name="podcast_search_episodes">פרקים</string>
+    <string name="episode_filter">סינון פרקים</string>
+    <string name="episode_filter_all">הכול</string>
+    <string name="episode_filter_unplayed">לא הושמעו</string>
+    <string name="episode_filter_in_progress">בהשמעה</string>
+    <string name="episode_filter_played">הושמעו</string>
+    <string name="episode_filter_none">אין פרקים במסנן הזה.</string>
 </resources>
