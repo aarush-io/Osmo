@@ -75,7 +75,19 @@ object Innertube {
     val currentLanguage: String
         get() = com.music.bitchord.data.LocaleTags.ytHl(currentLocaleTag)
 
+    /**
+     * The `gl` for browse, search and radio requests: the country the
+     * listener chose in Settings, or [automaticRegion]. See
+     * [com.music.bitchord.data.ContentCountry].
+     */
     val currentRegion: String
+        get() = com.music.bitchord.data.ContentCountry.chosenOrNull() ?: automaticRegion
+
+    /**
+     * The `gl` Dial sent before the country setting, from the app language
+     * only. Stream resolution and play reports keep it, whatever country is chosen.
+     */
+    val automaticRegion: String
         get() = com.music.bitchord.data.LocaleTags.ytGl(currentLocaleTag)
 
     private val acceptLanguageHeader: String
@@ -832,7 +844,7 @@ object Innertube {
             parameter("cos", "Windows")
             parameter("cosver", "10.0")
             parameter("hl", currentLanguage.replace('-', '_'))
-            parameter("cr", currentRegion)
+            parameter("cr", automaticRegion)
             extras()
             statsHeaders(session)
         }.status.value

@@ -59,6 +59,8 @@ class BitChordApplication : Application(), SingletonImageLoader.Factory, Configu
         // The player is drawn by the shared UI module; this is what it reads
         // underneath — settings, the Canvas decoder, outputs, the party.
         AndroidStreamHooks.installEarly()
+        // A log left on carries on from here, so that it has the launch.
+        com.music.bitchord.data.LogRecorder.resumeAtLaunch(this)
         PlayerPlatform.install(AndroidPlayerHost(this))
         com.music.bitchord.ui.AppUi.install(com.music.bitchord.ui.AndroidAppUiHost)
         // Per-song Canvas/audio fixes, from the player's ⋯ menu.
@@ -87,6 +89,9 @@ class BitChordApplication : Application(), SingletonImageLoader.Factory, Configu
         // The per-app language picker, which YouTube Music's `hl` follows.
         // Full tag (zh-Hant / zh-Hans preserved); Innertube maps to hl/gl.
         Innertube.appLanguage = { AppCompatDelegate.getApplicationLocales().get(0)?.toLanguageTag() }
+        // The country chosen in Settings, which YouTube Music's `gl` follows.
+        // Read on each request, so it is safe before AppSettings.init.
+        com.music.bitchord.data.ContentCountry.chosen = { AppSettings.contentCountry.value }
         migrateScriptOnlyAppLocale()
         LyricsTranslation.cacheDir = cacheDir
         // PlaybackService shares this process, so seeding the cookie here means
@@ -162,7 +167,11 @@ class BitChordApplication : Application(), SingletonImageLoader.Factory, Configu
         LastPlayed.init(this)
         com.music.bitchord.playback.BoundedContextPersistence.init(this)
         com.music.bitchord.data.settings.PlayedCollections.init(this)
+        // Before the device's plays: the episodes among them come off the speed dial.
+        com.music.bitchord.data.podcasts.KnownEpisodes.init(this)
         com.music.bitchord.data.settings.DevicePlays.init(this)
+        // Only told where its file is: it is read when a show's page or playback first needs it.
+        com.music.bitchord.data.podcasts.EpisodeProgress.init(this)
         com.music.bitchord.playback.PartyPersonalQueueStash.init(this)
         // Which tracks the listener has reverted to YouTube's own upload. Read
         // by [Song.toMediaItem], so it has to be open before the restart
@@ -252,6 +261,10 @@ class BitChordApplication : Application(), SingletonImageLoader.Factory, Configu
             // the header is attached per request instead. See WebDavCoilAuth.
             .components {
                 add(WebDavCoilAuth())
+                // A video's picture is listed at 400x225; where it is drawn
+                // large, load a larger copy. Before LetterboxCrop, which
+                // then sees the address in use. See VideoThumbnailUpgrade.
+                add(com.music.bitchord.data.VideoThumbnailUpgrade())
                 // Video thumbnails come letterboxed; trim the bars so a
                 // square crop fills with picture. See LetterboxCrop.
                 add(com.music.bitchord.data.LetterboxCrop.Install())

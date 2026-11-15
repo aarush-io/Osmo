@@ -34,6 +34,15 @@
     <string name="audio_files_on_device">Arquivos de áudio no dispositivo</string>
     <string name="on_device">No dispositivo</string>
     <string name="playlists">Playlists</string>
+    <string name="podcasts">Podcasts</string>
+    <string name="podcasts_dial_menu">Opções de podcasts</string>
+    <string name="podcast">Podcast</string>
+    <string name="read_more">Ler mais</string>
+    <string name="about_podcast">Sobre o podcast</string>
+    <string name="new_episode">Novo episódio</string>
+    <string name="episodes_for_later">Episódios para mais tarde</string>
+    <string name="podcast_source">Programas recomendados</string>
+    <string name="podcast_source_both">Ambos</string>
     <string name="new_playlist">Nova playlist</string>
     <string name="saved_to_youtube_music">Salva no YouTube Music</string>
     <string name="sign_in">Entrar</string>
@@ -233,6 +242,8 @@
     <string name="hide_volume_bar_subtitle">Remove o controle de volume do player principal</string>
     <string name="hide_song_status">Ocultar status da música</string>
     <string name="hide_song_status_subtitle">Oculta o texto “Tocando de” ou “Tocado por” no player principal</string>
+    <string name="hide_player_status_bar">Ocultar a barra de estado</string>
+    <string name="hide_player_status_bar_subtitle">Oculta a barra de estado e a sombra superior no leitor principal</string>
     <string name="off">Desativado</string>
     <string name="low">Baixa</string>
     <string name="medium">Média</string>
@@ -249,18 +260,21 @@
     <string name="filter_non_music_audio">Filtrar áudio não musical</string>
     <string name="filter_non_music_audio_subtitle">Oculta clipes com menos de 30 segundos, arquivos WAV, notas de voz, gravações e sons do sistema</string>
     <string name="performance">Desempenho</string>
+    <string name="video_quality">Qualidade de vídeo</string>
+    <string name="video_quality_subtitle">Para vídeos musicais e para um vídeo musical mostrado como Canvas de uma música. Qualidade máxima usa até 4K. Usa muito mais dados e bateria e pode ser lenta em telefones fracos.</string>
+    <string name="video_quality_mobile">Dados móveis</string>
+    <string name="video_quality_max">Qualidade máxima</string>
     <string name="high_performance_mode">Modo de alto desempenho</string>
-    <string name="high_performance_subtitle">Usa animações completas e desfoque, e solicita uma taxa de atualização de tela mais alta</string>
+    <string name="high_performance_subtitle">Solicita uma taxa de atualização de tela mais alta</string>
     <string name="high_performance_active">%1$d Hz solicitados. O Android pode diminuir quando necessário.</string>
     <string name="beta">Beta</string>
     <string name="refresh_rate">Taxa de atualização</string>
-    <string name="high_performance_before_enabling">Antes de ativar</string>
-    <string name="high_performance_battery_warning">Primeiro, defina o uso da bateria do Dial como Irrestrito. Taxas de atualização mais altas usam mais bateria, CPU e GPU, e podem aquecer seu dispositivo.</string>
-    <string name="open_battery_settings">Abrir configurações da bateria</string>
-    <string name="enable_high_performance_title">Ativar modo de alto desempenho?</string>
-    <string name="enable_high_performance_confirmation">Ative apenas se o uso de bateria do Dial estiver definido como Irrestrito. O Android ainda pode limitar a taxa de atualização quando o dispositivo estiver quente ou com pouca bateria.</string>
+    <string name="high_performance_battery_needed">Defina o uso da bateria do Dial como Irrestrito. Toque aqui para abrir as configurações.</string>
+    <string name="disable_haptics">Desativar resposta tátil</string>
+    <string name="disable_haptics_subtitle">Para todas as vibrações no Dial</string>
+    <string name="static_background">Cores de fundo estáticas</string>
+    <string name="static_background_subtitle">Para o movimento das cores atrás das páginas do app</string>
     <string name="enable">Ativar</string>
-    <string name="not_yet">Ainda não</string>
     <string name="activity">Atividade</string>
     <string name="activity_competing">Competindo</string>
     <string name="activity_dialog_message">O verbo mostrado acima do cartão.</string>
@@ -552,6 +566,12 @@
     <string name="sort_title_descending">Alfabética (Z a A)</string>
     <string name="sort_date_added">Data de adição (mais recente primeiro)</string>
     <string name="sort_date_modified">Data de modificação (mais recente primeiro)</string>
+    <string name="sort_alphabetical">Alfabética</string>
+    <string name="sort_date_modified_toggle">Data de modificação</string>
+    <string name="sort_a_to_z">A a Z</string>
+    <string name="sort_z_to_a">Z a A</string>
+    <string name="sort_newest_first">Mais recentes primeiro</string>
+    <string name="sort_oldest_first">Mais antigos primeiro</string>
     <string name="use_all_audio_folders">Usar todas as pastas de áudio</string>
     <string name="use_all_audio_folders_subtitle">Remove o limite da pasta e varre músicas em todo o dispositivo</string>
     <string name="album">álbum</string>
@@ -1185,6 +1205,13 @@
     <string name="search_languages">Search languages</string>
 
     <string name="no_languages_match">No languages match</string>
+    <string name="language_and_location">Idioma e local</string>
+    <string name="content_country">País</string>
+    <string name="content_country_subtitle">Recomendações, paradas e lançamentos vêm deste país</string>
+    <string name="content_country_description">O YouTube Music mostra recomendações, paradas e lançamentos deste país. O Spotify usa o país da sua conta.</string>
+    <string name="content_country_automatic">Automático</string>
+    <string name="search_countries">Pesquisar países</string>
+    <string name="no_countries_match">Nenhum país corresponde</string>
 
 
 
@@ -1468,4 +1495,19 @@
     <string name="old_app_notice_body">Suas configurações, biblioteca, histórico de audição e logins do app antigo não vêm sozinhos. No app antigo, abra Configurações, depois Seus dados, e toque em Exportar dados. Depois toque em Importar dados aqui e escolha esse arquivo. Você precisará entrar de novo.</string>
     <string name="old_app_notice_take_me_there">Levar até lá</string>
     <string name="old_app_notice_got_it">Entendi</string>
+    <string name="episode_info">Informações</string>
+    <string name="episode_play_video">Reproduzir vídeo</string>
+    <string name="search_podcasts_hint">Pesquisar podcasts</string>
+    <string name="podcast_search_hint">Pesquise programas e episódios.</string>
+    <string name="podcast_search_library_hint">Pesquise nos programas que você segue, nos programas do seu dial e nos seus episódios para depois.</string>
+    <string name="podcast_search_failed">Não foi possível pesquisar. Tente novamente.</string>
+    <string name="podcast_search_none">Nenhum programa ou episódio para “%1$s”.</string>
+    <string name="podcast_search_shows">Programas</string>
+    <string name="podcast_search_episodes">Episódios</string>
+    <string name="episode_filter">Filtrar episódios</string>
+    <string name="episode_filter_all">Todos</string>
+    <string name="episode_filter_unplayed">Não reproduzidos</string>
+    <string name="episode_filter_in_progress">Em andamento</string>
+    <string name="episode_filter_played">Reproduzidos</string>
+    <string name="episode_filter_none">Nenhum episódio neste filtro.</string>
 </resources>

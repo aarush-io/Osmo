@@ -10,6 +10,12 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.Canvas
+import kotlin.math.roundToInt
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -209,6 +215,9 @@ val HOME_LOGO_LARGE = 60.dp
 /** And pinned, once the list has been scrolled. */
 val HOME_LOGO_SMALL = 34.dp
 
+/** The mark's width at rest: [HOME_LOGO_LARGE] high, in the logo's 3:4 grid. */
+val HOME_LOGO_WIDTH = HOME_LOGO_LARGE * SQUARE_LOGO_ASPECT
+
 /** Space the list reserves at its top for the mark, so the first section clears it. */
 val HOME_LOGO_RESERVE = 72.dp
 
@@ -250,6 +259,11 @@ fun HomeStickyLogo(
     refreshing: Boolean,
     pullFraction: () -> Float,
     modifier: Modifier = Modifier,
+    /**
+     * A tap on the mark, or null for none. Home's mark takes one only while a
+     * category filters the page: the tap goes back to the whole of Home.
+     */
+    onLogoClick: (() -> Unit)? = null,
     /** Drawn beside the mark and moving with it, e.g. the app's name. */
     trailing: @Composable RowScope.() -> Unit = {},
 ) {
@@ -259,13 +273,15 @@ fun HomeStickyLogo(
     LogoPullHaptics(refreshing = refreshing, pullFraction = pullFraction)
     val restTop = topPadding - 20.dp
     val pinnedTop = topPadding - 12.dp - 26.dp - HOME_LOGO_LARGE / 2
+    // As tall as the mark's lowest place reaches, so the mark is inside its
+    // parent wherever it rides: a tap on it lands only there. Moved in
+    // placement rather than in a graphics layer, so where it takes taps is
+    // where it is drawn.
+    Box(modifier.fillMaxWidth().height(restTop + HOME_LOGO_LARGE)) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            // Clear of the account button on the right.
-            .padding(start = PAGE_GUTTER, end = 84.dp)
-            .height(HOME_LOGO_LARGE)
-            .graphicsLayer {
+        modifier = Modifier
+            .offset {
                 val travel = (restTop - pinnedTop).toPx()
                 // Measured from the last dial page showing, so the mark stays
                 // put while the dials turn (both rest in the same place under
@@ -279,16 +295,32 @@ fun HomeStickyLogo(
                     listState.firstVisibleItemIndex == 0 -> listState.firstVisibleItemScrollOffset.toFloat()
                     else -> travel
                 }
-                translationY = restTop.toPx() - scrolled.coerceIn(0f, travel)
-            },
+                IntOffset(0, (restTop.toPx() - scrolled.coerceIn(0f, travel)).roundToInt())
+            }
+            // Clear of the account button on the right.
+            .padding(start = PAGE_GUTTER, end = 84.dp)
+            .height(HOME_LOGO_LARGE),
     ) {
         SquareLogo(
             // Wears the playing song's colour; its own while nothing plays.
             color = LocalNowPlayingTint.current ?: MaterialTheme.colorScheme.onBackground,
             refreshing = refreshing,
             pullFraction = pullFraction,
-            modifier = Modifier.fillMaxHeight(),
+            modifier = Modifier
+                .fillMaxHeight()
+                .then(
+                    if (onLogoClick != null) {
+                        Modifier.clickable(
+                            interactionSource = null,
+                            indication = null,
+                            onClick = onLogoClick,
+                        )
+                    } else {
+                        Modifier
+                    },
+                ),
         )
         trailing()
+    }
     }
 }

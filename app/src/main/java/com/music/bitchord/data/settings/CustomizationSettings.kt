@@ -3,6 +3,9 @@ package com.music.bitchord.data.settings
 import android.content.SharedPreferences
 import com.music.bitchord.data.model.HomeShelf
 import com.music.bitchord.data.model.ShelfItem
+import com.music.bitchord.data.model.isPodcastShow
+import com.music.bitchord.data.podcasts.isPodcastTile
+import com.music.bitchord.data.podcasts.PodcastSource
 import com.music.bitchord.ui.components.DialTileStyle
 import com.music.bitchord.ui.components.GlassTint
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,14 +19,23 @@ enum class NavPage(val id: Int) {
     LIBRARY(2),
     SEARCH(3),
     PLAYLISTS(4),
+    PODCASTS(5),
     ;
 
     companion object {
         fun fromId(id: Int): NavPage? = entries.firstOrNull { it.id == id }
 
         /** Pages that can sit in the bar's main pill. Search always has its own button at the end. */
-        val pillPages = listOf(HOME, EXPLORE, LIBRARY, PLAYLISTS)
-        val defaultPill = listOf(HOME, EXPLORE, LIBRARY)
+        val pillPages = listOf(HOME, EXPLORE, PODCASTS, LIBRARY, PLAYLISTS)
+        val defaultPill = listOf(HOME, PLAYLISTS, PODCASTS, LIBRARY)
+
+        /**
+         * The bar's pages for a listener who has not set them: [defaultPill]
+         * in its order, then Explore, off. Home's category chips do what
+         * Explore's moods did. A saved choice keeps its own order and
+         * switches; [pillPages] only places a page it does not have yet.
+         */
+        val defaultOrder = defaultPill + EXPLORE
     }
 }
 
@@ -49,7 +61,7 @@ object CustomizationSettings {
     private var prefs: SharedPreferences? = null
 
     /** The pages in the bar's main pill, in order, each either shown or hidden. */
-    val navTabs = MutableStateFlow(NavPage.pillPages.map { OrderedToggle(it, it in NavPage.defaultPill) })
+    val navTabs = MutableStateFlow(NavPage.defaultOrder.map { OrderedToggle(it, it in NavPage.defaultPill) })
     val startPage = MutableStateFlow(NavPage.HOME)
     val keepNavBarExpanded = MutableStateFlow(false)
 
@@ -143,6 +155,13 @@ object CustomizationSettings {
 
     /** Slow colour blobs behind the app's pages. */
     val ambientBackground = MutableStateFlow(true)
+
+    /**
+     * Those blobs hold still: the colours stay, the drift stops. Each step of
+     * the drift redraws the page and every blurred bar over it, a few times a
+     * second for as long as the app is in front.
+     */
+    val ambientStatic = MutableStateFlow(false)
 
     /** Whether those blobs take the playing song's artwork colour. */
     val ambientFollowsArtwork = MutableStateFlow(true)
@@ -256,6 +275,31 @@ object CustomizationSettings {
     /** Which of [lastSpeedDial]'s tiles were tagged as new releases. */
     val lastDialNewReleases = MutableStateFlow<Set<String>>(emptySet())
 
+    /** Shows pinned to the Podcasts page's dial, in the order they were pinned. */
+    val podcastDialPins = MutableStateFlow<List<ShelfItem>>(emptyList())
+
+    /** The Podcasts page's dial as it last showed, for the page to open on at once; see [lastSpeedDial]. */
+    val lastPodcastDial = MutableStateFlow<List<ShelfItem>>(emptyList())
+
+    /**
+     * "Shows for you" as YouTube Music last gave it, under the title it had.
+     * YouTube leaves that shelf out of some answers; this stands in then, and
+     * is the Podcasts page's row of large cards until its feed is in.
+     */
+    val podcastShowsForYou = MutableStateFlow<HomeShelf?>(null)
+
+    /** Whose [podcastShowsForYou] is: another listener's shows are not this one's. */
+    private var podcastShowsListener = ""
+
+    /**
+     * Whether the Podcasts page's dial has the "Episodes for later" tile, where
+     * the speed dial has its die. Off until it is asked for.
+     */
+    val podcastEpisodesForLater = MutableStateFlow(false)
+
+    /** Whose recommended shows fill the Podcasts page's dial after the pins. */
+    val podcastSource = MutableStateFlow(PodcastSource.YOUTUBE)
+
     fun init(prefs: SharedPreferences) {
         this.prefs = prefs
         readAll()
@@ -263,7 +307,12 @@ object CustomizationSettings {
 
     fun readAll() {
         val p = prefs ?: return
-        navTabs.value = readOrdered(p.getString(KEY_NAV_TABS, null), NavPage.pillPages, NavPage.defaultPill.toSet()) {
+        navTabs.value = readOrdered(
+            p.getString(KEY_NAV_TABS, null),
+            NavPage.pillPages,
+            NavPage.defaultPill.toSet(),
+            defaultOrder = NavPage.defaultOrder,
+        ) {
             NavPage.entries.firstOrNull { page -> page.name == it }
         }.let(::ensureOneTab)
         startPage.value = NavPage.entries.firstOrNull { it.name == p.getString(KEY_START_PAGE, null) } ?: NavPage.HOME
@@ -297,6 +346,7 @@ object CustomizationSettings {
             ?.takeIf { it.size == DEFAULT_TAB_VIEWS.size }
             ?: DEFAULT_TAB_VIEWS
         ambientBackground.value = p.getBoolean(KEY_AMBIENT_BACKGROUND, true)
+        ambientStatic.value = p.getBoolean(KEY_AMBIENT_STATIC, false)
         ambientFollowsArtwork.value = p.getBoolean(KEY_AMBIENT_FOLLOWS_ARTWORK, true)
         // The glass's defaults were redrawn (90% see-through, 4dp, 90%
         // saturation, black shaded 30% on dark, white unshaded on light). The
@@ -370,6 +420,15 @@ object CustomizationSettings {
         lastSpeedDial.value = readPins(p.getString(KEY_LAST_SPEED_DIAL, null))
         lastDialNewReleases.value = p.getStringSet(KEY_LAST_DIAL_NEW_RELEASES, emptySet())?.toSet().orEmpty()
         artistDialPins.value = readPins(p.getString(KEY_ARTIST_DIAL_PINS, null))
+        podcastDialPins.value = readPins(p.getString(KEY_PODCAST_DIAL_PINS, null))
+        lastPodcastDial.value = readPins(p.getString(KEY_LAST_PODCAST_DIAL, null))
+        podcastEpisodesForLater.value = p.getBoolean(KEY_PODCAST_EPISODES_FOR_LATER, false)
+        podcastSource.value = PodcastSource.entries
+            .firstOrNull { it.name == p.getString(KEY_PODCAST_SOURCE, null) } ?: PodcastSource.YOUTUBE
+        podcastShowsListener = p.getString(KEY_PODCAST_SHOWS_LISTENER, null).orEmpty()
+        podcastShowsForYou.value = readPins(p.getString(KEY_PODCAST_SHOWS_FOR_YOU, null))
+            .takeIf { it.isNotEmpty() }
+            ?.let { HomeShelf(p.getString(KEY_PODCAST_SHOWS_TITLE, null).orEmpty(), it) }
         // The artist dial used to be on unless switched off. Someone who never
         // touched the switch but pinned artists to that dial keeps it, rather
         // than having those pins left on a page that is no longer shown.
@@ -392,7 +451,11 @@ object CustomizationSettings {
     // ── Speed dial ──────────────────────────────────────────────────────
 
     fun isPinnedToSpeedDial(id: String?): Boolean =
-        id != null && (speedDialPins.value.any { it.speedDialId == id } || artistDialPins.value.any { it.speedDialId == id })
+        id != null && (
+            speedDialPins.value.any { it.speedDialId == id } ||
+                artistDialPins.value.any { it.speedDialId == id } ||
+                podcastDialPins.value.any { it.speedDialId == id }
+            )
 
     /** Whether [item] is an artist (a YouTube channel), which may have a dial of its own. */
     fun isArtist(item: ShelfItem): Boolean = item.videoId == null && item.browseId?.startsWith("UC") == true
@@ -405,6 +468,14 @@ object CustomizationSettings {
         val id = item.speedDialId ?: return false
         // Pinning something taken off the dial brings it back.
         if (id in hiddenFromDial.value) setHiddenFromDial(hiddenFromDial.value - id)
+        // A podcast show goes to the Podcasts page's dial. One pinned to the
+        // speed dial before that page was there comes off the speed dial as before.
+        if (item.isPodcastShow && speedDialPins.value.none { it.speedDialId == id }) {
+            val current = podcastDialPins.value
+            val pinned = current.none { it.speedDialId == id }
+            setPodcastDialPins(if (pinned) (current + item).takeLast(SPEED_DIAL_SIZE) else current.filterNot { it.speedDialId == id })
+            return pinned
+        }
         if (isArtist(item) && (artistDial.value || artistDialPins.value.any { it.speedDialId == id })) {
             val current = artistDialPins.value
             val pinned = current.none { it.speedDialId == id }
@@ -480,6 +551,7 @@ object CustomizationSettings {
         val id = item.speedDialId ?: return
         setSpeedDialPins(speedDialPins.value.filterNot { it.speedDialId == id })
         setArtistDialPins(artistDialPins.value.filterNot { it.speedDialId == id })
+        setPodcastDialPins(podcastDialPins.value.filterNot { it.speedDialId == id })
         setHiddenFromDial(hiddenFromDial.value + id)
     }
 
@@ -525,6 +597,47 @@ object CustomizationSettings {
         val updated = value.distinctBy { it.speedDialId }.take(SPEED_DIAL_SIZE)
         artistDialPins.value = updated
         prefs?.edit()?.putString(KEY_ARTIST_DIAL_PINS, writeItems(updated))?.apply()
+    }
+
+    /** Replaces the Podcasts dial's pins, in the order given. */
+    fun setPodcastDialPins(value: List<ShelfItem>) {
+        val updated = value.distinctBy { it.speedDialId }.take(SPEED_DIAL_SIZE)
+        if (updated == podcastDialPins.value) return
+        podcastDialPins.value = updated
+        prefs?.edit()?.putString(KEY_PODCAST_DIAL_PINS, writeItems(updated))?.apply()
+    }
+
+    /** Saves the dial the Podcasts page is showing, for the page to open on next time. */
+    fun setLastPodcastDial(value: List<ShelfItem>) {
+        if (value == lastPodcastDial.value) return
+        lastPodcastDial.value = value
+        prefs?.edit()?.putString(KEY_LAST_PODCAST_DIAL, writeItems(value))?.apply()
+    }
+
+    /** [podcastShowsForYou], when it is [listener]'s (null is a guest); null when it is someone else's. */
+    fun podcastShowsFor(listener: String?): HomeShelf? =
+        podcastShowsForYou.value.takeIf { podcastShowsListener == listener.orEmpty() }
+
+    /** Keeps [listener]'s "Shows for you" shelf for the answers that leave it out. */
+    fun setPodcastShowsForYou(shelf: HomeShelf, listener: String?) {
+        if (shelf == podcastShowsForYou.value && podcastShowsListener == listener.orEmpty()) return
+        podcastShowsForYou.value = shelf
+        podcastShowsListener = listener.orEmpty()
+        prefs?.edit()
+            ?.putString(KEY_PODCAST_SHOWS_FOR_YOU, writeItems(shelf.items))
+            ?.putString(KEY_PODCAST_SHOWS_TITLE, shelf.title)
+            ?.putString(KEY_PODCAST_SHOWS_LISTENER, podcastShowsListener)
+            ?.apply()
+    }
+
+    fun setPodcastSource(value: PodcastSource) {
+        podcastSource.value = value
+        prefs?.edit()?.putString(KEY_PODCAST_SOURCE, value.name)?.apply()
+    }
+
+    fun setPodcastEpisodesForLater(value: Boolean) {
+        podcastEpisodesForLater.value = value
+        prefs?.edit()?.putBoolean(KEY_PODCAST_EPISODES_FOR_LATER, value)?.apply()
     }
 
     fun setFeelingLucky(value: Boolean) {
@@ -579,7 +692,9 @@ object CustomizationSettings {
                     .put("subtitle", pin.subtitle)
                     .put("thumb", pin.thumbnailUrl ?: JSONObject.NULL)
                     .put("video", pin.videoId ?: JSONObject.NULL)
-                    .put("browse", pin.browseId ?: JSONObject.NULL),
+                    .put("browse", pin.browseId ?: JSONObject.NULL)
+                    // So that a saved dial still knows an episode from a track.
+                    .put("podcast", pin.isPodcastEpisode || pin.durationText != null),
             )
         }
         return json.toString()
@@ -628,10 +743,15 @@ object CustomizationSettings {
         )
     }
 
-    /** Pins first, then [picks], minus what was taken off the dial, up to [SPEED_DIAL_SIZE]. */
+    /**
+     * Pins first, then [picks], minus what was taken off the dial, up to
+     * [SPEED_DIAL_SIZE]. The dial is music: podcast shows and episodes in
+     * [picks] are left to the Podcasts page's dial. A pin stays, as the
+     * listener put it there.
+     */
     fun assembleDial(pins: List<ShelfItem>, picks: List<ShelfItem>): List<ShelfItem> {
         val hidden = hiddenFromDial.value
-        return (pins + picks)
+        return (pins + picks.filterNot { it.isPodcastTile })
             .filter { it.speedDialId != null && it.speedDialId !in hidden }
             .distinctBy { it.speedDialId }
             .take(SPEED_DIAL_SIZE)
@@ -654,6 +774,7 @@ object CustomizationSettings {
                     thumbnailUrl = o.optStringOrNull("thumb"),
                     videoId = o.optStringOrNull("video"),
                     browseId = o.optStringOrNull("browse"),
+                    isPodcastEpisode = o.optBoolean("podcast", false),
                 )
             }
         }.getOrDefault(emptyList())
@@ -723,6 +844,11 @@ object CustomizationSettings {
     fun setAmbientBackground(value: Boolean) {
         ambientBackground.value = value
         prefs?.edit()?.putBoolean(KEY_AMBIENT_BACKGROUND, value)?.apply()
+    }
+
+    fun setAmbientStatic(value: Boolean) {
+        ambientStatic.value = value
+        prefs?.edit()?.putBoolean(KEY_AMBIENT_STATIC, value)?.apply()
     }
 
     fun setAmbientFollowsArtwork(value: Boolean) {
@@ -886,23 +1012,33 @@ object CustomizationSettings {
 
     /**
      * Reads "NAME:1,NAME:0,…". Unknown names are dropped, and any [all] entry the
-     * stored list doesn't mention is appended, enabled when it is in [defaultOn],
-     * so entries added in later builds still show up.
+     * stored list doesn't mention is put in, enabled when it is in [defaultOn],
+     * so entries added in later builds still show up. It goes in ahead of the
+     * first stored entry that follows it in [all], and at the end when none
+     * does: Podcasts, added between Explore and Library, lands before Library
+     * in an order saved before there was a Podcasts page.
      */
     internal fun <T> readOrdered(
         stored: String?,
         all: List<T>,
         defaultOn: Set<T>,
+        /** The order with nothing saved; [all] unless told otherwise. */
+        defaultOrder: List<T> = all,
         parse: (String) -> T?,
     ): List<OrderedToggle<T>> {
-        if (stored.isNullOrBlank()) return all.map { OrderedToggle(it, it in defaultOn) }
+        if (stored.isNullOrBlank()) return defaultOrder.map { OrderedToggle(it, it in defaultOn) }
         val saved: List<OrderedToggle<T>> = stored.split(",").mapNotNull { entry ->
             val item: T = parse(entry.substringBefore(':')) ?: return@mapNotNull null
             OrderedToggle<T>(item, entry.substringAfter(':', "1") != "0")
         }.distinctBy { it.item }
-        val missing: List<OrderedToggle<T>> = all.filter { item -> saved.none { it.item == item } }
-            .map { OrderedToggle<T>(it, it in defaultOn) }
-        return saved.filter { it.item in all } + missing
+        val ordered = saved.filter { it.item in all }.toMutableList()
+        all.forEachIndexed { index, item ->
+            if (ordered.any { it.item == item }) return@forEachIndexed
+            val followers = all.subList(index + 1, all.size)
+            val at = ordered.indexOfFirst { it.item in followers }
+            ordered.add(if (at >= 0) at else ordered.size, OrderedToggle<T>(item, item in defaultOn))
+        }
+        return ordered
     }
 
     internal fun <T> writeOrdered(value: List<OrderedToggle<T>>, name: (T) -> String): String =
@@ -916,13 +1052,13 @@ object CustomizationSettings {
     const val DEFAULT_SPEED_DIAL_ROWS = 4
 
     /**
-     * The glass as it ships, in both styles: 90% see-through, a 4dp frost,
+     * The glass as it ships, in both styles: 90% see-through, a 10dp frost,
      * the colour behind it taken down a touch (90%), and the theme's own
      * tint, black shaded 30% on the dark theme and white, unshaded, on the
      * light one.
      */
     const val DEFAULT_GLASS_TRANSPARENCY = 0.9f
-    const val DEFAULT_GLASS_BLUR = 4f
+    const val DEFAULT_GLASS_BLUR = 10f
     const val MAX_GLASS_BLUR = 32f
     const val DEFAULT_GLASS_SATURATION = 0.9f
     const val MAX_GLASS_SATURATION = 2f
@@ -956,6 +1092,7 @@ object CustomizationSettings {
     private const val KEY_GLOW_PROGRESS_BAR = "custom_glow_progress_bar"
     private const val KEY_PROGRESS_BAR_STYLE = "custom_progress_bar_style"
     private const val KEY_AMBIENT_BACKGROUND = "custom_ambient_background"
+    private const val KEY_AMBIENT_STATIC = "custom_ambient_static"
     private const val KEY_LIBRARY_TAB_VIEWS = "custom_library_tab_views"
     private const val KEY_AMBIENT_FOLLOWS_ARTWORK = "custom_ambient_follows_artwork"
     /** What a glass option's key ends in for the light theme's copy of it. */
@@ -1000,6 +1137,13 @@ object CustomizationSettings {
     private const val KEY_FEELING_LUCKY = "custom_feeling_lucky"
     private const val KEY_MIXES_DIAL = "custom_mixes_dial"
     private const val KEY_ARTIST_DIAL_PINS = "custom_artist_dial_pins"
+    private const val KEY_PODCAST_DIAL_PINS = "custom_podcast_dial_pins"
+    private const val KEY_LAST_PODCAST_DIAL = "custom_last_podcast_dial"
+    private const val KEY_PODCAST_SHOWS_FOR_YOU = "custom_podcast_shows_for_you"
+    private const val KEY_PODCAST_SHOWS_TITLE = "custom_podcast_shows_title"
+    private const val KEY_PODCAST_SHOWS_LISTENER = "custom_podcast_shows_listener"
+    private const val KEY_PODCAST_EPISODES_FOR_LATER = "custom_podcast_episodes_for_later"
+    private const val KEY_PODCAST_SOURCE = "custom_podcast_source"
     private const val KEY_HIDDEN_FROM_DIAL = "custom_hidden_from_dial"
     private const val KEY_DIAL_HIDDEN_LABELS = "custom_dial_hidden_labels"
     private const val KEY_DIAL_PIN_ICON = "custom_dial_pin_icon"

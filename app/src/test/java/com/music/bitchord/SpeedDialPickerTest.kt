@@ -1,6 +1,7 @@
 package com.music.bitchord
 
 import com.music.bitchord.data.model.ShelfItem
+import com.music.bitchord.data.podcasts.KnownEpisodes
 import com.music.bitchord.data.settings.SpeedDialPicker
 import com.music.bitchord.data.settings.SpeedDialSource
 import org.junit.Assert.assertEquals
@@ -15,6 +16,45 @@ class SpeedDialPickerTest {
     private val history = items("h", 20)
 
     private fun ids(items: List<ShelfItem>) = items.map { it.videoId ?: it.browseId!! }
+
+    @Test
+    fun theDialIsMusicOnly() {
+        val show = album("MPSPPLshow")
+        val episode = song("ep1").copy(isPodcastEpisode = true)
+        val shelfEpisode = song("ep2").copy(durationText = "34:00")
+        val later = album("VLSE")
+        val picks = SpeedDialPicker.pick(
+            SpeedDialSource.YOUTUBE,
+            history = listOf(episode, song("s3")),
+            official = listOf(show, song("s1")),
+            listenAgain = listOf(shelfEpisode, later, song("s2")),
+            size = 3,
+        )
+        assertEquals(listOf("s1", "s2", "s3"), ids(picks.items))
+        val fromHistory = SpeedDialPicker.pick(SpeedDialSource.HISTORY, listOf(show, song("s1"), episode), size = 3)
+        assertEquals(listOf("s1"), ids(fromHistory.items))
+    }
+
+    @Test
+    fun anEpisodeThatWasSeenStaysOffTheDialWhenItsCardDoesNotSayIt() {
+        // A saved dial, the device's own plays and the cached Home feed keep
+        // only the id: the list of episodes seen is what tells them apart.
+        KnownEpisodes.clearForTest()
+        try {
+            KnownEpisodes.add("ep1")
+            val picks = SpeedDialPicker.pick(
+                SpeedDialSource.YOUTUBE,
+                history = listOf(song("s2")),
+                official = listOf(song("ep1"), song("s1")),
+                size = 3,
+            )
+            assertEquals(listOf("s1", "s2"), ids(picks.items))
+            val fromHistory = SpeedDialPicker.pick(SpeedDialSource.HISTORY, listOf(song("ep1"), song("s1")), size = 3)
+            assertEquals(listOf("s1"), ids(fromHistory.items))
+        } finally {
+            KnownEpisodes.clearForTest()
+        }
+    }
 
     @Test
     fun history_keepsTheHistoryOrder() {
