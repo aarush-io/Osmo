@@ -11,7 +11,14 @@ class UpdateApkTest {
     private val release = listOf(
         "Dial-v1.8.0-arm64-v8a.apk",
         "Dial-v1.8.0-armeabi-v7a.apk",
+        "Dial-v1.8.0-universal.apk",
+        "Dial-v1.8.0-x86_64.apk",
     )
+
+    @Test
+    fun `an x86_64 device takes the x86_64 APK`() {
+        assertEquals("Dial-v1.8.0-x86_64.apk", pickUpdateApk(release, listOf("x86_64", "x86", "arm64-v8a")))
+    }
 
     @Test
     fun `a 64-bit phone takes the arm64 APK`() {

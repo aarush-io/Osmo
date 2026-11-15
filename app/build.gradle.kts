@@ -80,8 +80,8 @@ android {
         // Haze falls back to a translucent scrim below that.
         minSdk = 26
         targetSdk = 36
-        versionCode = 71
-        versionName = "1.7.1"
+        versionCode = 80
+        versionName = "1.8.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -102,9 +102,9 @@ android {
             // -Parm64Only is the CI test build's: the one APK that is tested,
             // which is quicker to build and a third of the download.
             // -Pabis=arm64-v8a,armeabi-v7a names the ABIs to build, one APK
-            // each and no universal one: the releases use it, and so does a
-            // test build that a 32-bit phone has to try. With neither, a
-            // build gets every ABI plus the universal APK.
+            // each and no universal one: a test build that a 32-bit phone
+            // has to try uses it. With neither, a build gets every ABI plus
+            // the universal APK: the releases publish those four.
             val abis = (project.findProperty("abis") as String?)
                 ?.split(',')?.map { it.trim() }?.filter { it.isNotEmpty() }.orEmpty()
             when {
