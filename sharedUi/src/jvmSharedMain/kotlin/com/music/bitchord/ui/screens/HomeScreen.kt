@@ -603,7 +603,12 @@ private fun androidx.compose.foundation.lazy.LazyListScope.itemsIndexedShelves(
         seen[shelf.title] = repeat + 1
         item(key = homeShelfKey(shelf.title) + if (repeat > 0) "#$repeat" else "") {
             // Shelves that arrive after the page is up fade in rather than pop.
-            Box(Modifier.animateItem(fadeInSpec = tween(SHELF_FADE_MS), fadeOutSpec = tween(SHELF_FADE_MS / 2))) {
+            // Not the speed dial: it takes the place of its placeholder page,
+            // which goes at once, so a fade from nothing left a moment with
+            // neither on screen. Its tiles have their own entrance, and in a
+            // sweep their placeholders stay under them until each is in.
+            val fadeIn = if (shelf.title == SPEED_DIAL_SHELF_TITLE) null else tween<Float>(SHELF_FADE_MS)
+            Box(Modifier.animateItem(fadeInSpec = fadeIn, fadeOutSpec = tween(SHELF_FADE_MS / 2))) {
                 val openItem: (ShelfItem) -> Unit = { item -> onItemClick(item, shelf.title) }
                 if (shelf.title == ARTIST_DIAL_SHELF_TITLE) {
                     SpeedDialShelf(
