@@ -11,6 +11,7 @@ import com.music.bitchord.data.model.EpisodeInfo
 import com.music.bitchord.data.model.BrowseItem
 import com.music.bitchord.data.model.BrowseType
 import com.music.bitchord.data.model.HomeShelf
+import com.music.bitchord.data.model.musicOnly
 import com.music.bitchord.data.model.LibraryState
 import com.music.bitchord.data.model.LikeStatus
 import com.music.bitchord.data.model.MoodGenre
@@ -198,16 +199,20 @@ object InnertubeParser {
 
     // ---- Home feed ----------------------------------------------------------
 
-    fun parseHome(response: JsonObject): List<HomeShelf> {
+    fun parseHome(response: JsonObject, musicOnly: Boolean = true): List<HomeShelf> {
         val sections = response.o("contents")
             .o("singleColumnBrowseResultsRenderer").a("tabs")?.firstOrNull()
             .o("tabRenderer").o("content").o("sectionListRenderer").a("contents")
             .orEmpty()
 
-        return sections.mapNotNull { section ->
+        val shelves = sections.mapNotNull { section ->
             section.o("musicCarouselShelfRenderer")?.let(::carouselShelf)
                 ?: section.o("musicShelfRenderer")?.let(::plainShelf)
         }
+        // Home is music: "Shows for you" and the podcast cards on other
+        // shelves are the Podcasts tab's. A category chip's feed, the shelves
+        // that follow and the pages added to Home come here too.
+        return if (musicOnly) shelves.musicOnly() else shelves
     }
 
     /**
@@ -279,7 +284,8 @@ object InnertubeParser {
             }
         }
         walk(root)
-        return out
+        // Home is music; see [parseHome].
+        return out.musicOnly()
     }
 
     /**

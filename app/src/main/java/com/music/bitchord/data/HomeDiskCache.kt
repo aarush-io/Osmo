@@ -3,6 +3,7 @@ package com.music.bitchord.data
 import android.content.Context
 import com.music.bitchord.data.model.HomeShelf
 import com.music.bitchord.data.model.ShelfItem
+import com.music.bitchord.data.model.musicOnly
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -42,7 +43,10 @@ object HomeDiskCache {
                 moreBrowseId = o.optNullableString("moreBrowse"),
                 moreParams = o.optNullableString("moreParams"),
             )
-        }.takeIf { it.isNotEmpty() }
+        }
+            // A feed saved before Home was music only can hold "Shows for you".
+            .musicOnly()
+            .takeIf { it.isNotEmpty() }
     }.getOrNull()
 
     fun write(context: Context, listener: String?, shelves: List<HomeShelf>) {

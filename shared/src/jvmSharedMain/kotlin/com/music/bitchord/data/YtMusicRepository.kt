@@ -247,7 +247,8 @@ object YtMusicRepository {
             emptyList()
         }
 
-        val allSongs = ytSongs.distinctBy { it.videoId }.take(RECENT_LIMIT)
+        // Home is music: an episode in the history is the Podcasts tab's.
+        val allSongs = ytSongs.filterNot { it.isEpisode }.distinctBy { it.videoId }.take(RECENT_LIMIT)
         if (allSongs.isEmpty()) return null
         return HomeShelf(
             title = RECENT_TITLE,
@@ -431,7 +432,8 @@ object YtMusicRepository {
         val key = "$browseId:${params.orEmpty()}"
         moodGenreShelfCache[key]?.let { return Result.success(it) }
         return call("mood-genre:$browseId") {
-            InnertubeParser.parseHome(Innertube.browse(browseId, params))
+            // A mood's own page, not Home: it is shown as YouTube Music gives it.
+            InnertubeParser.parseHome(Innertube.browse(browseId, params), musicOnly = false)
         }.also { result -> result.getOrNull()?.let { moodGenreShelfCache.putIfAbsent(key, it) } }
     }
 

@@ -393,10 +393,47 @@ class PodcastTest {
             } } } ] } } }
             """,
         )
-        val items = InnertubeParser.parseHome(home).single { it.title == "Listen again" }.items
+        val items = InnertubeParser.parseHome(home, musicOnly = false).single { it.title == "Listen again" }.items
         assertEquals(listOf("TPXdcOJRmRc", "eYSOabR3YP0", "dQw4w9WgXcQ"), items.map { it.videoId })
-        // Home's speed dial is music: it leaves out the two episodes, and keeps the song.
         assertEquals(listOf(true, true, false), items.map { it.isPodcast })
+        // Home is music: it keeps the song alone.
+        assertEquals(
+            listOf("dQw4w9WgXcQ"),
+            InnertubeParser.parseHome(home).single { it.title == "Listen again" }.items.map { it.videoId },
+        )
+    }
+
+    @Test
+    fun home_hasNoShelfOfShowsInAnyLanguage() {
+        fun song(videoId: String) = """
+            { "musicTwoRowItemRenderer": {
+              "title": { "runs": [ { "text": "A song" } ] },
+              "subtitle": { "runs": [ { "text": "Song • A Singer" } ] },
+              "navigationEndpoint": { "watchEndpoint": { "videoId": "$videoId" } }
+            } }"""
+        fun page(contents: String) = json(
+            """
+            { "contents": { "singleColumnBrowseResultsRenderer": { "tabs": [ { "tabRenderer": { "content": {
+              "sectionListRenderer": { "contents": [ $contents ] }
+            } } } ] } } }
+            """,
+        )
+        val home = page(
+            carousel("Sendungen für dich", showCard("PLaaa", "The Daily", "NYT") + "," + showCard("PLbbb", "Up First", "NPR")) +
+                "," + carousel("Quick picks", song("dQw4w9WgXcQ") + "," + showCard("PLccc", "A show", "Someone")),
+        )
+        val shelves = InnertubeParser.parseHome(home)
+        // The shelf of shows goes by its cards, not its title; a show on a music shelf goes too.
+        assertEquals(listOf("Quick picks"), shelves.map { it.title })
+        assertEquals(listOf("dQw4w9WgXcQ"), shelves.single().items.map { it.videoId })
+        // The shelves after the first page are read the same way.
+        val more = json(
+            """{ "continuationContents": { "sectionListContinuation": { "contents": [
+              ${carousel("Shows for you", showCard("PLddd", "Another", "Them"))},
+              ${carousel("Mixed for you", song("eYSOabR3YP0"))}
+            ] } } }""",
+        )
+        assertEquals(listOf("Mixed for you"), InnertubeParser.parseHomeContinuation(more).map { it.title })
     }
 
     @Test

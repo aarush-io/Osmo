@@ -467,6 +467,22 @@ val ShelfItem.isPodcast: Boolean
 /** YouTube Music's own podcast lists: "Episodes for later" and "New episodes", with and without "VL". */
 private val PODCAST_LIST_IDS = setOf("VLSE", "SE", "VLRDPN", "RDPN")
 
+/**
+ * These shelves without podcast content: Home is music. A card that is a show,
+ * an episode or a podcast list ([isPodcast]) goes, and a shelf that had only
+ * such cards goes too, so a shelf such as "Shows for you" is not shown in any
+ * language. A shelf that came with no cards stays as it was.
+ */
+fun List<HomeShelf>.musicOnly(): List<HomeShelf> = mapNotNull { shelf ->
+    if (shelf.items.isEmpty()) return@mapNotNull shelf
+    val music = shelf.items.filterNot { it.isPodcast }
+    when {
+        music.isEmpty() -> null
+        music.size == shelf.items.size -> shelf
+        else -> shelf.copy(items = music)
+    }
+}
+
 /** How a shelf's items are laid out — the web player's `ShelfLayout`, by the same rules. */
 enum class ShelfLayout {
     /** Square cards in one scrolling row. */
