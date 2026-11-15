@@ -648,6 +648,12 @@
     <string name="sort_date_added_oldest">Ngày thêm vào (cũ nhất trước)</string>
     <string name="sort_date_added_toggle">Ngày thêm vào</string>
     <string name="sort_date_modified">Ngày sửa đổi (mới nhất trước)</string>
+    <string name="sort_alphabetical">Theo bảng chữ cái</string>
+    <string name="sort_date_modified_toggle">Ngày sửa đổi</string>
+    <string name="sort_a_to_z">A đến Z</string>
+    <string name="sort_z_to_a">Z đến A</string>
+    <string name="sort_newest_first">Mới nhất trước</string>
+    <string name="sort_oldest_first">Cũ nhất trước</string>
     <string name="sort_default">Thứ tự mặc định</string>
     <string name="sort_library">Sắp xếp</string>
     <string name="sort_songs">Sắp xếp bài hát</string>

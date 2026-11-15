@@ -594,6 +594,12 @@
     <string name="sort_title_descending">Alfabet (Z ke A)</string>
     <string name="sort_date_added">Tanggal ditambahkan (terbaru dahulu)</string>
     <string name="sort_date_modified">Tanggal diubah (terbaru dahulu)</string>
+    <string name="sort_alphabetical">Abjad</string>
+    <string name="sort_date_modified_toggle">Tanggal diubah</string>
+    <string name="sort_a_to_z">A ke Z</string>
+    <string name="sort_z_to_a">Z ke A</string>
+    <string name="sort_newest_first">Terbaru dahulu</string>
+    <string name="sort_oldest_first">Terlama dahulu</string>
     <string name="use_all_audio_folders">Gunakan semua folder audio</string>
     <string name="use_all_audio_folders_subtitle">Menghapus batas folder dan memindai musik di seluruh perangkat</string>
     <string name="album">album</string>

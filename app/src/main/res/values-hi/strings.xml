@@ -613,6 +613,12 @@
     <string name="sort_title_descending">वर्णानुक्रम (Z से A)</string>
     <string name="sort_date_added">जोड़ने की तारीख (नए सबसे पहले)</string>
     <string name="sort_date_modified">बदलाव की तारीख (नए सबसे पहले)</string>
+    <string name="sort_alphabetical">वर्णानुक्रम</string>
+    <string name="sort_date_modified_toggle">बदलाव की तारीख</string>
+    <string name="sort_a_to_z">A से Z</string>
+    <string name="sort_z_to_a">Z से A</string>
+    <string name="sort_newest_first">नए सबसे पहले</string>
+    <string name="sort_oldest_first">पुराने सबसे पहले</string>
     <string name="use_all_audio_folders">सभी ऑडियो फ़ोल्डर इस्तेमाल करें</string>
     <string name="use_all_audio_folders_subtitle">फ़ोल्डर की सीमा हटाएं और पूरे डिवाइस में संगीत स्कैन करें</string>
     <string name="album">एल्बम</string>

@@ -637,6 +637,12 @@
     <string name="sort_title_descending">ตามตัวอักษร (ฮ ถึง ก)</string>
     <string name="sort_date_added">วันที่เพิ่ม (ใหม่สุดก่อน)</string>
     <string name="sort_date_modified">วันที่แก้ไข (ใหม่สุดก่อน)</string>
+    <string name="sort_alphabetical">ตามตัวอักษร</string>
+    <string name="sort_date_modified_toggle">วันที่แก้ไข</string>
+    <string name="sort_a_to_z">ก ถึง ฮ</string>
+    <string name="sort_z_to_a">ฮ ถึง ก</string>
+    <string name="sort_newest_first">ใหม่สุดก่อน</string>
+    <string name="sort_oldest_first">เก่าสุดก่อน</string>
     <string name="use_all_audio_folders">ใช้โฟลเดอร์เสียงทั้งหมด</string>
     <string name="use_all_audio_folders_subtitle">ยกเลิกขีดจำกัดโฟลเดอร์และสแกนเพลงทั่วทั้งอุปกรณ์</string>
     <string name="album">อัลบั้ม</string>
