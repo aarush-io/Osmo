@@ -56,4 +56,14 @@ class ModelsTest {
         val albums = HomeShelf("Albums & singles", (1..10).map { album("a$it") })
         assertEquals(listOf(listenAgain), listOf(listenAgain).withoutRepeatsOf(listOf(recents, albums)))
     }
+
+    @Test
+    fun exploreMusicVideosAreLeftToNewReleases() {
+        val videos = (1..5).map { ShelfItem("v$it", "", null, "v$it", null, isVideo = true) }
+        val newVideos = HomeShelf("New music videos", videos, layout = ShelfLayout.VIDEO)
+        val musicVideos = HomeShelf("Music videos", videos, layout = ShelfLayout.VIDEO)
+        val albums = HomeShelf("New albums & singles", (1..5).map { album("a$it") })
+        assertEquals(listOf(albums), homeSupplementShelves("FEmusic_explore", listOf(albums, newVideos)))
+        assertEquals(listOf(musicVideos), homeSupplementShelves("FEmusic_new_releases", listOf(musicVideos)))
+    }
 }

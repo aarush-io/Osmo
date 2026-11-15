@@ -562,6 +562,15 @@ fun List<HomeShelf>.withoutRepeatsOf(existing: List<HomeShelf>): List<HomeShelf>
     }
 }
 
+/**
+ * The Home shelves to take from a supplement browse. FEmusic_explore's "New music videos" is
+ * FEmusic_new_releases' "Music videos" again (same videos, same order), but [withoutRepeatsOf]
+ * compares only browsable items, so both came through. Explore's video shelf is dropped, by its
+ * layout and not its title, as the title comes in the account's language.
+ */
+fun homeSupplementShelves(browseId: String, shelves: List<HomeShelf>): List<HomeShelf> =
+    if (browseId == "FEmusic_explore") shelves.filterNot { it.layout == ShelfLayout.VIDEO } else shelves
+
 /** Share of the smaller shelf's items both must hold for one to count as a repeat of the other. */
 private const val REPEAT_SHELF_SHARE = 0.6
 
