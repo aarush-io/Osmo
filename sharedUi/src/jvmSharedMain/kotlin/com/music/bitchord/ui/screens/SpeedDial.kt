@@ -1,6 +1,7 @@
 package com.music.bitchord.ui.screens
 
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -1342,8 +1343,9 @@ private fun DimOverlay(dim: () -> Float) {
  * The "I'm Feeling Lucky" tile: a die of nine squares, like the app's own mark,
  * resting on three, on a dark ground with soft washes of colour drifting in
  * from its edges. In the light theme the ground is light and the lit squares
- * are dark instead. Tapped, its lights chase round the edge like a spinner, then
- * it lands on a face from one to six. [label] is only read out, not drawn.
+ * are dark instead. Tapped, its lights chase round the edge like a spinner, at
+ * one speed until the song is sounding, then slow to a stop and it lands on a
+ * face from one to six. [label] is only read out, not drawn.
  */
 @Composable
 private fun LuckyDiceTile(
@@ -1380,35 +1382,45 @@ private fun LuckyDiceTile(
                 scope.launch {
                     try {
                         spin.snapTo(0f)
-                        settle.animateTo(0f, tween(DICE_FADE_MS))
                         // A light tick each time the spinner's head moves on a
-                        // square, so the bumps race and then slow with it.
+                        // square: an even beat while it goes round, then the
+                        // beats draw apart as it comes to rest.
                         var square = 0
-                        spin.animateTo(DICE_ROLL_STEPS, tween(DICE_ROLL_MS, easing = FastOutSlowInEasing)) {
+                        val tick: Animatable<Float, AnimationVector1D>.() -> Unit = {
                             val now = value.toInt()
                             if (now != square) {
                                 square = now
                                 haptics.play(Haptic.Tick)
                             }
                         }
-                        // The song is not sounding yet: the lights go on
-                        // round, slower, and the die lands when it is. A die
-                        // that landed first and a song that came after read
-                        // as a button that was slow to answer.
-                        if (!sounding.isCompleted) {
-                            coroutineScope {
-                                val chase = launch {
-                                    while (true) {
-                                        spin.animateTo(
-                                            spin.value + DICE_RING.size,
-                                            tween(DICE_WAIT_LAP_MS, easing = LinearEasing),
-                                        )
-                                    }
-                                }
-                                withTimeoutOrNull(DICE_WAIT_MAX_MS) { sounding.await() }
-                                chase.cancelAndJoin()
+                        // The lights go round at one even speed from the tap
+                        // until the song is sounding, however long that is. A
+                        // die that landed first and a song that came after
+                        // read as a button that was slow to answer; so did a
+                        // roll that slowed, then took up speed again to wait.
+                        coroutineScope {
+                            val chase = launch {
+                                spin.animateTo(
+                                    DICE_WAIT_MAX_MS * DICE_SPEED,
+                                    tween(DICE_WAIT_MAX_MS.toInt(), easing = LinearEasing),
+                                    block = tick,
+                                )
                             }
+                            settle.animateTo(0f, tween(DICE_FADE_MS))
+                            // Not so brief that it is no roll at all, with a
+                            // song that was ready before the tap.
+                            delay(DICE_MIN_MS - DICE_FADE_MS)
+                            withTimeoutOrNull(DICE_WAIT_MAX_MS - DICE_MIN_MS) { sounding.await() }
+                            chase.cancelAndJoin()
                         }
+                        // And out of that speed to a stop, with no step in it:
+                        // this curve starts at twice its mean speed, so the
+                        // time is set to make that the speed it had.
+                        spin.animateTo(
+                            spin.value + DICE_REST_STEPS,
+                            tween((2 * DICE_REST_STEPS / DICE_SPEED).toInt(), easing = DICE_REST_EASING),
+                            block = tick,
+                        )
                         face = (1..6).random()
                         // And the landing on a face.
                         haptics.play(Haptic.Select)
@@ -1536,18 +1548,23 @@ private val DICE_FACES = listOf(
     setOf(0, 2, 3, 5, 6, 8),
 )
 
-/** Twice round, in this long, with a tail this many squares long. */
-private const val DICE_ROLL_STEPS = 16f
-private const val DICE_ROLL_MS = 950
+/**
+ * The spinner: its speed in squares a millisecond (once round in 720ms), the
+ * least time it turns, how many squares it takes to come to rest and on what
+ * curve, and its tail in squares.
+ */
+private const val DICE_SPEED = 8f / 720f
+private const val DICE_MIN_MS = 450L
+private const val DICE_REST_STEPS = 2f
+private val DICE_REST_EASING = Easing { 1f - (1f - it) * (1f - it) }
 private const val DICE_TAIL = 3.2f
 private const val DICE_FADE_MS = 140
 
 /**
- * Once round while the song is still on its way, and the longest the die
- * waits for it. Whoever was asked for the song stops waiting sooner than
- * this; it is here so that a die can never be left turning.
+ * The longest the die waits for the song. Whoever was asked for the song
+ * stops waiting sooner than this; it is here so that a die can never be left
+ * turning.
  */
-private const val DICE_WAIT_LAP_MS = 720
 private const val DICE_WAIT_MAX_MS = 12_000L
 
 /** The jiggle while a tile is moved: how far pinned tiles shrink, how far they rock and how fast. */
