@@ -582,6 +582,16 @@ data class HomeFeed(
     val continuation: String?,
 )
 
+/**
+ * One of the category chips over YouTube Music's Home ("Relax", "Energize",
+ * "Workout" ...). [params] asks FEmusic_home for that category's feed, made
+ * for the signed-in account.
+ */
+data class HomeChip(
+    val title: String,
+    val params: String,
+)
+
 /** One server-defined group of the buttons shown on Explore. */
 data class MoodGenreSection(
     val title: String,

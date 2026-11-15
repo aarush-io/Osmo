@@ -369,6 +369,11 @@ internal fun SpeedDialShelf(
     // then leaves and pops in afresh, rather than the kept ones sliding over.
     val firstDeal = remember { SpeedDialIntro.deal }
     val deal = remember(shelf.items) { SpeedDialIntro.deal }
+    // Asked for once by the app (Home filtered to a category, or back to the
+    // whole of Home): these tiles come in as one sweep, top left to bottom
+    // right, all at once their art is in. Taken by the shelf that shows them.
+    val sweep = remember(shelf.items) { SpeedDialIntro.sweep != SpeedDialIntro.swept }
+    SideEffect { if (sweep) SpeedDialIntro.swept = SpeedDialIntro.sweep }
     // Each tile's entrance plays once per deal. The pager drops a page once it
     // is swiped away and builds it afresh on the way back, so without this a
     // dealt tile would pop in again on every visit to its page.
@@ -549,6 +554,7 @@ internal fun SpeedDialShelf(
                                     val first = entered.add("$id#$dealt")
                                     first && page == pagerState.currentPage && (
                                         (intro && page == 0) ||
+                                            sweep ||
                                             (shownIds.isNotEmpty() && id !in shownIds) ||
                                             dealt != firstDeal
                                         )
@@ -561,6 +567,12 @@ internal fun SpeedDialShelf(
                                     // on screen. A bouncy spring, so each tile
                                     // grows a little past full size and settles.
                                     snapshotFlow { SpeedDialIntro.canStart }.first { it }
+                                    if (sweep) {
+                                        // On the diagonals: A1, then B1 and A2, then C1, B2, A3 ...
+                                        delay((cell / SPEED_DIAL_COLUMNS + cell % SPEED_DIAL_COLUMNS) * SWEEP_STEP_MS)
+                                        appear.animateTo(1f, tween(SWEEP_FADE_MS, easing = FastOutSlowInEasing))
+                                        return@LaunchedEffect
+                                    }
                                     delay(cell * INTRO_STEP_MS)
                                     appear.animateTo(
                                         1f,
@@ -575,7 +587,10 @@ internal fun SpeedDialShelf(
                                     .size(tileW, tileH)
                                     .graphicsLayer {
                                         val shown = appear.value
-                                        var scale = if (entering) {
+                                        var scale = if (entering && sweep) {
+                                            // A fade with the least of a grow: no bounce.
+                                            SWEEP_START_SCALE + (1f - SWEEP_START_SCALE) * shown
+                                        } else if (entering) {
                                             // Grows from smaller, overshooting with
                                             // the spring; opaque well before it lands.
                                             INTRO_START_SCALE + (1f - INTRO_START_SCALE) * shown
@@ -586,6 +601,7 @@ internal fun SpeedDialShelf(
                                             dragId == id -> 0f
                                             // Out as its page, as an open app's icon is.
                                             DialLaunch.isOut(id) -> 0f
+                                            entering && sweep -> shown.coerceIn(0f, 1f)
                                             entering -> (shown * 2.5f).coerceIn(0f, 1f)
                                             else -> shown.coerceIn(0f, 1f)
                                         }
@@ -832,6 +848,11 @@ private const val INTRO_STEP_MS = 45L
 private const val INTRO_START_SCALE = 0.35f
 private const val INTRO_BOUNCE = 0.5f
 
+/** The sweep: the gap between one diagonal of tiles and the next, each tile's fade, and its start size. */
+private const val SWEEP_STEP_MS = 70L
+private const val SWEEP_FADE_MS = 380
+private const val SWEEP_START_SCALE = 0.94f
+
 /**
  * The dial's entrance when the app opens: its first page pops in one tile at
  * a time, row by row. Once per launch; the app resets [played] when the
@@ -844,6 +865,24 @@ object SpeedDialIntro {
 
     /** Moved on by the app each time a pull to refresh deals the dial again. */
     var deal: Int by mutableIntStateOf(0)
+
+    /**
+     * Moved on by the app for the next dial shown to come in as a sweep (see
+     * [requestSweep]); [swept] is the last one a dial took.
+     */
+    var sweep: Int = 0
+        private set
+    var swept: Int = 0
+
+    /**
+     * The next tiles shown come in on the diagonals, top left to bottom right,
+     * in a fade. Also deals them anew, so tiles the dial already shows come
+     * in with the rest. The caller has their art in memory first.
+     */
+    fun requestSweep() {
+        sweep += 1
+        deal += 1
+    }
 }
 
 /** The faint chevron under the dial's page dots: there is more below. */

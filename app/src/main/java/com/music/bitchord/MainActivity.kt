@@ -4088,7 +4088,8 @@ private fun BitChordApp(
                             state = remember(arrangedHomeState, customCovers) {
                                 arrangedHomeState.withCustomCovers(customCovers)
                             },
-                            speedDialPinned = speedDialPinnedIds,
+                            // Filtered to a category, the dial holds no pins.
+                            speedDialPinned = if (homeFeed.filtered) emptySet() else speedDialPinnedIds,
                             onSpeedDialHeaderLongPress = { editingSpeedDial = true },
                             speedDialRows = speedDialRows,
                             onSpeedDialReorder = { reordered ->
@@ -4098,7 +4099,7 @@ private fun BitChordApp(
                             onArtistDialReorder = { reordered ->
                                 CustomizationSettings.setArtistDialPins(reordered)
                             },
-                            speedDialLucky = speedDialLucky,
+                            speedDialLucky = if (homeFeed.filtered) null else speedDialLucky,
                             dialHistoryLabel = stringResource(R.string.dial_history),
                             speedDialNewReleases = homeFeed.newReleaseIds,
                             mixesDialOn = homeFeed.mixesDialOn,
@@ -4106,10 +4107,14 @@ private fun BitChordApp(
                             mixesDialNamed = homeFeed.mixesNamed,
                             mixesDialEmptyLabel = stringResource(R.string.mixes_dial_empty),
                             newReleaseLabel = stringResource(R.string.dial_new_release),
-                            onSpeedDialHistory = {
-                                viewModel.loadDialHistory()
-                                historyMode = HistoryMode.DIAL_SONGS
-                                showHistory = true
+                            onSpeedDialHistory = if (homeFeed.filtered) {
+                                null
+                            } else {
+                                {
+                                    viewModel.loadDialHistory()
+                                    historyMode = HistoryMode.DIAL_SONGS
+                                    showHistory = true
+                                }
                             },
                             onArtistDialHistory = {
                                 viewModel.loadDialHistory()
@@ -4155,21 +4160,31 @@ private fun BitChordApp(
                             },
                             onItemLongPress = onShelfLongPress,
                             onDialItemLongPress = onDialLongPress,
-                            onRetry = viewModel::loadHome,
+                            onRetry = if (homeFeed.filtered) HomeCategory::reload else viewModel::loadHome,
                             refreshing = MainViewModel.Feed.HOME in refreshing,
-                            onRefresh = { viewModel.refresh(MainViewModel.Feed.HOME) },
+                            onRefresh = {
+                                viewModel.refresh(MainViewModel.Feed.HOME)
+                                HomeCategory.reload()
+                            },
                             pullState = homePull,
                             contentPadding = listPadding,
-                            onLoadMore = viewModel::loadMoreHome,
+                            onLoadMore = if (homeFeed.filtered) HomeCategory::loadMore else viewModel::loadMoreHome,
                             onSectionsRevealed = viewModel::revealHomeSections,
-                            loadingMore = homeLoadingMore,
+                            loadingMore = if (homeFeed.filtered) HomeCategory.loadingMore else homeLoadingMore,
                             // The saved dial needs no placeholder while Recently played loads.
-                            recentlyPlayedLoading = homeRecentlyPlayedLoading && !holdSavedDial,
+                            recentlyPlayedLoading = homeRecentlyPlayedLoading && !holdSavedDial && !homeFeed.filtered,
                             topPicks = topPicks,
                             topPicksLoading = topPicksLoading,
                             listenerName = account?.name,
-                            onTopPickClick = openTopPick,
-                            onMoodClick = { mood, label -> openTopPick(TopPicks.moodStation(mood), label) },
+                            // Top Picks and Find Your Mood are the whole of Home's, not a category's.
+                            onTopPickClick = if (homeFeed.filtered) null else openTopPick,
+                            onMoodClick = if (homeFeed.filtered) {
+                                null
+                            } else {
+                                { mood, label -> openTopPick(TopPicks.moodStation(mood), label) }
+                            },
+                            // The category chips, beside the mark.
+                            logoRowContent = HomeCategoryRow,
                             artworkMotion = artworkMotion && shown,
                             onTopPickLongPress = { pick ->
                                 pick.browseId?.let { browseId ->
@@ -6073,6 +6088,8 @@ private fun BitChordApp(
                         topPadding = topBarContentPadding(),
                         refreshing = MainViewModel.Feed.HOME in refreshing,
                         pullFraction = { homePull.distanceFraction },
+                        // Filtered to a category, a tap on the mark goes back to the whole of Home.
+                        onLogoClick = if (HomeCategory.active) HomeCategory::clear else null,
                         trailing = {
                             // Says which page is up: the dial's own title,
                             // then Artists, then Explore.
@@ -6095,7 +6112,9 @@ private fun BitChordApp(
                                     HomePage.ARTISTS -> stringResource(R.string.dial_page_artists)
                                     // With the dials off there are no pages to tell apart,
                                     // so the mark stands alone.
-                                    HomePage.EXPLORE -> if (speedDialsOn) stringResource(R.string.dial_page_explore) else ""
+                                    // Filtered to a category, the feed goes by the category's name.
+                                    HomePage.EXPLORE -> HomeCategory.selected?.title
+                                        ?: if (speedDialsOn) stringResource(R.string.dial_page_explore) else ""
                                 }
                                 Text(
                                     text = homeTitleWithDial(
@@ -6113,6 +6132,25 @@ private fun BitChordApp(
                         },
                     )
                 }
+                }
+
+                // Scrolled down into Home's feed, the category chips are held
+                // under the top bar, over the pages as the mark is.
+                Box(
+                    Modifier
+                        .matchParentSize()
+                        .graphicsLayer {
+                            alpha = HomeMark.alpha
+                            scaleX = HomeMark.scale
+                            scaleY = HomeMark.scale
+                        },
+                ) {
+                    HomeCategoryPinnedRow(
+                        inFeed = {
+                            homeRoot && homePage == HomePage.EXPLORE && homeListState.firstVisibleItemIndex > 0
+                        },
+                        top = topBarContentPadding(),
+                    )
                 }
 
                 // The Podcasts page's mark, in the same place and by the same rules.
@@ -9107,6 +9145,11 @@ private class HomeFeed(
     val mixes: List<ShelfItem>?,
     /** The Mixes Dial's tiles that show their name: the community's playlists. */
     val mixesNamed: Set<String>,
+    /**
+     * Whether a category chip filters Home ([HomeCategory]): [state] is then
+     * that chip's feed, its dial without pins, die or history tile.
+     */
+    val filtered: Boolean = false,
 )
 
 /**
@@ -9299,6 +9342,15 @@ private fun rememberHomeFeed(
             ?.firstOrNull { it.title == CustomizationSettings.SPEED_DIAL_TITLE }?.items
             ?: return@LaunchedEffect
         CustomizationSettings.setLastSpeedDial(dial, newReleaseIds)
+    }
+    // A category chip selected: Home is that chip's feed, with none of the
+    // dials' own tiles (pins, the Mixes Dial, the artists' dial, new-release tags).
+    val account by viewModel.account.collectAsStateWithLifecycle()
+    val category = rememberCategoryHome(account, speedDialsOn, hiddenFromDial)
+    if (category != null) {
+        return HomeFeed(
+            category, false, emptySet(), speedDialsOn, emptySet(), false, null, emptySet(), filtered = true,
+        )
     }
     return HomeFeed(
         arrangedHomeState, holdSavedDial, artistDialPinnedIds, speedDialsOn, newReleaseIds, mixesDialOn, mixes, mixesNamed,

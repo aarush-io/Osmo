@@ -27,7 +27,15 @@ enum class NavPage(val id: Int) {
 
         /** Pages that can sit in the bar's main pill. Search always has its own button at the end. */
         val pillPages = listOf(HOME, EXPLORE, PODCASTS, LIBRARY, PLAYLISTS)
-        val defaultPill = listOf(HOME, EXPLORE, PODCASTS, LIBRARY)
+        val defaultPill = listOf(HOME, PLAYLISTS, PODCASTS, LIBRARY)
+
+        /**
+         * The bar's pages for a listener who has not set them: [defaultPill]
+         * in its order, then Explore, off. Home's category chips do what
+         * Explore's moods did. A saved choice keeps its own order and
+         * switches; [pillPages] only places a page it does not have yet.
+         */
+        val defaultOrder = defaultPill + EXPLORE
     }
 }
 
@@ -53,7 +61,7 @@ object CustomizationSettings {
     private var prefs: SharedPreferences? = null
 
     /** The pages in the bar's main pill, in order, each either shown or hidden. */
-    val navTabs = MutableStateFlow(NavPage.pillPages.map { OrderedToggle(it, it in NavPage.defaultPill) })
+    val navTabs = MutableStateFlow(NavPage.defaultOrder.map { OrderedToggle(it, it in NavPage.defaultPill) })
     val startPage = MutableStateFlow(NavPage.HOME)
     val keepNavBarExpanded = MutableStateFlow(false)
 
@@ -299,7 +307,12 @@ object CustomizationSettings {
 
     fun readAll() {
         val p = prefs ?: return
-        navTabs.value = readOrdered(p.getString(KEY_NAV_TABS, null), NavPage.pillPages, NavPage.defaultPill.toSet()) {
+        navTabs.value = readOrdered(
+            p.getString(KEY_NAV_TABS, null),
+            NavPage.pillPages,
+            NavPage.defaultPill.toSet(),
+            defaultOrder = NavPage.defaultOrder,
+        ) {
             NavPage.entries.firstOrNull { page -> page.name == it }
         }.let(::ensureOneTab)
         startPage.value = NavPage.entries.firstOrNull { it.name == p.getString(KEY_START_PAGE, null) } ?: NavPage.HOME
@@ -1009,9 +1022,11 @@ object CustomizationSettings {
         stored: String?,
         all: List<T>,
         defaultOn: Set<T>,
+        /** The order with nothing saved; [all] unless told otherwise. */
+        defaultOrder: List<T> = all,
         parse: (String) -> T?,
     ): List<OrderedToggle<T>> {
-        if (stored.isNullOrBlank()) return all.map { OrderedToggle(it, it in defaultOn) }
+        if (stored.isNullOrBlank()) return defaultOrder.map { OrderedToggle(it, it in defaultOn) }
         val saved: List<OrderedToggle<T>> = stored.split(",").mapNotNull { entry ->
             val item: T = parse(entry.substringBefore(':')) ?: return@mapNotNull null
             OrderedToggle<T>(item, entry.substringAfter(':', "1") != "0")

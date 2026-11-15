@@ -10,6 +10,7 @@ import com.music.bitchord.data.model.completeArtistCredits
 import com.music.bitchord.data.model.EpisodeInfo
 import com.music.bitchord.data.model.BrowseItem
 import com.music.bitchord.data.model.BrowseType
+import com.music.bitchord.data.model.HomeChip
 import com.music.bitchord.data.model.HomeShelf
 import com.music.bitchord.data.model.LibraryState
 import com.music.bitchord.data.model.LikeStatus
@@ -209,6 +210,35 @@ object InnertubeParser {
                 ?: section.o("musicShelfRenderer")?.let(::plainShelf)
         }
     }
+
+    /**
+     * The category chips over Home ("Relax", "Energize", "Workout" ...): each
+     * with the browse params that ask Home again for that category. Taken
+     * from the plain Home page, where no chip is selected; the Podcasts chip
+     * is left out, as the Podcasts tab has that feed.
+     */
+    fun parseHomeChips(response: JsonObject): List<HomeChip> {
+        val header = response.o("contents")
+            .o("singleColumnBrowseResultsRenderer").a("tabs")?.firstOrNull()
+            .o("tabRenderer").o("content").o("sectionListRenderer").o("header")
+        return header.o("chipCloudRenderer").a("chips").orEmpty().mapNotNull { element ->
+            val chip = element.o("chipCloudChipRenderer") ?: return@mapNotNull null
+            val title = chip.o("text").runs().trim().takeIf { it.isNotEmpty() } ?: return@mapNotNull null
+            val endpoint = chip.o("navigationEndpoint").o("browseEndpoint") ?: return@mapNotNull null
+            val params = endpoint.s("params")?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+            if (endpoint.s("browseId") != "FEmusic_home") return@mapNotNull null
+            if (isPodcastsChip(params)) return@mapNotNull null
+            HomeChip(title = title, params = params)
+        }.distinctBy { it.params }
+    }
+
+    /**
+     * Each chip's params list every chip with a state: 3 for the one it
+     * selects, 1 for the others. Chip 12 is Podcasts; its entry selected is
+     * the six bytes 4A 04 08 0C 10 03, which base64 writes "SgQIDBAD" (the
+     * entries start on whole 3-byte groups).
+     */
+    fun isPodcastsChip(params: String): Boolean = "SgQIDBAD" in params
 
     /**
      * The Moods & genres browse page is a set of navigation-button grids, not
