@@ -550,6 +550,12 @@
     <string name="sort_title_descending">Alfabetycznie (Z-A)</string>
     <string name="sort_date_added">Data dodania (najnowsze na początku)</string>
     <string name="sort_date_modified">Data modyfikacji (najnowsze na początku)</string>
+    <string name="sort_alphabetical">Alfabetycznie</string>
+    <string name="sort_date_modified_toggle">Data modyfikacji</string>
+    <string name="sort_a_to_z">A do Z</string>
+    <string name="sort_z_to_a">Z do A</string>
+    <string name="sort_newest_first">Od najnowszych</string>
+    <string name="sort_oldest_first">Od najstarszych</string>
     <string name="use_all_audio_folders">Użyj wszystkich folderów audio</string>
     <string name="use_all_audio_folders_subtitle">Usunięcie limitu folderów i skanowanie muzyki na całym urządzeniu</string>
     <string name="album">album</string>

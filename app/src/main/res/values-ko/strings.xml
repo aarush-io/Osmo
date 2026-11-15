@@ -782,6 +782,12 @@
     <string name="sort_date_added_oldest">추가한 날짜 (날짜순)</string>
     <string name="sort_date_added_toggle">추가한 날짜</string>
     <string name="sort_date_modified">변경한 날짜 (최신순)</string>
+    <string name="sort_alphabetical">가나다순</string>
+    <string name="sort_date_modified_toggle">변경한 날짜</string>
+    <string name="sort_a_to_z">A-Z</string>
+    <string name="sort_z_to_a">Z-A</string>
+    <string name="sort_newest_first">최신순</string>
+    <string name="sort_oldest_first">오래된순</string>
     <string name="sort_default">기본 순서</string>
     <string name="sort_library">정렬</string>
     <string name="sort_songs">음악 정렬</string>

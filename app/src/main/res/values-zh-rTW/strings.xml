@@ -581,6 +581,12 @@
     <string name="sort_title_descending">按字母順序（Z 到 A）</string>
     <string name="sort_date_added">新增日期（最新優先）</string>
     <string name="sort_date_modified">修改日期（最新優先）</string>
+    <string name="sort_alphabetical">依字母順序</string>
+    <string name="sort_date_modified_toggle">修改日期</string>
+    <string name="sort_a_to_z">A 到 Z</string>
+    <string name="sort_z_to_a">Z 到 A</string>
+    <string name="sort_newest_first">最新優先</string>
+    <string name="sort_oldest_first">最舊優先</string>
     <string name="use_all_audio_folders">使用所有音訊資料夾</string>
     <string name="use_all_audio_folders_subtitle">取消資料夾限制，掃描整個裝置上的音樂</string>
     <string name="album">專輯</string>

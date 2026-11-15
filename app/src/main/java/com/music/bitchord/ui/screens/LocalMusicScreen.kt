@@ -53,6 +53,7 @@ import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Check
@@ -81,6 +82,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -93,6 +95,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.SolidColor
@@ -116,6 +119,10 @@ import com.music.bitchord.data.model.isSameTrackAs
 import com.music.bitchord.data.settings.AppSettings
 import com.music.bitchord.data.settings.LibraryViewType
 import com.music.bitchord.data.settings.LocalMusicSort
+import com.music.bitchord.data.settings.LocalMusicSortField
+import com.music.bitchord.data.settings.afterTapOn
+import com.music.bitchord.data.settings.field
+import com.music.bitchord.data.settings.isFlipped
 import com.music.bitchord.download.DownloadedCollection
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.DownloadDone
@@ -1855,6 +1862,20 @@ private fun List<Song>.sortedForLibrary(order: LocalMusicSort): List<Song> = whe
         compareByDescending<Song> { com.music.bitchord.data.settings.LastPlayed.at(it.videoId) }
             .thenBy(String.CASE_INSENSITIVE_ORDER) { it.title },
     )
+    // Oldest first. A song with no date, or one never played, still goes last.
+    LocalMusicSort.DATE_ADDED_OLDEST -> sortedWith(
+        compareBy<Song> { it.localDateAddedSeconds ?: Long.MAX_VALUE }
+            .thenBy(String.CASE_INSENSITIVE_ORDER) { it.title },
+    )
+    LocalMusicSort.DATE_MODIFIED_OLDEST -> sortedWith(
+        compareBy<Song> { it.localDateModifiedSeconds ?: Long.MAX_VALUE }
+            .thenBy(String.CASE_INSENSITIVE_ORDER) { it.title },
+    )
+    LocalMusicSort.LAST_PLAYED_OLDEST -> sortedWith(
+        compareBy<Song> {
+            com.music.bitchord.data.settings.LastPlayed.at(it.videoId).takeIf { at -> at > 0L } ?: Long.MAX_VALUE
+        }.thenBy(String.CASE_INSENSITIVE_ORDER) { it.title },
+    )
 }
 
 /**
@@ -2034,7 +2055,6 @@ fun LibraryFolderSortMenu(
     val tabViews by com.music.bitchord.data.settings.CustomizationSettings.libraryTabViews
         .collectAsStateWithLifecycle()
     val accent = pageAccent()
-    val options = LocalMusicSort.entries
     GlassMenuPanel(visible = visible, hazeState = hazeState, onDismiss = onDismiss) {
         if (viewTab != null) {
             val current = tabViews.getOrElse(viewTab) { LibraryViewType.LIST }
@@ -2061,14 +2081,20 @@ fun LibraryFolderSortMenu(
             )
         }
         MenuHeading(stringResource(R.string.sort_music))
-        options.forEach { option ->
+        // One row for each thing to sort by. The picked row shows its
+        // direction, and a second tap on it turns the direction around.
+        LocalMusicSortField.entries.forEach { field ->
+            val picked = sortOrder.field == field
             FolderMenuRow(
-                label = option.localizedLabel(),
+                label = field.localizedLabel(),
                 icon = null,
-                picked = option == sortOrder,
+                picked = picked,
                 accent = accent,
+                direction = if (picked) sortOrder.directionLabel() else null,
+                directionFlipped = sortOrder.isFlipped,
                 onClick = {
-                    if (isDownloads) AppSettings.setDownloadedMusicSort(option) else AppSettings.setLocalMusicSort(option)
+                    val next = sortOrder.afterTapOn(field)
+                    if (isDownloads) AppSettings.setDownloadedMusicSort(next) else AppSettings.setLocalMusicSort(next)
                     onDismiss()
                 },
             )
@@ -2083,6 +2109,9 @@ private fun FolderMenuRow(
     picked: Boolean,
     accent: Color,
     onClick: () -> Unit,
+    /** The picked sort's direction in words, shown with an arrow before the check mark. */
+    direction: String? = null,
+    directionFlipped: Boolean = false,
 ) {
     val color = if (picked) accent else LocalContentColor.current
     Row(
@@ -2097,13 +2126,37 @@ private fun FolderMenuRow(
             Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(14.dp))
         }
+        // The label takes all the width the row has left, so it stays on one
+        // line and the check mark column is at the right edge of every row.
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
             color = color,
-            modifier = Modifier.weight(1f, fill = false).padding(end = 20.dp),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f).padding(end = 12.dp),
         )
-        Spacer(Modifier.weight(1f))
+        if (direction != null) {
+            Text(
+                text = direction,
+                style = MaterialTheme.typography.bodyMedium,
+                color = accent.copy(alpha = .8f),
+                maxLines = 1,
+            )
+            Spacer(Modifier.width(4.dp))
+            // Up for the direction a sort starts in, as on the song sort menu.
+            val rotation by animateFloatAsState(
+                targetValue = if (directionFlipped) 180f else 0f,
+                label = "sortDirectionArrow",
+            )
+            Icon(
+                Icons.Rounded.ArrowUpward,
+                contentDescription = null,
+                tint = accent,
+                modifier = Modifier.size(18.dp).rotate(rotation),
+            )
+            Spacer(Modifier.width(10.dp))
+        }
         Box(Modifier.size(22.dp)) {
             if (picked) {
                 Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.selected), tint = accent)
@@ -2113,13 +2166,21 @@ private fun FolderMenuRow(
 }
 
 @Composable
-private fun LocalMusicSort.localizedLabel(): String = when (this) {
-    LocalMusicSort.TITLE_ASC -> stringResource(R.string.sort_title_ascending)
-    LocalMusicSort.TITLE_DESC -> stringResource(R.string.sort_title_descending)
-    LocalMusicSort.DATE_ADDED -> stringResource(R.string.sort_date_added)
-    LocalMusicSort.DATE_MODIFIED -> stringResource(R.string.sort_date_modified)
-    LocalMusicSort.LAST_PLAYED -> stringResource(R.string.sort_last_played)
+private fun LocalMusicSortField.localizedLabel(): String = when (this) {
+    LocalMusicSortField.TITLE -> stringResource(R.string.sort_alphabetical)
+    LocalMusicSortField.DATE_ADDED -> stringResource(R.string.sort_date_added_toggle)
+    LocalMusicSortField.DATE_MODIFIED -> stringResource(R.string.sort_date_modified_toggle)
+    LocalMusicSortField.LAST_PLAYED -> stringResource(R.string.sort_last_played)
 }
+
+@Composable
+private fun LocalMusicSort.directionLabel(): String = stringResource(
+    when {
+        field == LocalMusicSortField.TITLE -> if (isFlipped) R.string.sort_z_to_a else R.string.sort_a_to_z
+        isFlipped -> R.string.sort_oldest_first
+        else -> R.string.sort_newest_first
+    },
+)
 
 /** The Downloads-only replacement for the usual search and sort controls. */
 @Composable

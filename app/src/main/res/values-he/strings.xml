@@ -551,6 +551,12 @@
     <string name="sort_title_descending">אלפביתי (ת עד א)</string>
     <string name="sort_date_added">תאריך הוספה (מהחדש לישן)</string>
     <string name="sort_date_modified">תאריך שינוי (מהחדש לישן)</string>
+    <string name="sort_alphabetical">אלפביתי</string>
+    <string name="sort_date_modified_toggle">תאריך שינוי</string>
+    <string name="sort_a_to_z">א עד ת</string>
+    <string name="sort_z_to_a">ת עד א</string>
+    <string name="sort_newest_first">מהחדש לישן</string>
+    <string name="sort_oldest_first">מהישן לחדש</string>
     <string name="use_all_audio_folders">השתמש בכל תיקיות השמע</string>
     <string name="use_all_audio_folders_subtitle">מבטל את מגבלת התיקייה וסורק מוזיקה בכל המכשיר</string>
     <string name="album">אלבום</string>

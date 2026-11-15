@@ -580,6 +580,12 @@
     <string name="sort_title_descending">アルファベット順（Z→A）</string>
     <string name="sort_date_added">追加日（新しい順）</string>
     <string name="sort_date_modified">更新日（新しい順）</string>
+    <string name="sort_alphabetical">名前順</string>
+    <string name="sort_date_modified_toggle">更新日</string>
+    <string name="sort_a_to_z">A→Z</string>
+    <string name="sort_z_to_a">Z→A</string>
+    <string name="sort_newest_first">新しい順</string>
+    <string name="sort_oldest_first">古い順</string>
     <string name="use_all_audio_folders">すべてのオーディオフォルダを使用</string>
     <string name="use_all_audio_folders_subtitle">フォルダの制限を解除し、デバイス全体の音楽をスキャンします</string>
     <string name="album">アルバム</string>

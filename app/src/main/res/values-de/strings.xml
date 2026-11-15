@@ -599,6 +599,12 @@
     <string name="sort_title_descending">Alphabetisch (Z bis A)</string>
     <string name="sort_date_added">Hinzugefügt (neueste zuerst)</string>
     <string name="sort_date_modified">Geändert (neueste zuerst)</string>
+    <string name="sort_alphabetical">Alphabetisch</string>
+    <string name="sort_date_modified_toggle">Geändert am</string>
+    <string name="sort_a_to_z">A bis Z</string>
+    <string name="sort_z_to_a">Z bis A</string>
+    <string name="sort_newest_first">Neueste zuerst</string>
+    <string name="sort_oldest_first">Älteste zuerst</string>
     <string name="use_all_audio_folders">Alle Audioordner verwenden</string>
     <string name="use_all_audio_folders_subtitle">Entfernt die Ordnerbegrenzung und durchsucht Musik auf dem gesamten Gerät</string>
     <string name="album">Album</string>

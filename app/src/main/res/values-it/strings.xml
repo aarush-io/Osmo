@@ -661,6 +661,12 @@
     <string name="sort_title_descending">Alfabetico (Z-A)</string>
     <string name="sort_date_added">Data aggiunta (più recenti prima)</string>
     <string name="sort_date_modified">Data modifica (più recenti prima)</string>
+    <string name="sort_alphabetical">Alfabetico</string>
+    <string name="sort_date_modified_toggle">Data modifica</string>
+    <string name="sort_a_to_z">Dalla A alla Z</string>
+    <string name="sort_z_to_a">Dalla Z alla A</string>
+    <string name="sort_newest_first">Più recenti prima</string>
+    <string name="sort_oldest_first">Meno recenti prima</string>
     <string name="use_all_audio_folders">Usa tutte le cartelle audio</string>
     <string name="use_all_audio_folders_subtitle">Rimuove il limite delle cartelle e cerca musica in tutto il dispositivo</string>
     <string name="album">album</string>

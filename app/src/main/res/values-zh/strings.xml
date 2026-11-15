@@ -580,6 +580,12 @@
     <string name="sort_title_descending">按字母顺序（Z 到 A）</string>
     <string name="sort_date_added">添加日期（最新优先）</string>
     <string name="sort_date_modified">修改日期（最新优先）</string>
+    <string name="sort_alphabetical">按字母顺序</string>
+    <string name="sort_date_modified_toggle">修改日期</string>
+    <string name="sort_a_to_z">A 到 Z</string>
+    <string name="sort_z_to_a">Z 到 A</string>
+    <string name="sort_newest_first">最新优先</string>
+    <string name="sort_oldest_first">最旧优先</string>
     <string name="use_all_audio_folders">使用所有音频文件夹</string>
     <string name="use_all_audio_folders_subtitle">取消文件夹限制，扫描整个设备上的音乐</string>
     <string name="album">专辑</string>

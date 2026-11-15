@@ -854,6 +854,12 @@
     <string name="sort_date_added_oldest">Date added (oldest first)</string>
     <string name="sort_date_added_toggle">Date added</string>
     <string name="sort_date_modified">Date modified (newest first)</string>
+    <string name="sort_alphabetical">Alphabetical</string>
+    <string name="sort_date_modified_toggle">Date modified</string>
+    <string name="sort_a_to_z">A to Z</string>
+    <string name="sort_z_to_a">Z to A</string>
+    <string name="sort_newest_first">Newest first</string>
+    <string name="sort_oldest_first">Oldest first</string>
     <string name="sort_default">Default order</string>
     <string name="sort_library">Sort</string>
     <string name="sort_songs">Sort songs</string>

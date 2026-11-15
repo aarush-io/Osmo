@@ -624,6 +624,12 @@
     <string name="sort_title_descending">По алфавиту (Я — А)</string>
     <string name="sort_date_added">По дате добавления (сначала новые)</string>
     <string name="sort_date_modified">По дате изменения (сначала новые)</string>
+    <string name="sort_alphabetical">По алфавиту</string>
+    <string name="sort_date_modified_toggle">Дата изменения</string>
+    <string name="sort_a_to_z">От А до Я</string>
+    <string name="sort_z_to_a">От Я до А</string>
+    <string name="sort_newest_first">Сначала новые</string>
+    <string name="sort_oldest_first">Сначала старые</string>
     <string name="use_all_audio_folders">Использовать все папки с аудио</string>
     <string name="use_all_audio_folders_subtitle">Снять ограничение по папкам и сканировать музыку по всему устройству</string>
     <string name="album">альбом</string>

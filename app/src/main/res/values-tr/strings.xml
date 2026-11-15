@@ -643,6 +643,12 @@
     <string name="sort_title_descending">Alfabetik (Z\'den A\'ya)</string>
     <string name="sort_date_added">Eklenme tarihi (önce en yeni)</string>
     <string name="sort_date_modified">Değiştirilme tarihi (önce en yeni)</string>
+    <string name="sort_alphabetical">Alfabetik</string>
+    <string name="sort_date_modified_toggle">Değiştirilme tarihi</string>
+    <string name="sort_a_to_z">A\'dan Z\'ye</string>
+    <string name="sort_z_to_a">Z\'den A\'ya</string>
+    <string name="sort_newest_first">Önce en yeni</string>
+    <string name="sort_oldest_first">Önce en eski</string>
     <string name="use_all_audio_folders">Tüm ses klasörlerini kullan</string>
     <string name="use_all_audio_folders_subtitle">Klasör sınırını kaldırır ve tüm cihazda müzik tarar</string>
     <string name="album">albüm</string>

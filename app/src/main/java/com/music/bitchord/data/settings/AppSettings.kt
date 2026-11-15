@@ -142,15 +142,78 @@ enum class EqualizerMode {
     MANUAL,
 }
 
-/** Stable persisted ordering for each on-device music library. */
+/**
+ * Stable persisted ordering for each on-device music library. The names are
+ * what is saved, so the first five keep the names they were saved under
+ * before the dates had a second direction.
+ */
 enum class LocalMusicSort {
     TITLE_ASC,
     TITLE_DESC,
+    /** Newest first. */
     DATE_ADDED,
+    /** Newest first. */
     DATE_MODIFIED,
     /** Most recently played first, from [LastPlayed]. */
     LAST_PLAYED,
+    DATE_ADDED_OLDEST,
+    DATE_MODIFIED_OLDEST,
+    /** Longest since played first; never played last. */
+    LAST_PLAYED_OLDEST,
 }
+
+/** What a [LocalMusicSort] orders by: one row of the sort menu. */
+enum class LocalMusicSortField {
+    TITLE,
+    DATE_ADDED,
+    DATE_MODIFIED,
+    LAST_PLAYED,
+}
+
+val LocalMusicSort.field: LocalMusicSortField
+    get() = when (this) {
+        LocalMusicSort.TITLE_ASC, LocalMusicSort.TITLE_DESC -> LocalMusicSortField.TITLE
+        LocalMusicSort.DATE_ADDED, LocalMusicSort.DATE_ADDED_OLDEST -> LocalMusicSortField.DATE_ADDED
+        LocalMusicSort.DATE_MODIFIED, LocalMusicSort.DATE_MODIFIED_OLDEST -> LocalMusicSortField.DATE_MODIFIED
+        LocalMusicSort.LAST_PLAYED, LocalMusicSort.LAST_PLAYED_OLDEST -> LocalMusicSortField.LAST_PLAYED
+    }
+
+/** True for the second direction of a field: Z to A, or oldest first. */
+val LocalMusicSort.isFlipped: Boolean
+    get() = when (this) {
+        LocalMusicSort.TITLE_DESC,
+        LocalMusicSort.DATE_ADDED_OLDEST,
+        LocalMusicSort.DATE_MODIFIED_OLDEST,
+        LocalMusicSort.LAST_PLAYED_OLDEST -> true
+        else -> false
+    }
+
+/** The direction a field starts in: A to Z, or newest first. */
+val LocalMusicSortField.defaultSort: LocalMusicSort
+    get() = when (this) {
+        LocalMusicSortField.TITLE -> LocalMusicSort.TITLE_ASC
+        LocalMusicSortField.DATE_ADDED -> LocalMusicSort.DATE_ADDED
+        LocalMusicSortField.DATE_MODIFIED -> LocalMusicSort.DATE_MODIFIED
+        LocalMusicSortField.LAST_PLAYED -> LocalMusicSort.LAST_PLAYED
+    }
+
+fun LocalMusicSort.flipped(): LocalMusicSort = when (this) {
+    LocalMusicSort.TITLE_ASC -> LocalMusicSort.TITLE_DESC
+    LocalMusicSort.TITLE_DESC -> LocalMusicSort.TITLE_ASC
+    LocalMusicSort.DATE_ADDED -> LocalMusicSort.DATE_ADDED_OLDEST
+    LocalMusicSort.DATE_ADDED_OLDEST -> LocalMusicSort.DATE_ADDED
+    LocalMusicSort.DATE_MODIFIED -> LocalMusicSort.DATE_MODIFIED_OLDEST
+    LocalMusicSort.DATE_MODIFIED_OLDEST -> LocalMusicSort.DATE_MODIFIED
+    LocalMusicSort.LAST_PLAYED -> LocalMusicSort.LAST_PLAYED_OLDEST
+    LocalMusicSort.LAST_PLAYED_OLDEST -> LocalMusicSort.LAST_PLAYED
+}
+
+/**
+ * The sort a tap on [field]'s menu row gives: the field's first direction, or
+ * the other direction when the row is the one already picked.
+ */
+fun LocalMusicSort.afterTapOn(field: LocalMusicSortField): LocalMusicSort =
+    if (this.field == field) flipped() else field.defaultSort
 
 /**
  * Ordering for the track list on an album or playlist page — the same idea as
