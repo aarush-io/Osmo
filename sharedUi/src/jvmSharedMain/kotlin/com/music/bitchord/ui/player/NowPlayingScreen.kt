@@ -2772,6 +2772,8 @@ fun NowPlayingScreen(
     }
 
     if (landscape) {
+        // A method of its own, not part of the one above: see [SeparateMethod].
+        SeparateMethod {
         // Paused always wins outright over a scrub in progress — see
         // [ARTWORK_PAUSE_SHRINK_SCALE].
         val landscapeArtScale by animateFloatAsState(
@@ -3226,6 +3228,7 @@ fun NowPlayingScreen(
         }
             playerOverlays()
         }
+        }
         return@ProvidePlayerInk
     }
 
@@ -3659,6 +3662,8 @@ fun NowPlayingScreen(
         }
         // Painted by the handle strip rather than laid out here — see there.
 
+        // A method of its own, not part of the one above: see [SeparateMethod].
+        SeparateMethod {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -5398,9 +5403,34 @@ fun NowPlayingScreen(
             }
         }
         }
+        }
         playerOverlays()
     }
 }
+}
+
+/**
+ * Runs [content] in a method of its own.
+ *
+ * The body of [NowPlayingScreen] is one very large lambda. In the PR #108
+ * test build, R8 made code for that lambda that Android's verifier refused
+ * ("VerifyError ... NowPlayingScreen_...$lambda$4 ... type Float unexpected
+ * as arg to if-eqz/if-nez"). Android then refused the whole
+ * NowPlayingScreenKt class: the app stopped when Settings > Appearance (which
+ * reads [fullBleedArtworkAvailable]) or the player opened. The same type of
+ * R8 fault occurred before in this function (see the R8 note in the root
+ * build.gradle.kts).
+ *
+ * This function is not inline, so the lambda given to it is compiled as a
+ * method of its own. The landscape player and the portrait controls go
+ * through it. Thus the body has fewer instructions and fewer registers for R8
+ * to allocate. Smaller methods also help ART's JIT compiler, which does not
+ * compile a method of more than 10,000 code units. Each lambda takes the locals that it reads as arguments: keep each one
+ * below the JVM's 255 argument slots (see NowPlayingScreenClassSizeTest).
+ */
+@Composable
+private fun SeparateMethod(content: @Composable () -> Unit) {
+    content()
 }
 
 /**
