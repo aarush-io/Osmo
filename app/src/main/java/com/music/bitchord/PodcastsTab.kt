@@ -199,6 +199,8 @@ internal fun PodcastsTabPage(
                     )
                 },
                 episodesForLater = true,
+                // The list grows out of its tile, as a show's page does.
+                opens = EPISODES_FOR_LATER_ID,
             )
         } else {
             null

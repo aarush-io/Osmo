@@ -184,6 +184,12 @@ private fun ShelfItem.dialId(): String = videoId ?: browseId ?: title
 class SpeedDialLucky(
     val label: String,
     /**
+     * The browse id of the page a tap opens, for a tile that opens one
+     * ("Episodes for later"): the page grows out of the tile and closes back
+     * into it, as an album's does. Null for the die, which plays.
+     */
+    val opens: String? = null,
+    /**
      * The tile in the die's place is "Episodes for later" (the Podcasts
      * page's dial): it is drawn as that, and a tap opens it with [onRoll].
      */
@@ -620,6 +626,8 @@ internal fun SpeedDialShelf(
                                         }
                                         alpha = when {
                                             dragId == id -> 0f
+                                            // "Episodes for later" is out as its list.
+                                            item === LUCKY_TILE && lucky?.opens?.let { DialLaunch.isOut(it) } == true -> 0f
                                             // Out as its page, as an open app's icon is.
                                             DialLaunch.isOut(id) -> 0f
                                             entering && sweep -> shown.coerceIn(0f, 1f)
@@ -646,6 +654,20 @@ internal fun SpeedDialShelf(
                                         onClick = { lucky.onRoll {} },
                                         dim = dim,
                                         modifier = tileModifier,
+                                        // Its list grows out of the tile, as an album's page does.
+                                        onLaunch = lucky.opens?.let { opens ->
+                                            { bounds: Rect, pressedScale: Float, snapshot: ImageBitmap? ->
+                                                DialLaunch.origin = DialOrigin(
+                                                    key = opens,
+                                                    bounds = bounds,
+                                                    pressedScale = pressedScale,
+                                                    thumbnailUrl = null,
+                                                    shelfTitle = shelf.title,
+                                                    page = page,
+                                                    snapshot = snapshot,
+                                                )
+                                            }
+                                        },
                                     )
                                 } else if (item === LUCKY_TILE && lucky != null) {
                                     LuckyDiceTile(
@@ -1089,15 +1111,29 @@ private fun EpisodesForLaterTile(
     onClick: () -> Unit,
     dim: () -> Float,
     modifier: Modifier = Modifier,
+    /**
+     * Called before [onClick] for a tile that opens a page, with where the
+     * tile is, how far in it was pressed and its picture, as [SpeedDialTile]
+     * gives them: for the page to grow out of it.
+     */
+    onLaunch: ((bounds: Rect, pressedScale: Float, snapshot: ImageBitmap?) -> Unit)? = null,
 ) {
     val shape = RoundedCornerShape(10.dp)
     val press = rememberTilePress()
     val light = MaterialTheme.colorScheme.surface.luminance() > 0.5f
     val ground = if (light) LATER_GROUND_LIGHT else LATER_GROUND_DARK
+    // Its picture and its place, for the page it opens to grow out of (see [SpeedDialTile]).
+    val drawn = rememberGraphicsLayer()
+    val placed = remember { arrayOfNulls<LayoutCoordinates>(1) }
     Box(
         modifier
             .dialTileOutset()
+            .onPlaced { placed[0] = it }
             .tilePress(press)
+            .drawWithContent {
+                drawn.record { this@drawWithContent.drawContent() }
+                drawLayer(drawn)
+            }
             .clip(shape)
             .dialTileBorder(shape)
             .background(Brush.linearGradient(ground))
@@ -1105,7 +1141,18 @@ private fun EpisodesForLaterTile(
                 interactionSource = press.interactions,
                 indication = null,
                 onClickLabel = label,
-            ) { press.tap { onClick() } },
+            ) {
+                press.tap {
+                    if (onLaunch != null) {
+                        val bounds = placed[0]?.takeIf { it.isAttached }
+                            ?.let { it.findRootCoordinates().localBoundingBoxOf(it, clipBounds = false) }
+                        if (bounds != null) {
+                            onLaunch(bounds, press.scale, runCatching { drawn.toImageBitmap() }.getOrNull())
+                        }
+                    }
+                    onClick()
+                }
+            },
     ) {
         // In a layer of its own, so that the microphone is cut out of the
         // card down to the ground, and not painted on it.
