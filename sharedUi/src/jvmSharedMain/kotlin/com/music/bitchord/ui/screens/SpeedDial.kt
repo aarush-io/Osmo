@@ -95,6 +95,7 @@ import coil3.PlatformContext
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.Animatable
 import androidx.compose.runtime.SideEffect
+import com.music.bitchord.ui.components.dialTileLayer
 import androidx.compose.runtime.mutableStateMapOf
 import com.music.bitchord.data.model.CARD_ART_PX
 import com.music.bitchord.data.model.HomeShelf
@@ -596,7 +597,9 @@ internal fun SpeedDialShelf(
                                 val tileModifier = Modifier
                                     .offset { offset }
                                     .size(tileW, tileH)
-                                    .graphicsLayer {
+                                    // Over the whole tile, its reach past the cell
+                                    // included, so a fade does not cut its corners.
+                                    .dialTileLayer {
                                         val shown = appear.value
                                         var scale = if (entering && sweep) {
                                             // A fade with the least of a grow: no bounce.
