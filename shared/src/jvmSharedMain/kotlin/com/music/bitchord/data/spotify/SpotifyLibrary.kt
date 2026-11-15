@@ -121,7 +121,12 @@ object SpotifyLibrary {
         fromHome ?: run {
             val variables = buildJsonObject {
                 put("uri", TOP_MIXES_SECTION)
-                put("country", java.util.Locale.getDefault().country)
+                // Spotify's Home follows the account's own country; only this
+                // fallback query names one, so it takes the chosen country too.
+                put(
+                    "country",
+                    com.music.bitchord.data.ContentCountry.chosenOrNull() ?: java.util.Locale.getDefault().country,
+                )
                 put("timeZone", timeZone)
                 put("sp_t", "")
                 put("sectionItemsLimit", 20)

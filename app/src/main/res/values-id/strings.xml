@@ -1159,6 +1159,13 @@
     <string name="search_languages">Search languages</string>
 
     <string name="no_languages_match">No languages match</string>
+    <string name="language_and_location">Bahasa &amp; lokasi</string>
+    <string name="content_country">Negara</string>
+    <string name="content_country_subtitle">Rekomendasi, tangga lagu, dan rilis baru berasal dari negara ini</string>
+    <string name="content_country_description">YouTube Music memberi rekomendasi, tangga lagu, dan rilis baru untuk negara ini. Spotify memakai negara akun Anda.</string>
+    <string name="content_country_automatic">Otomatis</string>
+    <string name="search_countries">Cari negara</string>
+    <string name="no_countries_match">Tidak ada negara yang cocok</string>
 
 
 

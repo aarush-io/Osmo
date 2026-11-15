@@ -1152,6 +1152,13 @@
     <string name="search_languages">Search languages</string>
 
     <string name="no_languages_match">No languages match</string>
+    <string name="language_and_location">Idioma y ubicación</string>
+    <string name="content_country">País</string>
+    <string name="content_country_subtitle">Las recomendaciones, listas y novedades vienen de este país</string>
+    <string name="content_country_description">YouTube Music da recomendaciones, listas y novedades de este país. Spotify usa el país de tu cuenta.</string>
+    <string name="content_country_automatic">Automático</string>
+    <string name="search_countries">Buscar países</string>
+    <string name="no_countries_match">Ningún país coincide</string>
 
 
 

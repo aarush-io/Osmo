@@ -1180,6 +1180,13 @@
     <string name="search_languages">Search languages</string>
 
     <string name="no_languages_match">No languages match</string>
+    <string name="language_and_location">भाषा और स्थान</string>
+    <string name="content_country">देश</string>
+    <string name="content_country_subtitle">सुझाव, चार्ट और नई रिलीज़ इस देश से आती हैं</string>
+    <string name="content_country_description">YouTube Music इस देश के लिए सुझाव, चार्ट और नई रिलीज़ देता है। Spotify आपके खाते का देश इस्तेमाल करता है।</string>
+    <string name="content_country_automatic">स्वचालित</string>
+    <string name="search_countries">देश खोजें</string>
+    <string name="no_countries_match">कोई देश नहीं मिला</string>
 
 
 

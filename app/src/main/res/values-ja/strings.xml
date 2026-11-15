@@ -1160,6 +1160,13 @@
     <string name="search_languages">Search languages</string>
 
     <string name="no_languages_match">No languages match</string>
+    <string name="language_and_location">言語と地域</string>
+    <string name="content_country">国</string>
+    <string name="content_country_subtitle">おすすめ、チャート、新作はこの国のものになります</string>
+    <string name="content_country_description">YouTube Music はこの国のおすすめ、チャート、新作を表示します。Spotify はアカウントの国を使います。</string>
+    <string name="content_country_automatic">自動</string>
+    <string name="search_countries">国を検索</string>
+    <string name="no_countries_match">一致する国はありません</string>
 
 
 

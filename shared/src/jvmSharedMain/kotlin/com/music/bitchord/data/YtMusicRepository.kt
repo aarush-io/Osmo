@@ -217,6 +217,14 @@ object YtMusicRepository {
         Innertube.sendFeedback(token)
     }
 
+    /**
+     * The chosen country changed: mood and genre shelves were fetched for the
+     * old one, so they are fetched again on the next open.
+     */
+    fun onContentCountryChanged() {
+        moodGenreShelfCache.clear()
+    }
+
     /** Forgets the shared history, so the next read fetches it fresh. */
     fun invalidateHistoryCache() {
         historyMemo = null

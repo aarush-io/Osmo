@@ -104,7 +104,7 @@ object InnerTubeXResolver {
             runCatching {
                 innerTube.cookie = Innertube.cookie
                 innerTube.visitorData = Innertube.ensureVisitorData()
-                innerTube.locale = YouTubeLocale(gl = Innertube.currentRegion, hl = Innertube.currentLanguage)
+                innerTube.locale = YouTubeLocale(gl = Innertube.automaticRegion, hl = Innertube.currentLanguage)
                 extractor.prewarm()
             }.onFailure { if (it is CancellationException) throw it }
                 .onFailure { TrackLog.w(TAG, "InnerTubeX warm-up failed: ${it.message}") }
@@ -228,7 +228,7 @@ object InnerTubeXResolver {
     ): Extracted? {
         innerTube.cookie = Innertube.cookie
         innerTube.visitorData = Innertube.ensureVisitorData()
-        innerTube.locale = YouTubeLocale(gl = Innertube.currentRegion, hl = Innertube.currentLanguage)
+        innerTube.locale = YouTubeLocale(gl = Innertube.automaticRegion, hl = Innertube.currentLanguage)
         val stream = extractor.extract(
             videoId = videoId,
             hints = ContentHints(isUploaded = true.takeIf { uploaded })
@@ -283,7 +283,7 @@ object InnerTubeXResolver {
     suspend fun extractVideo(videoId: String, maxHeight: Int): VideoStream? {
         innerTube.cookie = Innertube.cookie
         innerTube.visitorData = Innertube.ensureVisitorData()
-        innerTube.locale = YouTubeLocale(gl = Innertube.currentRegion, hl = Innertube.currentLanguage)
+        innerTube.locale = YouTubeLocale(gl = Innertube.automaticRegion, hl = Innertube.currentLanguage)
         val stream = extractor.extract(
             videoId = videoId,
             hints = ContentHints(wantVideo = true, maxVideoHeight = maxHeight)

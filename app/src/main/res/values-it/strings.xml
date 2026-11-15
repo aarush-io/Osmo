@@ -1119,6 +1119,13 @@
     <string name="search_languages">Search languages</string>
 
     <string name="no_languages_match">No languages match</string>
+    <string name="language_and_location">Lingua e posizione</string>
+    <string name="content_country">Paese</string>
+    <string name="content_country_subtitle">Consigli, classifiche e nuove uscite arrivano da questo paese</string>
+    <string name="content_country_description">YouTube Music mostra consigli, classifiche e nuove uscite per questo paese. Spotify usa il paese del tuo account.</string>
+    <string name="content_country_automatic">Automatico</string>
+    <string name="search_countries">Cerca paesi</string>
+    <string name="no_countries_match">Nessun paese corrisponde</string>
 
 
 

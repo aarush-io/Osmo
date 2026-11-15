@@ -1926,6 +1926,15 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             }
         }
         viewModelScope.launch {
+            // A new country in Settings: Home and Explore were fetched for the
+            // old one. Home is fetched again in place, Explore from the start.
+            AppSettings.contentCountry.drop(1).collect {
+                YtMusicRepository.onContentCountryChanged()
+                refresh(Feed.HOME)
+                loadExplore()
+            }
+        }
+        viewModelScope.launch {
             AppSettings.webdavUrl.drop(1).collect {
                 reloadRemoteDetail(com.music.bitchord.data.webdav.WebDavConfig.BROWSE_ID)
             }

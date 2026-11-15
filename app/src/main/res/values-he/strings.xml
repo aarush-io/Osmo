@@ -1185,6 +1185,13 @@
     <string name="search_languages">Search languages</string>
 
     <string name="no_languages_match">No languages match</string>
+    <string name="language_and_location">שפה ומיקום</string>
+    <string name="content_country">מדינה</string>
+    <string name="content_country_subtitle">המלצות, מצעדים ושירים חדשים מגיעים מהמדינה הזו</string>
+    <string name="content_country_description">YouTube Music נותן המלצות, מצעדים ושירים חדשים למדינה הזו. Spotify משתמש במדינה של החשבון שלך.</string>
+    <string name="content_country_automatic">אוטומטי</string>
+    <string name="search_countries">חיפוש מדינות</string>
+    <string name="no_countries_match">אין מדינות תואמות</string>
 
 
 

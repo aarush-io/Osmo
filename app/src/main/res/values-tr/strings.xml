@@ -1135,6 +1135,13 @@
     <string name="search_languages">Dil ara</string>
 
     <string name="no_languages_match">Eşleşen dil yok</string>
+    <string name="language_and_location">Dil ve konum</string>
+    <string name="content_country">Ülke</string>
+    <string name="content_country_subtitle">Öneriler, listeler ve yeni çıkanlar bu ülkeden gelir</string>
+    <string name="content_country_description">YouTube Music bu ülke için öneriler, listeler ve yeni çıkanlar sunar. Spotify hesabınızın ülkesini kullanır.</string>
+    <string name="content_country_automatic">Otomatik</string>
+    <string name="search_countries">Ülke ara</string>
+    <string name="no_countries_match">Eşleşen ülke yok</string>
 
 
 
