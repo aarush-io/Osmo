@@ -1173,6 +1173,13 @@
     <string name="search_languages">Search languages</string>
 
     <string name="no_languages_match">No languages match</string>
+    <string name="language_and_location">语言和地区</string>
+    <string name="content_country">国家/地区</string>
+    <string name="content_country_subtitle">推荐、排行榜和新发行内容来自此国家/地区</string>
+    <string name="content_country_description">YouTube Music 会提供此国家/地区的推荐、排行榜和新发行内容。Spotify 使用你账号的国家/地区。</string>
+    <string name="content_country_automatic">自动</string>
+    <string name="search_countries">搜索国家/地区</string>
+    <string name="no_countries_match">没有匹配的国家/地区</string>
 
 
 

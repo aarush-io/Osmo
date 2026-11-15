@@ -962,6 +962,13 @@
     <string name="search_languages">Search languages</string>
 
     <string name="no_languages_match">No languages match</string>
+    <string name="language_and_location">Ngôn ngữ và vị trí</string>
+    <string name="content_country">Quốc gia</string>
+    <string name="content_country_subtitle">Đề xuất, bảng xếp hạng và bản phát hành mới đến từ quốc gia này</string>
+    <string name="content_country_description">YouTube Music đưa ra đề xuất, bảng xếp hạng và bản phát hành mới cho quốc gia này. Spotify dùng quốc gia của tài khoản bạn.</string>
+    <string name="content_country_automatic">Tự động</string>
+    <string name="search_countries">Tìm quốc gia</string>
+    <string name="no_countries_match">Không có quốc gia phù hợp</string>
 
 
 

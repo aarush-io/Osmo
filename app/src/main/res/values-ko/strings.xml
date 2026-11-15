@@ -413,6 +413,13 @@
     <string name="translation_language_subtitle">앱 언어 따르기</string>
     <string name="search_languages">언어 검색</string>
     <string name="no_languages_match">일치하는 언어 없음</string>
+    <string name="language_and_location">언어 및 위치</string>
+    <string name="content_country">국가</string>
+    <string name="content_country_subtitle">추천, 차트, 최신 음악을 이 국가 기준으로 가져옵니다</string>
+    <string name="content_country_description">YouTube Music은 이 국가의 추천, 차트, 최신 음악을 보여 줍니다. Spotify는 계정의 국가를 사용합니다.</string>
+    <string name="content_country_automatic">자동</string>
+    <string name="search_countries">국가 검색</string>
+    <string name="no_countries_match">일치하는 국가 없음</string>
     <string name="connect_account_first">먼저 계정을 연결하세요</string>
     <string name="connected_presence_off">연결됨, 활동 공유 꺼짐</string>
     <string name="copy_log">로그 복사</string>

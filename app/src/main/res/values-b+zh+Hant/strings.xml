@@ -1175,6 +1175,13 @@
     <string name="search_languages">Search languages</string>
 
     <string name="no_languages_match">No languages match</string>
+    <string name="language_and_location">語言和地區</string>
+    <string name="content_country">國家/地區</string>
+    <string name="content_country_subtitle">推薦、排行榜和新發行內容來自此國家/地區</string>
+    <string name="content_country_description">YouTube Music 會提供此國家/地區的推薦、排行榜和新發行內容。Spotify 使用你帳戶的國家/地區。</string>
+    <string name="content_country_automatic">自動</string>
+    <string name="search_countries">搜尋國家/地區</string>
+    <string name="no_countries_match">沒有相符的國家/地區</string>
 
 
 

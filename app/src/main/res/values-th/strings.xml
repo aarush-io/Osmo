@@ -999,6 +999,13 @@
     <string name="search_languages">Search languages</string>
 
     <string name="no_languages_match">No languages match</string>
+    <string name="language_and_location">ภาษาและตำแหน่ง</string>
+    <string name="content_country">ประเทศ</string>
+    <string name="content_country_subtitle">คำแนะนำ ชาร์ต และเพลงใหม่มาจากประเทศนี้</string>
+    <string name="content_country_description">YouTube Music แสดงคำแนะนำ ชาร์ต และเพลงใหม่ของประเทศนี้ Spotify ใช้ประเทศของบัญชีคุณ</string>
+    <string name="content_country_automatic">อัตโนมัติ</string>
+    <string name="search_countries">ค้นหาประเทศ</string>
+    <string name="no_countries_match">ไม่มีประเทศที่ตรงกัน</string>
 
 
 

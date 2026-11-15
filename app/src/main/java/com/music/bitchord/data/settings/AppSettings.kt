@@ -529,6 +529,14 @@ object AppSettings {
     val translationLanguage = MutableStateFlow("")
 
     /**
+     * The country YouTube Music gets recommendations, charts and new releases
+     * for: an ISO 3166 code such as "DE". Blank — the default — is automatic,
+     * the value Dial always sent before this setting. See
+     * [com.music.bitchord.data.ContentCountry].
+     */
+    val contentCountry = MutableStateFlow("")
+
+    /**
      * Plays a looping video behind the cover art on the player when one is
      * published for the track — Spotify's Canvas, Apple's motion artwork.
      *
@@ -1096,6 +1104,7 @@ object AppSettings {
         lyricsOffsetMs.value = prefs.getInt(KEY_LYRICS_OFFSET_MS, 0)
             .coerceIn(MIN_LYRICS_OFFSET_MS, MAX_LYRICS_OFFSET_MS)
         translationLanguage.value = prefs.getString(KEY_TRANSLATION_LANGUAGE, "").orEmpty()
+        contentCountry.value = prefs.getString(KEY_CONTENT_COUNTRY, "").orEmpty()
         animatedCanvas.value = prefs.getBoolean(KEY_ANIMATED_CANVAS, true)
         performanceMode.value = prefs.getBoolean(KEY_PERFORMANCE_MODE, false)
         keepHome.value = prefs.getBoolean(KEY_KEEP_HOME, !lowRamDevice)
@@ -1643,6 +1652,12 @@ object AppSettings {
     fun setTranslationLanguage(value: String) {
         translationLanguage.value = value
         prefs.edit().putString(KEY_TRANSLATION_LANGUAGE, value).apply()
+    }
+
+    /** Blank restores automatic; see [contentCountry]. */
+    fun setContentCountry(value: String) {
+        contentCountry.value = value
+        prefs.edit().putString(KEY_CONTENT_COUNTRY, value).apply()
     }
 
     fun setSyncedLyrics(value: Boolean) {
@@ -2500,6 +2515,7 @@ object AppSettings {
     private const val KEY_LYRICS_BLUR = "lyrics_blur"
     private const val KEY_LYRICS_OFFSET_MS = "lyrics_offset_ms"
     private const val KEY_TRANSLATION_LANGUAGE = "translation_language"
+    private const val KEY_CONTENT_COUNTRY = "content_country"
     private const val KEY_ANIMATED_CANVAS = "animated_canvas"
     private const val KEY_CANVAS_OVER_CELLULAR = "canvas_over_cellular"
     private const val KEY_VIDEO_QUALITY_WIFI = "video_quality_wifi"

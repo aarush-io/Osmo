@@ -1234,6 +1234,13 @@
     <string name="search_languages">Search languages</string>
 
     <string name="no_languages_match">No languages match</string>
+    <string name="language_and_location">Język i lokalizacja</string>
+    <string name="content_country">Kraj</string>
+    <string name="content_country_subtitle">Rekomendacje, listy przebojów i nowości pochodzą z tego kraju</string>
+    <string name="content_country_description">YouTube Music podaje rekomendacje, listy przebojów i nowości dla tego kraju. Spotify używa kraju Twojego konta.</string>
+    <string name="content_country_automatic">Automatycznie</string>
+    <string name="search_countries">Szukaj krajów</string>
+    <string name="no_countries_match">Brak pasujących krajów</string>
 
 
 

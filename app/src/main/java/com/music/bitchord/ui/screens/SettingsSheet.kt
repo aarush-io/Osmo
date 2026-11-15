@@ -83,6 +83,7 @@ import androidx.compose.material.icons.rounded.InvertColors
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material.icons.rounded.LibraryMusic
@@ -326,6 +327,7 @@ fun SettingsScreen(
     val lyricsInNotification by AppSettings.lyricsInNotification.collectAsStateWithLifecycle()
     val lyricsSources by AppSettings.lyricsSources.collectAsStateWithLifecycle()
     val translationLanguage by AppSettings.translationLanguage.collectAsStateWithLifecycle()
+    val contentCountry by AppSettings.contentCountry.collectAsStateWithLifecycle()
     val theme by AppSettings.themeMode.collectAsStateWithLifecycle()
     val sessionId by AppSettings.audioSessionId.collectAsStateWithLifecycle()
     val outputPcmMode by AppSettings.outputPcmMode.collectAsStateWithLifecycle()
@@ -2095,7 +2097,7 @@ fun SettingsScreen(
             }
         }
 
-        if (shows(SettingsCategory.LANGUAGE)) SearchableSettingsGroup(search, header = stringResource(R.string.language)) {
+        if (shows(SettingsCategory.LANGUAGE)) SearchableSettingsGroup(search, header = stringResource(R.string.language_and_location)) {
             val appLanguageTitle = stringResource(R.string.app_language)
             row(appLanguageTitle, "locale", "translate") {
                 val selectedLanguage = AppCompatDelegate.getApplicationLocales().get(0)?.toLanguageTag()
@@ -2106,6 +2108,26 @@ fun SettingsScreen(
                     subtitle = stringResource(languageDisplayNameRes(selectedLanguage)),
                     onClick = onAppLanguage,
                 )
+            }
+            val contentCountryTitle = stringResource(R.string.content_country)
+            row(contentCountryTitle, "country", "region", "location", "recommendations", "charts") {
+                var picking by remember { mutableStateOf(false) }
+                SettingsRow(
+                    icon = Icons.Rounded.Public,
+                    title = contentCountryTitle,
+                    subtitle = stringResource(R.string.content_country_subtitle),
+                    value = contentCountry.trim().takeIf { it.length == 2 }
+                        ?.let { com.music.bitchord.data.ContentCountry.displayName(it, countryDisplayLocale()) }
+                        ?: stringResource(R.string.content_country_automatic),
+                    onClick = { picking = true },
+                )
+                if (picking) {
+                    ContentCountryDialog(
+                        title = contentCountryTitle,
+                        selected = contentCountry,
+                        onDismiss = { picking = false },
+                    )
+                }
             }
         }
 
@@ -3502,7 +3524,7 @@ enum class SettingsCategory(@param:StringRes val title: Int) {
     STORAGE(R.string.storage),
     YOUR_DATA(R.string.your_data),
     MISCELLANEOUS(R.string.miscellaneous),
-    LANGUAGE(R.string.language),
+    LANGUAGE(R.string.language_and_location),
     ADVANCED(R.string.advanced_options),
     ;
 
