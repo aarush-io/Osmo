@@ -11,18 +11,19 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.unit.Dp
+import com.music.bitchord.ui.components.glassAccentFill
 import com.music.bitchord.ui.components.liquidGlass
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -38,7 +39,13 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
@@ -358,7 +365,7 @@ private fun HomeCategoryChips(floating: Boolean) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         contentPadding = PaddingValues(start = if (floating) PAGE_GUTTER else 0.dp, end = PAGE_GUTTER),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().chipRowEdgeFade(rowState),
     ) {
         items(chips, key = { it.params }) { chip ->
             CategoryChip(
@@ -379,8 +386,12 @@ private fun CategoryChip(title: String, selected: Boolean, floating: Boolean, on
     // The accent the tab bar's selected tab wears.
     val accent = LocalAmbientAccent.current ?: LocalNowPlayingTint.current ?: MaterialTheme.colorScheme.primary
     val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val style = appStyle()
+    // Glass and Frost let a touch of their blur through the accent, so the
+    // chosen chip reads as tinted glass and not as paint on it.
+    val fillAlpha = if (style == AppStyle.SOLID) 1f else CHIP_GLASS_FILL
     val fill by animateColorAsState(
-        targetValue = if (selected) accent else accent.copy(alpha = 0f),
+        targetValue = accent.copy(alpha = if (selected) fillAlpha else 0f),
         animationSpec = tween(CHIP_FILL_MS),
         label = "chipFill",
     )
@@ -403,7 +414,7 @@ private fun CategoryChip(title: String, selected: Boolean, floating: Boolean, on
         }
         seen = selected
     }
-    val surface = when (appStyle()) {
+    val surface = when (style) {
         AppStyle.GLASS -> MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
         AppStyle.FROST -> frostPageButtonFill(dark)
         AppStyle.SOLID -> MaterialTheme.colorScheme.surfaceVariant
@@ -427,7 +438,9 @@ private fun CategoryChip(title: String, selected: Boolean, floating: Boolean, on
                     Modifier.lightweightLiquidGlass(CHIP_SHAPE, fallbackColor = surface)
                 },
             )
-            .background(fill, CHIP_SHAPE)
+            // The accent is laid on the glass under its light and rim; an
+            // opaque fill over the glass hid both on the held row.
+            .glassAccentFill(CHIP_SHAPE, fill)
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 8.dp),
     ) {
@@ -441,6 +454,51 @@ private fun CategoryChip(title: String, selected: Boolean, floating: Boolean, on
     }
 }
 
+/**
+ * Feathers the chip row's ends, as the player's scrolling titles are, rather
+ * than cutting the chips off sharp. Each end fades only where there are chips
+ * past it, and the left fade comes in over the first [CHIP_EDGE_FADE] of the
+ * scroll, so a row at its start shows its first chip clear. Read at draw time:
+ * a scroll only redraws the mask.
+ */
+private fun Modifier.chipRowEdgeFade(state: LazyListState): Modifier = this
+    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+    .drawWithContent {
+        drawContent()
+        val edge = CHIP_EDGE_FADE.toPx().coerceAtMost(size.width / 2f)
+        if (edge <= 0f) return@drawWithContent
+        val info = state.layoutInfo
+        val scrolled = if (state.firstVisibleItemIndex > 0) edge else state.firstVisibleItemScrollOffset.toFloat()
+        val last = info.visibleItemsInfo.lastOrNull()
+        val remaining = if (last == null || info.totalItemsCount == 0) {
+            0f
+        } else if (last.index < info.totalItemsCount - 1) {
+            edge
+        } else {
+            (last.offset + last.size + info.afterContentPadding - info.viewportEndOffset).toFloat()
+        }
+        fun fade(strength: Float, fromLeft: Boolean) {
+            if (strength <= 0f) return
+            val x0 = if (fromLeft) 0f else size.width - edge
+            val clear = Color.Black.copy(alpha = 1f - strength)
+            drawRect(
+                brush = Brush.horizontalGradient(
+                    0f to if (fromLeft) clear else Color.Black,
+                    1f to if (fromLeft) Color.Black else clear,
+                    startX = x0,
+                    endX = x0 + edge,
+                ),
+                topLeft = Offset(x0, 0f),
+                size = Size(edge, size.height),
+                blendMode = BlendMode.DstIn,
+            )
+        }
+        fade((scrolled / edge).coerceIn(0f, 1f), fromLeft = true)
+        fade((remaining / edge).coerceIn(0f, 1f), fromLeft = false)
+    }
+
 private val CHIP_SHAPE = RoundedCornerShape(12.dp)
+private val CHIP_EDGE_FADE = 28.dp
 private const val CHIP_FILL_MS = 240
+private const val CHIP_GLASS_FILL = 0.86f
 private const val CHIP_PRESS_SCALE = 0.88f

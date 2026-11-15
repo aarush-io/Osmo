@@ -51,6 +51,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -90,6 +91,7 @@ import coil3.PlatformContext
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.Animatable
 import androidx.compose.runtime.SideEffect
+import com.music.bitchord.ui.components.ShimmerBox
 import com.music.bitchord.ui.components.dialTileLayer
 import androidx.compose.runtime.mutableStateMapOf
 import com.music.bitchord.data.model.CARD_ART_PX
@@ -582,6 +584,19 @@ internal fun SpeedDialShelf(
                                     appear.animateTo(
                                         1f,
                                         spring(dampingRatio = INTRO_BOUNCE, stiffness = Spring.StiffnessMediumLow),
+                                    )
+                                }
+                                // In a sweep, the loading page's placeholder
+                                // stays in the tile's cell while the tile waits
+                                // for its art and fades in over it, and goes
+                                // once the tile is fully in.
+                                val holdsPlaceholder by remember(id) {
+                                    derivedStateOf { entering && sweep && appear.value < 1f }
+                                }
+                                if (holdsPlaceholder) {
+                                    ShimmerBox(
+                                        modifier = Modifier.offset { offset }.size(tileW, tileH),
+                                        shape = RoundedCornerShape(10.dp),
                                     )
                                 }
                                 val pinnedTile = id in pinnedIds
