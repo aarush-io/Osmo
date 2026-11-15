@@ -6,6 +6,8 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.GraphicsLayerScope
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -60,6 +62,38 @@ fun Modifier.dialTileOutset(): Modifier = composed {
             placeable.place(-grow, -grow)
         }
     }
+}
+
+/**
+ * A graphics layer for a whole dial tile, [LocalDialTileOutset] included.
+ * A layer laid over the cell alone ends at the cell: while it fades (alpha
+ * under 1) it is drawn in a buffer of its own size, and the part of the tile
+ * past the cell, its rounded corners and its rim, is cut off until the fade
+ * ends. This one is the tile's full size; what is in it is the cell again,
+ * which [dialTileOutset] then grows to fill it.
+ */
+fun Modifier.dialTileLayer(block: GraphicsLayerScope.() -> Unit): Modifier = composed {
+    val outset = LocalDialTileOutset.current
+    if (outset <= 0.dp) return@composed Modifier.graphicsLayer(block)
+    Modifier
+        .layout { measurable, constraints ->
+            val grow = outset.roundToPx()
+            val placeable = measurable.measure(constraints.offset(2 * grow, 2 * grow))
+            layout(
+                (placeable.width - 2 * grow).coerceAtLeast(0),
+                (placeable.height - 2 * grow).coerceAtLeast(0),
+            ) {
+                placeable.place(-grow, -grow)
+            }
+        }
+        .graphicsLayer(block)
+        .layout { measurable, constraints ->
+            val grow = outset.roundToPx()
+            val placeable = measurable.measure(constraints.offset(-2 * grow, -2 * grow))
+            layout(placeable.width + 2 * grow, placeable.height + 2 * grow) {
+                placeable.place(grow, grow)
+            }
+        }
 }
 
 /**
