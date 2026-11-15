@@ -45,6 +45,32 @@ object BitChordIcons {
         }.build()
     }
 
+    /**
+     * Monochrome's pixel mark: a 3x3 grid of square blocks with the
+     * top-left, middle and bottom-right cells empty, as in its logo.
+     */
+    val Monochrome: ImageVector by lazy {
+        ImageVector.Builder(
+            name = "bc_monochrome", defaultWidth = 24.dp, defaultHeight = 24.dp,
+            viewportWidth = 24f, viewportHeight = 24f,
+        ).apply {
+            path(fill = stroke) {
+                val cell = 6f
+                val origin = 3f
+                val filled = listOf(1 to 0, 2 to 0, 0 to 1, 2 to 1, 0 to 2, 1 to 2)
+                for ((column, row) in filled) {
+                    val x = origin + column * cell
+                    val y = origin + row * cell
+                    moveTo(x, y)
+                    lineTo(x + cell, y)
+                    lineTo(x + cell, y + cell)
+                    lineTo(x, y + cell)
+                    close()
+                }
+            }
+        }.build()
+    }
+
     val LyricsQuote: ImageVector by lazy {
         ImageVector.Builder(
             name = "bc_lyrics_quote", defaultWidth = 24.dp, defaultHeight = 24.dp,
