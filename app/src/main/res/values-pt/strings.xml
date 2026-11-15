@@ -450,6 +450,7 @@
     <string name="sources_order_header">Fontes, tentadas nesta ordem</string>
     <string name="sources_quality_capped">Esta conexão está definida abaixo de Alta qualidade, então os fluxos são transcodificados. Downloads não são afetados.</string>
     <string name="jiosaavn_mismatch_warning">Pode encontrar a versão errada de uma música. Ative por sua conta e risco.</string>
+    <string name="monochrome_source_detail">FLAC sem perdas. Se o Monochrome não tiver uma música, o YouTube Music toca.</string>
     <string name="enable_jiosaavn">Ativar JioSaavn?</string>
     <string name="enable_anyway">Ativar mesmo assim</string>
     <string name="sources_subtitle">De onde vem o áudio e a ordem usada</string>

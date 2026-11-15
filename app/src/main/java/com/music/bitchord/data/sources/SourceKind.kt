@@ -5,8 +5,8 @@ package com.music.bitchord.data.sources
  *
  * Fixed and small on purpose. **[rank] is the order sources are tried** — see
  * `SourceRegistry.active()`, which sorts on it — so the sources a user added
- * come first, then the legacy built-in module kind, then JioSaavn, then
- * YouTube Music. Adding a source means adding a [MusicSource]
+ * come first, then the legacy built-in module kind, then Monochrome, then
+ * JioSaavn, then YouTube Music. Adding a source means adding a [MusicSource]
  * implementation and an entry here, which is the point — every protocol the
  * app speaks is one someone can read in this repo, and a source can't teach
  * the app a new way to behave after it ships.
@@ -54,6 +54,12 @@ enum class SourceKind(
      * nothing about what was actually asked first.
      */
     val rank: Int,
+    /**
+     * Whether a new install, or an install that gets this kind for the first
+     * time, has it switched on. Off for the kinds that send the listener's
+     * songs to a catalogue outside YouTube Music without being asked.
+     */
+    val onByDefault: Boolean = true,
 ) {
     /**
      * An addon server the user pointed at themselves.
@@ -127,6 +133,26 @@ enum class SourceKind(
         rank = 1,
     ),
 
+    /**
+     * Monochrome's own track streamer: lossless FLAC with no account and no
+     * address to type in. Built in, so it is a switch on the sources screen
+     * and not something to add. Off until the listener turns it on.
+     *
+     * Lossless, so it is asked only while the ceiling in force is Lossless
+     * (see [AudioQuality.permits][com.music.bitchord.data.settings.permits]),
+     * and ranked above JioSaavn because a FLAC beats a 320kbps AAC of the
+     * same recording.
+     */
+    MONOCHROME(
+        label = "Monochrome",
+        detail = "Lossless FLAC from Monochrome. No account. A song Monochrome does not have plays from YouTube Music.",
+        labels = listOf("FLAC", "Lossless", "No account"),
+        needsServer = false,
+        canServeLossless = true,
+        rank = 2,
+        onByDefault = false,
+    ),
+
     JIOSAAVN(
         label = "JioSaavn",
         detail = "Optional JioSaavn streams up to 320kbps AAC/MP4. Catalogue matching can select the wrong song.",
@@ -134,7 +160,8 @@ enum class SourceKind(
         needsServer = false,
         canServeLossless = false,
         worthPrefetching = true,
-        rank = 2,
+        rank = 3,
+        onByDefault = false,
     ),
 
     /**
@@ -150,7 +177,7 @@ enum class SourceKind(
         labels = listOf("Lossy", "Full catalogue", "Radio"),
         needsServer = false,
         canServeLossless = false,
-        rank = 3,
+        rank = 4,
     ),
     ;
 

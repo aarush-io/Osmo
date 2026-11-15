@@ -471,6 +471,7 @@
     <string name="sources_order_header">來源，按此順序嘗試</string>
     <string name="sources_quality_capped">此連線的設定低於高品質，因此串流會被轉碼以符合該限制，下載不受影響。</string>
     <string name="jiosaavn_mismatch_warning">可能匹配到歌曲的錯誤版本。啟用風險自負。</string>
+    <string name="monochrome_source_detail">無損 FLAC。Monochrome 沒有的歌曲由 YouTube Music 播放。</string>
     <string name="enable_jiosaavn">啟用 JioSaavn？</string>
     <string name="enable_anyway">仍然啟用</string>
     <string name="sources_subtitle">音訊的來源及使用順序</string>
