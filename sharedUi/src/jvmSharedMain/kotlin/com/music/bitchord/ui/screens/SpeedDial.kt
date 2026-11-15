@@ -90,6 +90,7 @@ import coil3.PlatformContext
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.Animatable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableStateMapOf
 import com.music.bitchord.data.model.CARD_ART_PX
 import com.music.bitchord.data.model.HomeShelf
 import com.music.bitchord.data.model.ShelfItem
@@ -372,6 +373,9 @@ internal fun SpeedDialShelf(
     // is swiped away and builds it afresh on the way back, so without this a
     // dealt tile would pop in again on every visit to its page.
     val entered = remember { HashSet<String>() }
+    // The tiles whose art is in, for a sweep to wait on: it starts once every
+    // tile on its page has its art, so all come in whole, rim and art as one.
+    val artIn = remember(deal) { mutableStateMapOf<String, Boolean>() }
 
     // Turn the page while the finger rests at a side.
     LaunchedEffect(edge, dragId) {
@@ -523,6 +527,9 @@ internal fun SpeedDialShelf(
                     modifier = Modifier.fillMaxWidth(),
                 ) { page ->
                     Box(Modifier.fillMaxWidth().height(gridHeight)) {
+                        val pageArt = display.drop(page * perPage).take(perPage).mapNotNull { tile ->
+                            tile?.takeIf { it !== LUCKY_TILE && it !== HISTORY_TILE && it.thumbnailUrl != null }?.dialId()
+                        }
                         display.drop(page * perPage).take(perPage).forEachIndexed { cell, slotItem ->
                             val item = slotItem ?: return@forEachIndexed
                             // Pins, the die and the history tile stay put
@@ -562,6 +569,9 @@ internal fun SpeedDialShelf(
                                     // grows a little past full size and settles.
                                     snapshotFlow { SpeedDialIntro.canStart }.first { it }
                                     if (sweep) {
+                                        withTimeoutOrNull(SWEEP_ART_WAIT_MS) {
+                                            snapshotFlow { pageArt.all { artIn[it] == true } }.first { it }
+                                        }
                                         // On the diagonals: A1, then B1 and A2, then C1, B2, A3 ...
                                         delay((cell / SPEED_DIAL_COLUMNS + cell % SPEED_DIAL_COLUMNS) * SWEEP_STEP_MS)
                                         appear.animateTo(1f, tween(SWEEP_FADE_MS, easing = FastOutSlowInEasing))
@@ -590,6 +600,13 @@ internal fun SpeedDialShelf(
                                             INTRO_START_SCALE + (1f - INTRO_START_SCALE) * shown
                                         } else {
                                             1f
+                                        }
+                                        // Faded as one picture, rim and glass with the art,
+                                        // rather than each drawn part on its own.
+                                        compositingStrategy = if (entering && sweep && shown < 1f) {
+                                            CompositingStrategy.Offscreen
+                                        } else {
+                                            CompositingStrategy.Auto
                                         }
                                         alpha = when {
                                             dragId == id -> 0f
@@ -669,6 +686,7 @@ internal fun SpeedDialShelf(
                                         },
                                         dim = dim,
                                         modifier = tileModifier,
+                                        onArtLoaded = { artIn[id] = true },
                                     )
                                 }
                             }
@@ -761,7 +779,13 @@ private const val ART_WIPE_FEATHER = 0.25f
  * diagonal edge rather than the tile blanking to grey and popping.
  */
 @Composable
-private fun SpeedDialArt(url: String?, contentDescription: String?, modifier: Modifier = Modifier) {
+private fun SpeedDialArt(
+    url: String?,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    /** Once the first art has loaded, or failed to. */
+    onLoaded: (() -> Unit)? = null,
+) {
     val context = LocalPlatformContext.current
     var shownUrl by remember { mutableStateOf(url) }
     // False from the moment the new art takes the bottom layer until that
@@ -787,10 +811,14 @@ private fun SpeedDialArt(url: String?, contentDescription: String?, modifier: Mo
             model = shown,
             contentDescription = contentDescription,
             contentScale = ContentScale.Crop,
-            onSuccess = { settled = true },
+            onSuccess = {
+                settled = true
+                onLoaded?.invoke()
+            },
             onError = {
                 settled = true
                 failed = true
+                onLoaded?.invoke()
             },
             modifier = Modifier.fillMaxSize(),
         )
@@ -845,6 +873,9 @@ private const val INTRO_BOUNCE = 0.5f
 private const val SWEEP_STEP_MS = 70L
 private const val SWEEP_FADE_MS = 380
 private const val SWEEP_START_SCALE = 0.94f
+
+/** The longest a sweep waits for its page's art before it starts anyway. */
+private const val SWEEP_ART_WAIT_MS = 1_500L
 
 /**
  * The dial's entrance when the app opens: its first page pops in one tile at
@@ -913,6 +944,8 @@ private fun SpeedDialTile(
     dim: () -> Float = { 0f },
     /** Where it is and its picture, for whoever needs them: see [TileSpot]. */
     spot: TileSpot = remember { TileSpot() },
+    /** Once its art has loaded (or failed to): see the dial's sweep. */
+    onArtLoaded: (() -> Unit)? = null,
 ) {
     val shape = RoundedCornerShape(10.dp)
     val press = rememberTilePress()
@@ -952,7 +985,7 @@ private fun SpeedDialTile(
             )
             .contextClick(onLongPress),
     ) {
-        SpeedDialArt(item.thumbnailUrl, item.title, Modifier.fillMaxSize())
+        SpeedDialArt(item.thumbnailUrl, item.title, Modifier.fillMaxSize(), onLoaded = onArtLoaded)
         if (showLabel) {
             Box(
                 Modifier
