@@ -3781,8 +3781,10 @@ fun NowPlayingScreen(
                     //    player closes from the picture as well as from the
                     //    handle; up is taken here and drags the queue in.
                     //  * The queue or the lyrics — the header those panels sit
-                    //    below, and nothing else. Down closes the player, up does
-                    //    nothing: there is no sleeve left to pull away from.
+                    //    below, and nothing else. Up does nothing: there is no
+                    //    sleeve left to pull away from. Down over the lyrics
+                    //    closes the player; down over the queue's header puts the
+                    //    queue away and leaves the full player.
                     //
                     // The header is worked out from the state rather than read
                     // off the sleeve, which is the whole point of doing it here:
@@ -3832,6 +3834,30 @@ fun NowPlayingScreen(
                                                 )
                                                 if (open) queueControlsOpen = true
                                                 queueOpen = open
+                                            }
+                                            queueReleased++
+                                        },
+                                    )
+                                } else if (queueOpen && !lyricsOpen) {
+                                    // The queue's header, the playing song: down
+                                    // puts the queue away and leaves the full
+                                    // player, as a swipe down over the controls
+                                    // does, rather than closing the whole player.
+                                    // The sleeve follows the finger back out over
+                                    // the same travel it came in on.
+                                    val headerTravel = (dismissBandBottom - dismissBandTop -
+                                        HEADER_HEIGHT.toPx()).takeIf { it >= 1f }
+                                        ?: QUEUE_CLOSE_TRAVEL.toPx()
+                                    dragPanelClosed(
+                                        down = down,
+                                        travel = headerTravel,
+                                        slide = queueSlide,
+                                        threshold = PANEL_CLOSE_DRAG.toPx(),
+                                        onHold = { queueDragging = it },
+                                        onSettle = { open ->
+                                            if (!open) {
+                                                haptics.play(Haptic.Tap)
+                                                queueOpen = false
                                             }
                                             queueReleased++
                                         },
