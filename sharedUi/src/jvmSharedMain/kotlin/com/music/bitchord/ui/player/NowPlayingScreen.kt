@@ -1743,7 +1743,7 @@ fun NowPlayingScreen(
     }
 
     // The audio output, lyrics provider and Listen Together drawers handle
-    // back themselves, so a predictive swipe can slide them down — see
+    // back themselves, so a predictive swipe can shrink them — see
     // [PlayerDrawer]'s handlesBack.
 
     PlayerBackHandler(enabled = showAudioPipeline) { showAudioPipeline = false }

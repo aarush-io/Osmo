@@ -62,6 +62,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.music.bitchord.ui.components.optimizedHazeEffect
+import com.music.bitchord.ui.components.predictiveBackShrink
+import com.music.bitchord.ui.components.predictiveBackShrinkContent
 import com.music.bitchord.ui.utils.containSheetGestures
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
@@ -97,13 +99,6 @@ val PlayerDrawerScrim: Color get() = SCRIM_COLOR
  */
 private const val DISMISS_DRAG_FRACTION = 0.25f
 
-/**
- * How much of its own height the drawer follows a predictive back swipe down
- * by, at the swipe's full length. Enough to read as the drawer leaving; the
- * rest of the way is the exit once the swipe commits.
- */
-private const val BACK_SWIPE_TRAVEL = 0.4f
-
 /** The wash over the drawer's liquid glass: dark enough for its white rows on any artwork. */
 private val DRAWER_GLASS_TINT = Color(0xFF121212).copy(alpha = 0.6f)
 private val DRAWER_SURFACE = Color(0xFF121212)
@@ -116,7 +111,8 @@ private val GLASS_OVERHANG = 64.dp
 /**
  * The bottom-edge drawer shell every player sheet in this package puts up —
  * [AudioOutputSheet] and [ListenTogetherMembersSheet] alike: dark over a
- * scrim, a grab handle, a title, drag down to put it away. Pulled out because
+ * scrim, a grab handle, a title, drag down to put it away, and a predictive
+ * back swipe that shrinks it before it goes. Pulled out because
  * the drag gesture, the scrim fade tied to it, and the haze background are
  * identical between the two and worth keeping in exactly one place.
  *
@@ -183,7 +179,8 @@ fun PlayerDrawer(
     }
 
     // How far through a predictive back swipe the listener is, 0..1. The
-    // drawer sinks with it, and comes back up if the swipe is let go.
+    // drawer shrinks with it (see [predictiveBackShrink]), slides off from
+    // there once the swipe commits, and grows back if the swipe is let go.
     val backSwipe = remember { Animatable(0f) }
     PlayerPredictiveBackHandler(
         enabled = handlesBack && !closing,
@@ -200,6 +197,7 @@ fun PlayerDrawer(
     // How far the drawer has been dragged down, in pixels. Released, it either
     // springs back or goes — see [DISMISS_DRAG_FRACTION].
     var drag by remember { mutableFloatStateOf(0f) }
+    var width by remember { mutableIntStateOf(0) }
     var height by remember { mutableIntStateOf(0) }
     val offset by animateFloatAsState(
         targetValue = drag,
@@ -213,7 +211,7 @@ fun PlayerDrawer(
     )
     // Fades with the drawer rather than staying at full strength under a sheet
     // halfway off the screen, which is what makes the drag feel connected.
-    val backOffset = backSwipe.value * height * BACK_SWIPE_TRAVEL + duck * height
+    val backOffset = duck * height
     val scrimAlpha = scrimFade * if (height > 0) (1f - (offset + backOffset) / height).coerceIn(0f, 1f) else 1f
 
     // The drawer's rows scroll, and that scroll takes the finger before the
@@ -293,10 +291,14 @@ fun PlayerDrawer(
                 // own BottomCenter alignment once it is narrower.
                 .widthIn(max = DRAWER_MAX_WIDTH)
                 .fillMaxWidth()
-                .onSizeChanged { height = it.height }
+                .onSizeChanged {
+                    width = it.width
+                    height = it.height
+                }
                 .offset {
-                    IntOffset(0, (offset + backSwipe.value * height * BACK_SWIPE_TRAVEL + duck * height).roundToInt())
-                },
+                    IntOffset(0, (offset + duck * height).roundToInt())
+                }
+                .predictiveBackShrink({ backSwipe.value }),
         ) {
         // The app's menu glass over the player's backdrop, when the app has
         // glass on. Drawn behind the rows rather than
@@ -331,6 +333,7 @@ fun PlayerDrawer(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .predictiveBackShrinkContent({ backSwipe.value }, { width }, { height })
                 .clip(DRAWER_SHAPE)
                 .then(
                     when {
