@@ -381,6 +381,14 @@ class CanvasVideoSpec(
     val bottomFade: Float,
     val bottomFadeEndPx: Float?,
     val pausedForTransition: Boolean,
+    /**
+     * The last song's clip, still on screen as it fades out over the next
+     * song's sleeve (the player's own fade, through [presentationAlpha]). A
+     * clip that shares a decoder with other surfaces — a music video standing
+     * in as the Canvas — gives the decoder up and holds the frame it shows,
+     * rather than fading itself out the moment its song stops feeding it.
+     */
+    val leaving: Boolean = false,
 )
 
 /**
@@ -405,6 +413,7 @@ fun CanvasArtworkPlayer(
     bottomFade: Float = 0f,
     bottomFadeEndPx: Float? = null,
     pausedForTransition: Boolean = false,
+    leaving: Boolean = false,
 ) {
     PlayerPlatform.host.CanvasVideo(
         CanvasVideoSpec(
@@ -423,6 +432,7 @@ fun CanvasArtworkPlayer(
             bottomFade = bottomFade,
             bottomFadeEndPx = bottomFadeEndPx,
             pausedForTransition = pausedForTransition,
+            leaving = leaving,
         ),
         modifier,
     )
