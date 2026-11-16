@@ -63,7 +63,7 @@ import com.music.bitchord.data.settings.CustomizationSettings
 import com.music.bitchord.ui.components.LocalAmbientAccent
 import com.music.bitchord.ui.components.PAGE_GUTTER
 import com.music.bitchord.ui.components.appStyle
-import com.music.bitchord.ui.components.frostPageButtonFill
+import com.music.bitchord.ui.components.styleSurfaceWithoutBackdrop
 import com.music.bitchord.ui.components.lightweightLiquidGlass
 import com.music.bitchord.ui.haptics.Haptic
 import com.music.bitchord.ui.haptics.rememberHaptics
@@ -385,7 +385,6 @@ private fun HomeCategoryChips(floating: Boolean) {
 private fun CategoryChip(title: String, selected: Boolean, floating: Boolean, onClick: () -> Unit) {
     // The accent the tab bar's selected tab wears.
     val accent = LocalAmbientAccent.current ?: LocalNowPlayingTint.current ?: MaterialTheme.colorScheme.primary
-    val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     val style = appStyle()
     // Glass and Frost let a touch of their blur through the accent, so the
     // chosen chip reads as tinted glass and not as paint on it.
@@ -414,11 +413,9 @@ private fun CategoryChip(title: String, selected: Boolean, floating: Boolean, on
         }
         seen = selected
     }
-    val surface = when (style) {
-        AppStyle.GLASS -> MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
-        AppStyle.FROST -> frostPageButtonFill(dark)
-        AppStyle.SOLID -> MaterialTheme.colorScheme.surfaceVariant
-    }
+    // In Home's list, Frost and Solid take the held row's own fill and
+    // hairline; Glass keeps its lightweight look (null).
+    val inList = Modifier.styleSurfaceWithoutBackdrop(CHIP_SHAPE, carriesText = true)
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -434,8 +431,14 @@ private fun CategoryChip(title: String, selected: Boolean, floating: Boolean, on
                 } else {
                     // In Home's list, which is what the bars' glass samples,
                     // so nothing is sampled here: Glass gives the bars' tint,
-                    // light and rim; Frost a see-through veil; Solid the fill.
-                    Modifier.lightweightLiquidGlass(CHIP_SHAPE, fallbackColor = surface)
+                    // light and rim. Frost and Solid give the same fill and
+                    // hairline as the held row, so the chips do not change
+                    // as Home scrolls from the dial into its feed (a pale
+                    // veil here made them bright beside the held ones).
+                    inList ?: Modifier.lightweightLiquidGlass(
+                        CHIP_SHAPE,
+                        fallbackColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                    )
                 },
             )
             // The accent is laid on the glass under its light and rim; an
