@@ -92,6 +92,8 @@ internal fun AndroidLyricsShareSheet(
         onDismiss = onDismiss,
         modifier = modifier,
         titleGap = 2.dp,
+        // Back puts the card away with the drawer's own predictive swipe.
+        handlesBack = true,
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
