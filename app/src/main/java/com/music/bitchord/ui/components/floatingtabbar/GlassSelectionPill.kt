@@ -496,6 +496,25 @@ internal fun Modifier.pillPlacement(center: () -> Offset, size: () -> Size): Mod
         }
     }
 
+/**
+ * [size] made small enough that a pill centred on [centerX] (and on the bar's
+ * centre line) stays inside a bar running from [left] to [right] and
+ * [barHeight] tall, so the bar's clip never cuts it.
+ *
+ * Both are stadiums: a pill no taller than the bar and with its ends no
+ * further out than the bar's ends is inside it — at the bar's end its round
+ * cap lies within the bar's, which is at least as large. The width is trimmed
+ * evenly about the centre, so the pill stays on its tab.
+ */
+internal fun fitInsideBar(size: Size, centerX: Float, left: Float, right: Float, barHeight: Float): Size {
+    if (barHeight <= 0f || right <= left) return size
+    val halfRoom = minOf(centerX - left, right - centerX).coerceAtLeast(0f)
+    return Size(
+        width = minOf(size.width, halfRoom * 2f),
+        height = minOf(size.height, barHeight),
+    )
+}
+
 /** The flat pill: a fill and nothing else. */
 @Composable
 internal fun FlatSelectionPill(

@@ -96,6 +96,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.Snapshot
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
@@ -172,6 +173,7 @@ import com.music.bitchord.ui.theme.rememberArtworkControlsBandLuminance
 import com.music.bitchord.ui.theme.controlsBandLuminance
 import com.music.bitchord.ui.theme.rememberArtworkTopBandLuminance
 import com.music.bitchord.ui.theme.stableStatusBarTop
+import com.music.bitchord.ui.utils.leaveTopEdgeToSystem
 import com.music.bitchord.ui.theme.topBandScrimAlpha
 import com.music.bitchord.ui.LyricsProviderState
 import com.music.bitchord.ui.components.optimizedHazeEffect
@@ -284,6 +286,15 @@ private const val CANVAS_DROP_GRACE_MS = 1_200L
 
 /** How long the last track's clip takes to fade out when the song changes. */
 private const val CANVAS_OUTGOING_FADE_MS = 650
+
+/** The longest the last cover is held for a music video whose song version is looked up. */
+private const val SONG_VERSION_HOLD_MS = 5_000L
+
+/** How long a skip from a Canvas waits for the next full-size cover before it fades the clip out. */
+private const val CANVAS_HANDOFF_FULL_COVER_WAIT_MS = 400L
+
+/** Then how long it waits for any copy of that cover, small or full. */
+private const val CANVAS_HANDOFF_ANY_COVER_WAIT_MS = 1_600L
 
 /** How much smaller the transport and the action row get under an open queue. */
 private const val COMPACT_TRANSPORT_SHRINK = 0.3f
@@ -1003,6 +1014,14 @@ fun NowPlayingScreen(
     /** A version switch (video vs audio-only), triggered from the player's
      * menu, is fetching and measuring the target cut. */
     audioVersionSwitching: Boolean,
+    /**
+     * [song] is a music video that is about to change to its song version,
+     * which is still being looked up. It plays as audio only, so it is never
+     * shown as a video, and its thumbnail is not the cover to show either:
+     * the last cover (or the last song's Canvas) stays until the song's own
+     * cover is known, for at most [SONG_VERSION_HOLD_MS].
+     */
+    songVersionPending: Boolean = false,
     /** The player has just swapped this item to a higher-quality source. */
     qualityUpgraded: Boolean,
     queue: List<Song>,
@@ -1113,9 +1132,24 @@ fun NowPlayingScreen(
     // A music video playing as audio only has its thumbnail for a cover. Marked
     // so the request is made afresh the moment the track turns audio-only, and
     // the image loader crops the frame's letterbox bars off it for the sleeve.
-    val remoteArt = rememberRemoteArtworkUrl(song)?.let {
+    val shownArt = rememberRemoteArtworkUrl(song)?.let {
         if (song.isVideo && song.videoId in audioOnlyVideos) "$it#audio-only" else it
     }
+    // A music video changing to its song version keeps the last cover until
+    // the song's is known — see [songVersionPending]. Shown, its thumbnail
+    // came in first and the song's cover flashed in over it a moment later.
+    // Bounded, so a lookup that never answers still lets the thumbnail in.
+    var songVersionWaitOver by remember(song.videoId) { mutableStateOf(false) }
+    LaunchedEffect(song.videoId, songVersionPending) {
+        if (!songVersionPending) return@LaunchedEffect
+        delay(SONG_VERSION_HOLD_MS)
+        songVersionWaitOver = true
+    }
+    val holdingArt = songVersionPending && !songVersionWaitOver
+    // The cover last shown while nothing was held. Plain: read only here.
+    val lastShownArt = remember { arrayOfNulls<String>(1) }
+    val remoteArt = if (holdingArt) lastShownArt[0] else shownArt
+    SideEffect { if (!holdingArt) lastShownArt[0] = shownArt }
     // The player's text and glyphs take a faint cast of the accent — see
     // [ProvidePlayerInk]. The body is left at its old indent to keep this wrap
     // out of everyone's diffs. The brighter the sleeve, the further the ink
@@ -1219,8 +1253,14 @@ fun NowPlayingScreen(
     // [MusicVideoSurface] — and takes the place of any animated cover.
     // An episode plays its video only while the "…" menu's switch is on.
     val episodeVideoOn by EpisodeVideo.on.collectAsStateWithLifecycle()
-    val musicVideo = showsMusicVideo(song) && song.videoId !in audioOnlyVideos &&
-        (song.isVideo || !song.isEpisode || episodeVideoOn)
+    // Video quality Off for mobile data: on mobile data the song plays as
+    // audio with its cover, as a song set to audio only does.
+    val videoOff by PlayerSettings.videoOff.collectAsStateWithLifecycle()
+    // Never as a video while its song version is looked up: it plays as
+    // audio only either way, and the frame or two before that was known put
+    // the player in its video layout and straight back.
+    val musicVideo = showsMusicVideo(song) && song.videoId !in audioOnlyVideos && !videoOff &&
+        !songVersionPending && (song.isVideo || !song.isEpisode || episodeVideoOn)
     val restoredPlayerScreen = remember { PlayerSettings.lastPlayerScreen.value }
     var queueOpen by remember {
         mutableStateOf(restoredPlayerScreen == LastPlayerScreen.QUEUE)
@@ -1376,8 +1416,18 @@ fun NowPlayingScreen(
         val preloaded = canvas?.let { preloads[it.url] }?.takeIf { it.rendered || it.aspect > 0f }
         when {
             canvas == null -> CanvasSeed.NONE
+            // A music video comes back with its last frame (a skip back to
+            // it, say) the way a clip does: up at once, over the last cover.
+            // Mounted as new, it stayed off until the last song's fade was
+            // through, and then cut in over the cover.
             canvas.musicVideoId != null ->
-                if (canvas.url == lastPresentedCanvasUrl) CanvasSeed(true, 0f, null, false) else CanvasSeed.NONE
+                if (canvas.url == lastPresentedCanvasUrl ||
+                    canvas.musicVideoId?.let { PlayerPlatform.host.hasRememberedMusicVideoFrame(it) } == true
+                ) {
+                    CanvasSeed(true, 0f, null, false)
+                } else {
+                    CanvasSeed.NONE
+                }
             preloaded != null ->
                 CanvasSeed(preloaded.rendered, preloaded.aspect, preloaded.frame, preloaded.rendered)
             else -> PlayerPlatform.host.rememberedCanvasAspect(canvas.url)
@@ -1433,15 +1483,11 @@ fun NowPlayingScreen(
     // read only at the moment a song moves on, never drawn.
     val lastShownClip = remember { arrayOfNulls<CanvasArtwork>(1) }
     val lastShownAspect = remember { floatArrayOf(0f) }
-    LaunchedEffect(outgoingClip) {
-        if (outgoingClip == null) return@LaunchedEffect
-        outgoingFade.snapTo(1f)
-        outgoingFade.animateTo(0f, tween(durationMillis = CANVAS_OUTGOING_FADE_MS, easing = FastOutSlowInEasing))
-        outgoingClip = null
-        // Ready for the next handoff, whose first frame is drawn before this
-        // effect gets to run again.
-        outgoingFade.snapTo(1f)
-    }
+    // Whether a clip playing inside the sleeve itself (a player that is not
+    // full bleed, or the landscape one) was covering the still cover in the
+    // last pass. Plain, like the two above: [OutgoingArtwork] asks it only at
+    // the change of cover, to know that the last cover was never on screen.
+    val sleeveClipUp = remember { booleanArrayOf(false) }
     // A clip that is up from its first frame — loaded ahead of its song, or
     // standing in from its remembered frame on a skip back — needs nothing
     // over the last song's clip: that one fades out over it. Over the last
@@ -1450,7 +1496,7 @@ fun NowPlayingScreen(
     // player reopened) is let straight back in: it never really left.
     val songAtLastClip = remember { arrayOf(song.videoId) }
     val incomingFade = remember(canvas?.url) {
-        val clipHandsOver = lastShownClip[0]?.let { it.url != canvas?.url && it.musicVideoId == null } == true
+        val clipHandsOver = lastShownClip[0]?.let { it.url != canvas?.url } == true
         val sameSong = songAtLastClip[0] == song.videoId
         Animatable(if (canvasSeed.rendered && !clipHandsOver && !sameSong) 0f else 1f)
     }
@@ -1678,6 +1724,10 @@ fun NowPlayingScreen(
     // [QUEUE_CARRY_FRACTION] has to fall back to 0 just as surely as one that
     // carried has to finish reaching 1.
     var queueReleased by remember { mutableIntStateOf(0) }
+    // How collapsed the sleeve is for the lyrics, and for the queue once its own
+    // slide has let go — see [p]. Declared up here because the queue's settle
+    // below has to move it too.
+    val sleeveCollapse = remember { Animatable(if (lyricsOpen || queueOpen) 1f else 0f) }
 
     // Back out of the lyrics panel to the player, and only from the player
     // itself out to the mini player.
@@ -1739,7 +1789,7 @@ fun NowPlayingScreen(
     }
 
     // The audio output, lyrics provider and Listen Together drawers handle
-    // back themselves, so a predictive swipe can slide them down — see
+    // back themselves, so a predictive swipe can shrink them — see
     // [PlayerDrawer]'s handlesBack.
 
     PlayerBackHandler(enabled = showAudioPipeline) { showAudioPipeline = false }
@@ -1776,6 +1826,13 @@ fun NowPlayingScreen(
     LaunchedEffect(queueOpen, queueDragging, queueReleased) {
         if (queueDragging) return@LaunchedEffect
         val target = if (queueOpen) 1f else 0f
+        // The slide below is what the sleeve follows until it lands; then [p]
+        // hands over to [sleeveCollapse]. That one has to be there already.
+        // Left to its own 420ms ease from the release, it was still part way
+        // when a swipe-down or back swipe close (a shorter slide) landed, and
+        // the sleeve jumped back up by that much and eased down again: the
+        // bounce at the end of the close.
+        if (!lyricsOpen) sleeveCollapse.snapTo(target)
         val from = queueSlide.floatValue
         if (from == target) return@LaunchedEffect
         animate(
@@ -1796,7 +1853,11 @@ fun NowPlayingScreen(
         Animatable(if (restoredPlayerScreen == LastPlayerScreen.MAIN) 0f else 1f)
     }
     LaunchedEffect(queueOpen, lyricsOpen, queueDragging, queueReleased) {
-        if (queueDragging && !lyricsOpen) {
+        // A release part way (a drag or a back swipe let go) settles the slide
+        // in less than [QUEUE_TRAVEL_MS]; a fresh 420ms ease from there let the
+        // controls arrive after the sleeve. They ride the slide instead.
+        val slideMidway = queueSlide.floatValue > 0f && queueSlide.floatValue < 1f
+        if (!lyricsOpen && (queueDragging || slideMidway)) {
             snapshotFlow { queueSlide.floatValue }.collect { queueCompact.snapTo(it) }
         } else {
             queueCompact.animateTo(
@@ -1865,11 +1926,12 @@ fun NowPlayingScreen(
     }
     // How collapsed the sleeve is, whichever surface asked for it — one 420ms
     // ease for the queue and the lyrics both.
-    val animatedCollapse = animateFloatAsState(
-        targetValue = if (lyricsOpen || queueOpen) 1f else 0f,
-        animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing),
-        label = "sleeveCollapse",
-    )
+    LaunchedEffect(lyricsOpen, queueOpen) {
+        sleeveCollapse.animateTo(
+            targetValue = if (lyricsOpen || queueOpen) 1f else 0f,
+            animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing),
+        )
+    }
     // A queue tap/drag already owns a 420ms progress value. Reusing it avoids
     // driving this large layout from two independent animations on every frame.
     // Lyrics retain the ordinary collapse animation; switching queue -> lyrics
@@ -1884,7 +1946,7 @@ fun NowPlayingScreen(
     val p: () -> Float = {
         val queueOwnsCollapse = !lyricsOpen &&
             (queueOpen || queueDragging || queueSlide.floatValue > 0.001f)
-        if (queueOwnsCollapse) queueSlide.floatValue else animatedCollapse.value
+        if (queueOwnsCollapse) queueSlide.floatValue else sleeveCollapse.value
     }
     val collapseStarted by remember { derivedStateOf { p() > 0f } }
     val collapseAtRest by remember { derivedStateOf { p() == 0f } }
@@ -1969,6 +2031,34 @@ fun NowPlayingScreen(
     // never fires again. Keyed on the cover there is nothing to reset: the
     // bitmap really is still loaded, so the state stays true.
     val art = rememberPlayerArtwork(remoteArt)
+    // The last track's clip leaves only once the next cover has something to
+    // show: the full-size copy, or failing that its small one, with the same
+    // bounds as [OutgoingArtwork]. Faded at once, it went out over the sleeve
+    // before the new cover had loaded, and the sleeve still held the last
+    // song's cover, so a skip from a Canvas flashed the old album art.
+    // Not when the next song's own clip is already up: the two crossfade.
+    val currentArt by rememberUpdatedState(art)
+    val currentClipUp by rememberUpdatedState(canvasRenderedState)
+    val currentlyHoldingArt by rememberUpdatedState(holdingArt)
+    LaunchedEffect(outgoingClip) {
+        if (outgoingClip == null) return@LaunchedEffect
+        outgoingFade.snapTo(1f)
+        // While a music video's song version is looked up the sleeve holds
+        // the last song's cover, which is loaded: waited on as the next
+        // cover, it let the clip go at once and showed that old cover.
+        // Bounded by the hold itself (see [songVersionPending]).
+        snapshotFlow { currentlyHoldingArt }.first { !it }
+        withTimeoutOrNull(CANVAS_HANDOFF_FULL_COVER_WAIT_MS) {
+            snapshotFlow { currentArt.loaded || currentClipUp.value }.first { it }
+        } ?: withTimeoutOrNull(CANVAS_HANDOFF_ANY_COVER_WAIT_MS) {
+            snapshotFlow { currentArt.loaded || currentArt.previewLoaded || currentClipUp.value }.first { it }
+        }
+        outgoingFade.animateTo(0f, tween(durationMillis = CANVAS_OUTGOING_FADE_MS, easing = FastOutSlowInEasing))
+        outgoingClip = null
+        // Ready for the next handoff, whose first frame is drawn before this
+        // effect gets to run again.
+        outgoingFade.snapTo(1f)
+    }
     // Sticky, unlike [PlayerArtwork.loaded]: the banner is the shape of the player rather
     // than a property of the track in it. Waiting on each new cover would
     // collapse the banner into a card and blow it back out on every skip —
@@ -2098,6 +2188,18 @@ fun NowPlayingScreen(
         label = "canvasCompact",
     )
     val canvasCompactAtRest by remember { derivedStateOf { canvasCompact.value == 0f } }
+    // With no lyric line to show (an instrumental, or no lyrics found), the
+    // compact Canvas controls fold the line's slot away as well, so the song
+    // and artist sit down on the transport instead of a line's height above it.
+    // Its own value rather than [canvasCompact]: an answer that comes in while
+    // the controls are already compact still moves the credits down smoothly.
+    val noLyricLine = !lyricStripShown ||
+        (lyricsUnavailable && lyricsTranslation.displayedLyrics.isEmpty())
+    val lyricSlotFold = animateFloatAsState(
+        targetValue = if (canvasCompactMode && noLyricLine) 1f else 0f,
+        animationSpec = tween(SPOTIFY_CANVAS_CONTROLS_ANIMATION_MS, easing = FastOutSlowInEasing),
+        label = "lyricSlotFold",
+    )
     // How compact the control deck is: under the queue and lyrics, or over a
     // Canvas in the mode above. Read only in layout and draw lambdas.
     val deckCompact: () -> Float = { maxOf(queueCompact.value, canvasCompact.value) }
@@ -2124,8 +2226,14 @@ fun NowPlayingScreen(
     // which the song has moved on but [outgoingClip] isn't set yet: decided only
     // there, that pass mounted the next song's clip — a flash of it — and then
     // swapped the last one back in on a player that had to start it over.
+    //
+    // A music video standing in as the Canvas hands off too. Cut at once, it
+    // left the last song's cover (under it the whole time) on screen for a
+    // moment before the next song's came in: a flash of the old album art on
+    // every skip. Leaving, it gives the decoder up and holds its last frame,
+    // which fades like any other clip (see [CanvasVideoSpec.leaving]).
     val handingOffClip = lastShownClip[0]?.takeIf { last ->
-        last.url != canvas?.url && outgoingClip == null && last.musicVideoId == null &&
+        last.url != canvas?.url && outgoingClip == null &&
             heroMode && !lyricsOpen && !queueOpen && !collapseStarted
     }
     SideEffect {
@@ -2151,6 +2259,8 @@ fun NowPlayingScreen(
         } else if (heroClip == null) {
             lastShownClip[0] = null
         }
+        sleeveClipUp[0] = canvas != null && canvasRendered &&
+            (if (landscapeLayout) landscapeBackdropClip == null else !heroMode)
         // Only the clips that can still be asked for are worth remembering.
         preloads.keys.retainAll(setOfNotNull(nextClip?.url, canvas?.url))
     }
@@ -2269,6 +2379,9 @@ fun NowPlayingScreen(
     } else {
         WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     }
+    // Whether the player has the status bar hidden right now — see the
+    // HideStatusBar call further down, which sets it.
+    val statusBarAwayState = remember { mutableStateOf(false) }
     // What sits between the status bar and the artwork: the drag strip. Read
     // in three places — the strip itself,
     // the scrim drawn over it and the banner's own height — which all have to
@@ -3003,7 +3116,11 @@ fun NowPlayingScreen(
                         artRequest = art.request,
                         artLoaded = art.loaded,
                         onArtState = art::onState,
-                        outgoingArt = { OutgoingArtwork(art, Modifier.fillMaxSize()) },
+                        outgoingArt = {
+                            // Not the last cover when a clip in this sleeve
+                            // was playing over it: see [sleeveClipUp].
+                            OutgoingArtwork(art, Modifier.fillMaxSize(), lastCoverHidden = { sleeveClipUp[0] })
+                        },
                         // A Canvas playing behind the player leaves the
                         // sleeve its still cover.
                         canvas = canvas?.takeIf { landscapeBackdropClip == null },
@@ -3238,6 +3355,10 @@ fun NowPlayingScreen(
             .fillMaxSize()
             .onSizeChanged { playerBounds = it }
             .then(dockHost)
+            // With the status bar hidden, a swipe down from the top edge is
+            // the system's (it shows the bar, and a second swipe opens the
+            // notification shade), not a pull that minimizes the player.
+            .leaveTopEdgeToSystem(active = { statusBarAwayState.value }, edge = statusBarTop)
             .background(Color.Black),
     ) {
         // Everything but the drawers and popups below, recorded whole for their
@@ -3350,6 +3471,7 @@ fun NowPlayingScreen(
                     // for the sleeve's first frame of movement as well.
                     pausedForTransition = lyricsOpen || queueOpen || queueDragging ||
                         collapseStarted || dockMoving,
+                    leaving = outgoing,
                     // Spotify's 9:16 Canvas is the phone background, so it
                     // covers every edge. Other providers retain the contained
                     // portrait treatment introduced for motion cover art.
@@ -3628,7 +3750,7 @@ fun NowPlayingScreen(
         val playerLanded by remember(dock) {
             derivedStateOf { dock == null || dock.openFraction() >= 1f }
         }
-        var statusBarAway by remember { mutableStateOf(false) }
+        var statusBarAway by statusBarAwayState
         LaunchedEffect(playerLanded, hidePlayerStatusBar, dock == null) {
             if (playerLanded && hidePlayerStatusBar) {
                 // Without the dock ("Reduce animation") the sheet slides up on
@@ -3781,8 +3903,10 @@ fun NowPlayingScreen(
                     //    player closes from the picture as well as from the
                     //    handle; up is taken here and drags the queue in.
                     //  * The queue or the lyrics — the header those panels sit
-                    //    below, and nothing else. Down closes the player, up does
-                    //    nothing: there is no sleeve left to pull away from.
+                    //    below, and nothing else. Up does nothing: there is no
+                    //    sleeve left to pull away from. Down over the lyrics
+                    //    closes the player; down over the queue's header puts the
+                    //    queue away and leaves the full player.
                     //
                     // The header is worked out from the state rather than read
                     // off the sleeve, which is the whole point of doing it here:
@@ -3832,6 +3956,30 @@ fun NowPlayingScreen(
                                                 )
                                                 if (open) queueControlsOpen = true
                                                 queueOpen = open
+                                            }
+                                            queueReleased++
+                                        },
+                                    )
+                                } else if (queueOpen && !lyricsOpen) {
+                                    // The queue's header, the playing song: down
+                                    // puts the queue away and leaves the full
+                                    // player, as a swipe down over the controls
+                                    // does, rather than closing the whole player.
+                                    // The sleeve follows the finger back out over
+                                    // the same travel it came in on.
+                                    val headerTravel = (dismissBandBottom - dismissBandTop -
+                                        HEADER_HEIGHT.toPx()).takeIf { it >= 1f }
+                                        ?: QUEUE_CLOSE_TRAVEL.toPx()
+                                    dragPanelClosed(
+                                        down = down,
+                                        travel = headerTravel,
+                                        slide = queueSlide,
+                                        threshold = PANEL_CLOSE_DRAG.toPx(),
+                                        onHold = { queueDragging = it },
+                                        onSettle = { open ->
+                                            if (!open) {
+                                                haptics.play(Haptic.Tap)
+                                                queueOpen = false
                                             }
                                             queueReleased++
                                         },
@@ -4085,8 +4233,12 @@ fun NowPlayingScreen(
                     } ?: regularTitleTop()
                     ).let { top ->
                     // Compact Canvas controls: the credits sit straight on top
-                    // of the shrunken deck.
-                    val compactTop = (maxHeight - HEADER_HEIGHT).coerceAtLeast(0.dp)
+                    // of the shrunken deck. With no lyric line there (see
+                    // [lyricSlotFold]) they also take the gap above the deck,
+                    // so they stand where the line would have, on the transport.
+                    val compactTop = (
+                        maxHeight - HEADER_HEIGHT + PANEL_DECK_GAP * lyricSlotFold.value
+                        ).coerceAtLeast(0.dp)
                     lerp(top, compactTop, canvasCompact.value)
                 }
                 fun titleStart(): Dp = lerp(0.dp, THUMB_SIZE + 12.dp, p())
@@ -4555,8 +4707,22 @@ fun NowPlayingScreen(
                             .fillMaxSize()
                             .drawWithContent { if (art.loaded || !canvasRendered) drawContent() },
                     )
-                    // The last track's cover, fading out over this one.
-                    OutgoingArtwork(art, Modifier.fillMaxSize())
+                    // The last track's cover, fading out over this one. Not
+                    // when a Canvas was playing over that cover: the clip
+                    // fades straight into this cover instead. A clip already
+                    // mostly faded out had let that cover back on screen, so
+                    // then it is the one to fade from — asked as late as the
+                    // change of cover itself, which can come a while after
+                    // the change of song (a music video's song version, a
+                    // file's own picture read from it).
+                    OutgoingArtwork(
+                        art,
+                        Modifier.fillMaxSize(),
+                        lastCoverHidden = {
+                            handingOffClip != null || sleeveClipUp[0] ||
+                                (outgoingClip != null && outgoingFade.value > 0.5f)
+                        },
+                    )
 
                     // Where the clip plays when it can't have the banner:
                     // inside the same clip as the still art, taking the
@@ -5255,6 +5421,7 @@ fun NowPlayingScreen(
             // accompanied by a dedicated lyrics button in the bottom row. Its
             // one-line slot remains, invisibly, so opening lyrics cannot grow
             // the half-player merely to make room for the source label.
+            Box(Modifier.fillMaxWidth().collapseBy { lyricSlotFold.value }) {
             if (!lyricsOpen && lyricStripShown) {
                 CurrentLyricStrip(
                     lines = lyricsTranslation.displayedLyrics,
@@ -5281,6 +5448,7 @@ fun NowPlayingScreen(
                         .offset(y = 6.dp)
                         .padding(vertical = 4.dp),
                 )
+            }
             }
             if (lyricsOpen) {
                 LyricsStatusWithChange(

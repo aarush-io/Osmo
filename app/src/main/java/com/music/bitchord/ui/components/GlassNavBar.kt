@@ -51,7 +51,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.music.bitchord.R
 import com.music.bitchord.data.settings.CustomizationSettings
 import com.music.bitchord.data.settings.MiniPlayerShape
@@ -107,6 +106,8 @@ fun GlassNavBar(
     /** The playhead, glowing along the player's bottom edge; read only when drawing. */
     position: com.music.bitchord.playback.PlaybackPosition? = null,
     durationMs: Long = 0L,
+    /** @see MiniPlayer */
+    songVersionPending: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     // Held for the same reason [tabs] is. The glass factory below closes over
@@ -176,6 +177,7 @@ fun GlassNavBar(
                     pull = pull,
                     position = position,
                     durationMs = durationMs,
+                    holdCover = songVersionPending,
                     shape = accessoryShape,
                     circular = shapeChoice == MiniPlayerShape.CIRCULAR,
                     modifier = accessoryModifier.then(accessoryGlass()),
@@ -200,6 +202,7 @@ fun GlassNavBar(
                     pull = pull,
                     position = position,
                     durationMs = durationMs,
+                    holdCover = songVersionPending,
                     shape = accessoryShape,
                     circular = shapeChoice == MiniPlayerShape.CIRCULAR,
                     modifier = accessoryModifier.fillMaxWidth().then(accessoryGlass()),
@@ -259,6 +262,9 @@ fun GlassNavBar(
                         )
                     },
                     onClick = onClick,
+                    // No ripple: the glyph's press bounce is the feedback,
+                    // as in the plain bar.
+                    indication = null,
                 )
             } else {
                 tab(
@@ -285,6 +291,12 @@ fun GlassNavBar(
                         )
                     },
                     onClick = onClick,
+                    // No ripple. It was drawn in the tab's cell, under the
+                    // pill, and showed as a second, smaller shape inside it
+                    // (inside the lens too, which refracts the tab row). The
+                    // pill and the glyph's press bounce are the feedback, as
+                    // in the plain bar.
+                    indication = null,
                 )
             }
         }
@@ -321,6 +333,7 @@ private fun GlassNowPlaying(
     pull: MiniPlayerPull?,
     position: com.music.bitchord.playback.PlaybackPosition?,
     durationMs: Long,
+    holdCover: Boolean,
     shape: androidx.compose.ui.graphics.Shape,
     circular: Boolean,
     modifier: Modifier = Modifier,
@@ -433,9 +446,11 @@ private fun GlassNowPlaying(
             // A round bar gets a round cover; half the side, so the player
             // also flies into a circle.
             val artCorner = if (circular) artSize / 2 else if (isInline) 6.dp else 8.dp
-            AsyncImage(
+            // Fades from one track's cover into the next, as [MiniPlayer]'s does.
+            MiniPlayerCover(
                 model = artUrl?.artworkAt(ROW_ART_PX),
-                contentDescription = null,
+                hold = holdCover,
+                contentScale = com.music.bitchord.ui.components.thumbnailContentScale(),
                 modifier = Modifier
                     .size(artSize)
                     // Whichever of the two densities is on screen is the one
@@ -443,7 +458,6 @@ private fun GlassNowPlaying(
                     .playerDockArt(dock, artCorner)
                     .clip(RoundedCornerShape(artCorner))
                     .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentScale = com.music.bitchord.ui.components.thumbnailContentScale(),
             )
             Spacer(Modifier.width(if (isInline) 8.dp else 10.dp))
             if (isInline) {

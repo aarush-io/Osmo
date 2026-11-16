@@ -14,7 +14,9 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.unit.dp
 
 /**
  * Stops a resting [androidx.compose.material3.ModalBottomSheet] from stealing a
@@ -89,3 +91,35 @@ private object SwallowNestedScroll : NestedScrollConnection {
     override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource) = available
     override suspend fun onPostFling(consumed: Velocity, available: Velocity) = available
 }
+
+/**
+ * Leaves a swipe that starts on the top edge of the screen to the system while
+ * the status bar is hidden ([active]), so it does not move the player under it.
+ * Goes on the player's root, which fills the window.
+ *
+ * With the bar hidden, Android shows it again for a moment on a swipe down from
+ * the top edge (`BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE`), and a second swipe
+ * then opens the notification shade. The app gets that first swipe too, and
+ * the player took it as a pull down and minimized, so the shade could not be
+ * reached from the full player. Every move of a touch that comes down within
+ * [edge] (plus a little) of the top is consumed in the Initial pass: the
+ * player's own drags and the sheet's, which come after, see it taken and do
+ * not start. The touch-down is left alone, so a tap there still works.
+ */
+fun Modifier.leaveTopEdgeToSystem(active: () -> Boolean, edge: Dp): Modifier =
+    pointerInput(edge) {
+        val edgePx = edge.toPx() + TOP_EDGE_SLOP.toPx()
+        awaitEachGesture {
+            val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+            if (!active() || down.position.y > edgePx) return@awaitEachGesture
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Initial)
+                val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                if (!change.pressed) break
+                if (change.positionChange() != Offset.Zero) change.consume()
+            }
+        }
+    }
+
+/** Below the status bar's own height, how far down a swipe still counts as from the edge. */
+private val TOP_EDGE_SLOP = 8.dp

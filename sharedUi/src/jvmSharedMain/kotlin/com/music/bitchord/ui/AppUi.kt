@@ -1,5 +1,9 @@
 package com.music.bitchord.ui
 
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.music.bitchord.data.canvas.CanvasArtwork
@@ -42,6 +46,27 @@ interface AppUiHost {
      * [artistName], for Home's Top Picks. Null as for [releaseMotion].
      */
     suspend fun artistMotion(browseId: String, artistName: String): CanvasArtwork? = null
+
+    /**
+     * A slide-up menu over a shared page, opened all the way (no half-open
+     * stop), made of the app style's material as every other menu is. The
+     * phone puts up its own sheet (Glass, Frost or Solid, a predictive back
+     * that shrinks it); [PlainMenuSheet] is Material's, for a platform with
+     * no style of its own.
+     */
+    @Composable
+    fun MenuSheet(onDismissRequest: () -> Unit, content: @Composable ColumnScope.() -> Unit)
+}
+
+/** [AppUiHost.MenuSheet] as Material draws it. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PlainMenuSheet(onDismissRequest: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        content = content,
+    )
 }
 
 object AppUi {

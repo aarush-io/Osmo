@@ -271,6 +271,7 @@
     <string name="video_quality">Качество видео</string>
     <string name="video_quality_subtitle">Для музыкальных клипов и для клипа, который показывается как Canvas песни. «Максимальное качество» использует до 4K. Оно расходует намного больше трафика и заряда и может работать медленно на слабых телефонах.</string>
     <string name="video_quality_mobile">Мобильный интернет</string>
+    <string name="video_quality_mobile_off_note">В мобильной сети Canvas и видео не воспроизводятся. Плеер показывает обложку, музыка играет как обычно. Canvas, сохранённый вместе со скачанной песней, по-прежнему воспроизводится.</string>
     <string name="video_quality_max">Максимальное качество</string>
     <string name="high_performance_mode">Режим высокой производительности</string>
     <string name="high_performance_subtitle">Запрашивает более высокую частоту обновления экрана</string>
