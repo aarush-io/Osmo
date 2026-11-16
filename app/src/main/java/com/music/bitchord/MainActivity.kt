@@ -6346,7 +6346,9 @@ private fun BitChordApp(
                         selectedIndex = selectedBarIndex,
                         onTabSelected = { index -> onTabSelected(barPages[index]) },
                         scrollConnection = navBarScroll,
-                        song = player.song,
+                        // A music video's song version when it is known — see [shownTrack].
+                        song = shownTrack?.song ?: player.song,
+                        songVersionPending = shownTrack?.versionPending == true,
                         isPlaying = player.isPlaying,
                         isLoading = playPauseBusy,
                         onPlayPause = {
@@ -6385,7 +6387,9 @@ private fun BitChordApp(
                     QueueActionNoticeHost(queueNotice)
                     player.song?.let { song ->
                         MiniPlayer(
-                            song = song,
+                            // A music video's song version when it is known — see [shownTrack].
+                            song = shownTrack?.song ?: song,
+                            songVersionPending = shownTrack?.versionPending == true,
                             isPlaying = player.isPlaying,
                             isLoading = playPauseBusy,
                             hazeState = hazeState,
