@@ -3743,7 +3743,10 @@ internal fun SettingsRow(
     iconPainter: Painter? = null,
     onClick: (() -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = null,
+    /** Red title and glyph, for a row that logs out or disconnects — see [destructiveRed]. */
+    danger: Boolean = false,
 ) {
+    val ink = if (danger) destructiveRed() else MaterialTheme.colorScheme.onBackground
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -3757,14 +3760,14 @@ internal fun SettingsRow(
             Icon(
                 painter = iconPainter,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onBackground,
+                tint = ink,
                 modifier = Modifier.size(ICON_SIZE),
             )
         } else if (icon != null) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onBackground,
+                tint = ink,
                 modifier = Modifier.size(ICON_SIZE),
             )
         }
@@ -3774,7 +3777,7 @@ internal fun SettingsRow(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = ink,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -3963,6 +3966,8 @@ internal fun SliderRow(
 internal fun DestructiveRow(
     label: String,
     enabled: Boolean = true,
+    /** Log out or disconnect: red text, as the system's own sign-out rows have. */
+    danger: Boolean = false,
     onClick: () -> Unit,
 ) {
     Box(
@@ -3975,10 +3980,19 @@ internal fun DestructiveRow(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.primary,
+            color = if (danger) destructiveRed() else MaterialTheme.colorScheme.primary,
         )
     }
 }
+
+/**
+ * The red of a "Log out" or "Disconnect" option in the settings. Not the
+ * theme's error colour, which in the dark theme is a pale pink: the system red,
+ * a little lighter on a dark page so it reads as clearly as on a light one.
+ */
+@Composable
+internal fun destructiveRed(): Color =
+    if (MaterialTheme.colorScheme.background.luminance() < 0.5f) Color(0xFFFF453A) else Color(0xFFFF3B30)
 
 /** One line of the video quality setting: the connection name above its three choices. */
 @Composable
