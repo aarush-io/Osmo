@@ -287,6 +287,9 @@ private const val CANVAS_DROP_GRACE_MS = 1_200L
 /** How long the last track's clip takes to fade out when the song changes. */
 private const val CANVAS_OUTGOING_FADE_MS = 650
 
+/** The longest the last cover is held for a music video whose song version is looked up. */
+private const val SONG_VERSION_HOLD_MS = 5_000L
+
 /** How long a skip from a Canvas waits for the next full-size cover before it fades the clip out. */
 private const val CANVAS_HANDOFF_FULL_COVER_WAIT_MS = 400L
 
@@ -1011,6 +1014,14 @@ fun NowPlayingScreen(
     /** A version switch (video vs audio-only), triggered from the player's
      * menu, is fetching and measuring the target cut. */
     audioVersionSwitching: Boolean,
+    /**
+     * [song] is a music video that is about to change to its song version,
+     * which is still being looked up. It plays as audio only, so it is never
+     * shown as a video, and its thumbnail is not the cover to show either:
+     * the last cover (or the last song's Canvas) stays until the song's own
+     * cover is known, for at most [SONG_VERSION_HOLD_MS].
+     */
+    songVersionPending: Boolean = false,
     /** The player has just swapped this item to a higher-quality source. */
     qualityUpgraded: Boolean,
     queue: List<Song>,
@@ -1121,9 +1132,24 @@ fun NowPlayingScreen(
     // A music video playing as audio only has its thumbnail for a cover. Marked
     // so the request is made afresh the moment the track turns audio-only, and
     // the image loader crops the frame's letterbox bars off it for the sleeve.
-    val remoteArt = rememberRemoteArtworkUrl(song)?.let {
+    val shownArt = rememberRemoteArtworkUrl(song)?.let {
         if (song.isVideo && song.videoId in audioOnlyVideos) "$it#audio-only" else it
     }
+    // A music video changing to its song version keeps the last cover until
+    // the song's is known — see [songVersionPending]. Shown, its thumbnail
+    // came in first and the song's cover flashed in over it a moment later.
+    // Bounded, so a lookup that never answers still lets the thumbnail in.
+    var songVersionWaitOver by remember(song.videoId) { mutableStateOf(false) }
+    LaunchedEffect(song.videoId, songVersionPending) {
+        if (!songVersionPending) return@LaunchedEffect
+        delay(SONG_VERSION_HOLD_MS)
+        songVersionWaitOver = true
+    }
+    val holdingArt = songVersionPending && !songVersionWaitOver
+    // The cover last shown while nothing was held. Plain: read only here.
+    val lastShownArt = remember { arrayOfNulls<String>(1) }
+    val remoteArt = if (holdingArt) lastShownArt[0] else shownArt
+    SideEffect { if (!holdingArt) lastShownArt[0] = shownArt }
     // The player's text and glyphs take a faint cast of the accent — see
     // [ProvidePlayerInk]. The body is left at its old indent to keep this wrap
     // out of everyone's diffs. The brighter the sleeve, the further the ink
@@ -1230,8 +1256,11 @@ fun NowPlayingScreen(
     // Video quality Off for mobile data: on mobile data the song plays as
     // audio with its cover, as a song set to audio only does.
     val videoOff by PlayerSettings.videoOff.collectAsStateWithLifecycle()
+    // Never as a video while its song version is looked up: it plays as
+    // audio only either way, and the frame or two before that was known put
+    // the player in its video layout and straight back.
     val musicVideo = showsMusicVideo(song) && song.videoId !in audioOnlyVideos && !videoOff &&
-        (song.isVideo || !song.isEpisode || episodeVideoOn)
+        !songVersionPending && (song.isVideo || !song.isEpisode || episodeVideoOn)
     val restoredPlayerScreen = remember { PlayerSettings.lastPlayerScreen.value }
     var queueOpen by remember {
         mutableStateOf(restoredPlayerScreen == LastPlayerScreen.QUEUE)
@@ -1444,6 +1473,11 @@ fun NowPlayingScreen(
     // read only at the moment a song moves on, never drawn.
     val lastShownClip = remember { arrayOfNulls<CanvasArtwork>(1) }
     val lastShownAspect = remember { floatArrayOf(0f) }
+    // Whether a clip playing inside the sleeve itself (a player that is not
+    // full bleed, or the landscape one) was covering the still cover in the
+    // last pass. Plain, like the two above: [OutgoingArtwork] asks it only at
+    // the change of cover, to know that the last cover was never on screen.
+    val sleeveClipUp = remember { booleanArrayOf(false) }
     // A clip that is up from its first frame — loaded ahead of its song, or
     // standing in from its remembered frame on a skip back — needs nothing
     // over the last song's clip: that one fades out over it. Over the last
@@ -1452,7 +1486,7 @@ fun NowPlayingScreen(
     // player reopened) is let straight back in: it never really left.
     val songAtLastClip = remember { arrayOf(song.videoId) }
     val incomingFade = remember(canvas?.url) {
-        val clipHandsOver = lastShownClip[0]?.let { it.url != canvas?.url && it.musicVideoId == null } == true
+        val clipHandsOver = lastShownClip[0]?.let { it.url != canvas?.url } == true
         val sameSong = songAtLastClip[0] == song.videoId
         Animatable(if (canvasSeed.rendered && !clipHandsOver && !sameSong) 0f else 1f)
     }
@@ -1995,9 +2029,15 @@ fun NowPlayingScreen(
     // Not when the next song's own clip is already up: the two crossfade.
     val currentArt by rememberUpdatedState(art)
     val currentClipUp by rememberUpdatedState(canvasRenderedState)
+    val currentlyHoldingArt by rememberUpdatedState(holdingArt)
     LaunchedEffect(outgoingClip) {
         if (outgoingClip == null) return@LaunchedEffect
         outgoingFade.snapTo(1f)
+        // While a music video's song version is looked up the sleeve holds
+        // the last song's cover, which is loaded: waited on as the next
+        // cover, it let the clip go at once and showed that old cover.
+        // Bounded by the hold itself (see [songVersionPending]).
+        snapshotFlow { currentlyHoldingArt }.first { !it }
         withTimeoutOrNull(CANVAS_HANDOFF_FULL_COVER_WAIT_MS) {
             snapshotFlow { currentArt.loaded || currentClipUp.value }.first { it }
         } ?: withTimeoutOrNull(CANVAS_HANDOFF_ANY_COVER_WAIT_MS) {
@@ -2176,8 +2216,14 @@ fun NowPlayingScreen(
     // which the song has moved on but [outgoingClip] isn't set yet: decided only
     // there, that pass mounted the next song's clip — a flash of it — and then
     // swapped the last one back in on a player that had to start it over.
+    //
+    // A music video standing in as the Canvas hands off too. Cut at once, it
+    // left the last song's cover (under it the whole time) on screen for a
+    // moment before the next song's came in: a flash of the old album art on
+    // every skip. Leaving, it gives the decoder up and holds its last frame,
+    // which fades like any other clip (see [CanvasVideoSpec.leaving]).
     val handingOffClip = lastShownClip[0]?.takeIf { last ->
-        last.url != canvas?.url && outgoingClip == null && last.musicVideoId == null &&
+        last.url != canvas?.url && outgoingClip == null &&
             heroMode && !lyricsOpen && !queueOpen && !collapseStarted
     }
     SideEffect {
@@ -2203,6 +2249,8 @@ fun NowPlayingScreen(
         } else if (heroClip == null) {
             lastShownClip[0] = null
         }
+        sleeveClipUp[0] = canvas != null && canvasRendered &&
+            (if (landscapeLayout) landscapeBackdropClip == null else !heroMode)
         // Only the clips that can still be asked for are worth remembering.
         preloads.keys.retainAll(setOfNotNull(nextClip?.url, canvas?.url))
     }
@@ -3058,7 +3106,11 @@ fun NowPlayingScreen(
                         artRequest = art.request,
                         artLoaded = art.loaded,
                         onArtState = art::onState,
-                        outgoingArt = { OutgoingArtwork(art, Modifier.fillMaxSize()) },
+                        outgoingArt = {
+                            // Not the last cover when a clip in this sleeve
+                            // was playing over it: see [sleeveClipUp].
+                            OutgoingArtwork(art, Modifier.fillMaxSize(), lastCoverHidden = { sleeveClipUp[0] })
+                        },
                         // A Canvas playing behind the player leaves the
                         // sleeve its still cover.
                         canvas = canvas?.takeIf { landscapeBackdropClip == null },
@@ -3409,6 +3461,7 @@ fun NowPlayingScreen(
                     // for the sleeve's first frame of movement as well.
                     pausedForTransition = lyricsOpen || queueOpen || queueDragging ||
                         collapseStarted || dockMoving,
+                    leaving = outgoing,
                     // Spotify's 9:16 Canvas is the phone background, so it
                     // covers every edge. Other providers retain the contained
                     // portrait treatment introduced for motion cover art.
@@ -4646,8 +4699,20 @@ fun NowPlayingScreen(
                     )
                     // The last track's cover, fading out over this one. Not
                     // when a Canvas was playing over that cover: the clip
-                    // fades straight into this cover instead.
-                    OutgoingArtwork(art, Modifier.fillMaxSize(), lastCoverHidden = leavingClip != null)
+                    // fades straight into this cover instead. A clip already
+                    // mostly faded out had let that cover back on screen, so
+                    // then it is the one to fade from — asked as late as the
+                    // change of cover itself, which can come a while after
+                    // the change of song (a music video's song version, a
+                    // file's own picture read from it).
+                    OutgoingArtwork(
+                        art,
+                        Modifier.fillMaxSize(),
+                        lastCoverHidden = {
+                            handingOffClip != null || sleeveClipUp[0] ||
+                                (outgoingClip != null && outgoingFade.value > 0.5f)
+                        },
+                    )
 
                     // Where the clip plays when it can't have the banner:
                     // inside the same clip as the still art, taking the

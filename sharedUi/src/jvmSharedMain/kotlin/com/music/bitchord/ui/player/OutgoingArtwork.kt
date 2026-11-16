@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -31,17 +32,19 @@ import kotlinx.coroutines.withTimeoutOrNull
  * Two tracks off one album share a [PlayerArtwork] (it is keyed on the cover),
  * so skipping between them has nothing to fade and doesn't.
  *
- * [lastCoverHidden] is read in the pass the cover changes: true when the last
- * track's cover was not on screen at all, because its Canvas was playing over
- * it. That cover is then not brought back. Brought back, it showed for a
- * moment between the last song's Canvas and the next song's cover, which read
- * as a flash of the old album art on every skip from a Canvas.
+ * [lastCoverHidden] is asked once, in the pass the cover changes, and not
+ * observed: true when the last track's cover was not on screen at all,
+ * because its Canvas was playing over it. That cover is then not brought
+ * back, and not remembered as the one to fade from next time either. Brought
+ * back, it showed for a moment between the last song's Canvas and the next
+ * song's cover, which read as a flash of the old album art on every skip
+ * from a Canvas.
  */
 @Composable
 internal fun OutgoingArtwork(
     art: PlayerArtwork,
     modifier: Modifier = Modifier,
-    lastCoverHidden: Boolean = false,
+    lastCoverHidden: () -> Boolean = { false },
 ) {
     val reduceAnimation by PlayerSettings.reduceAnimation.collectAsStateWithLifecycle()
     val history = remember { ArtworkHistory() }
@@ -53,9 +56,14 @@ internal fun OutgoingArtwork(
         // A skip arriving mid-fade fades from whichever of the two is most
         // on screen, rather than snapping back to the older one.
         val previous = history.fade
-        val from = previous?.from?.takeIf { !previous.done && previous.alpha.value > 0.5f }
+        // Read without observing: asked only at the change, it must not
+        // recompose this on every frame of the clip's fade it may look at.
+        val hidden = Snapshot.withoutReadObservation { lastCoverHidden() }
+        // A cover nobody saw is not one to fade from on the change after this.
+        if (hidden) history.settled = null
+        val from = previous?.from?.takeIf { !hidden && !previous.done && previous.alpha.value > 0.5f }
             ?: history.settled
-        ArtworkFade(from?.takeIf { it !== art && !reduceAnimation && !lastCoverHidden }).also { history.fade = it }
+        ArtworkFade(from?.takeIf { it !== art && !reduceAnimation && !hidden }).also { history.fade = it }
     }
 
     LaunchedEffect(fade) {

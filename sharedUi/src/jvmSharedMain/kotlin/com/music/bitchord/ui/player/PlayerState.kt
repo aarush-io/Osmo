@@ -1,6 +1,7 @@
 package com.music.bitchord.ui.player
 
 import com.music.bitchord.data.CanvasAudioFixes
+import com.music.bitchord.data.YtMusicRepository
 
 import kotlinx.coroutines.flow.first
 import androidx.compose.runtime.snapshotFlow
@@ -163,7 +164,17 @@ internal fun rememberNextCanvas(position: PlaybackPosition, durationMs: Long, ne
     val due by remember(position, durationMs) {
         derivedStateOf { nextCanvasDue(position.positionMs, durationMs) }
     }
-    val target = next?.takeUnless { it.isVideo }
+    // A music video plays as its song version, when one is already known
+    // (see [com.music.bitchord.data.YtMusicRepository.cachedAudioVersion]):
+    // that song's clip is the one its turn will ask for.
+    val target = next?.let { upcoming ->
+        if (!upcoming.isVideo) {
+            upcoming
+        } else {
+            YtMusicRepository.cachedAudioVersion(upcoming.videoId)
+                ?.takeUnless { it.isVideo || it.videoId == upcoming.videoId }
+        }
+    }
     val allowed = target != null && canvasEnabled && (
         PlayerPlatform.host.hasDownloadedCanvas(target.videoId) ||
             (!videoOff && (meteredConnection != true || canvasOverCellular))
