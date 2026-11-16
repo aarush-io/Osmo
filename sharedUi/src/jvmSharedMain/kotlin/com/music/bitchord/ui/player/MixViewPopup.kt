@@ -151,6 +151,9 @@ internal fun MixViewPopup(
     LaunchedEffect(visible) { shown = visible }
     val scrimAlpha by animateFloatAsState(if (shown) 1f else 0f, tween(200), label = "mixViewScrim")
     val reduceDynamicBlur by PlayerSettings.reduceDynamicBlur.collectAsStateWithLifecycle()
+    // The app's menu glass over the player in Glass and Frost, as the player's
+    // drawers and its Audio pipeline card have; a plain fill in Solid.
+    val glass = LocalPlayerGlass.current
 
     Box(
         modifier = modifier
@@ -176,17 +179,36 @@ internal fun MixViewPopup(
             enter = fadeIn(tween(180)) + scaleIn(tween(220, easing = FastOutSlowInEasing), initialScale = 0.92f),
             exit = fadeOut(tween(150)) + scaleOut(tween(150), targetScale = 0.95f),
         ) {
-            Column(
-                modifier = Modifier
+            Box(
+                Modifier
                     .widthIn(max = PopupMaxWidth)
                     .fillMaxWidth()
-                    .padding(horizontal = 26.dp)
+                    .padding(horizontal = 26.dp),
+            ) {
+            if (glass != null && !reduceDynamicBlur) {
+                Box(
+                    Modifier
+                        .matchParentSize()
+                        .then(
+                            glass.surface(
+                                Modifier,
+                                PopupShape,
+                                underlay = ScrimColor,
+                                menu = true,
+                                darkGround = true,
+                            ),
+                        ),
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
                     .clip(PopupShape)
                     .then(
-                        if (reduceDynamicBlur) {
-                            Modifier.background(PopupColor)
-                        } else {
-                            Modifier
+                        when {
+                            reduceDynamicBlur -> Modifier.background(PopupColor)
+                            glass != null -> Modifier
+                            else -> Modifier
                                 .optimizedHazeEffect(
                                     state = hazeState,
                                     style = HazeMaterials.regular(PopupColor),
@@ -204,6 +226,7 @@ internal fun MixViewPopup(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 MixViewContent(view, progress, live)
+            }
             }
         }
     }

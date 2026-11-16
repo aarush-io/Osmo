@@ -49,8 +49,6 @@ import com.music.bitchord.data.lyrics.TRANSLATION_LANGUAGES
 import com.music.bitchord.data.lyrics.translationLanguageName
 import com.music.bitchord.data.settings.AppSettings
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
-import dev.chrisbanes.haze.materials.HazeMaterials
 import java.util.Locale
 
 /** How much of the screen the list may take before it scrolls inside the card. */
@@ -70,14 +68,12 @@ private val LIST_MAX_HEIGHT = 340.dp
  * "follow the app", which is a different answer from naming today's app
  * language and having it stick when the app changes.
  */
-@OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 fun TranslationLanguageDialog(
     hazeState: HazeState,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val reduceDynamicBlur by AppSettings.reduceDynamicBlur.collectAsStateWithLifecycle()
     val selected by AppSettings.translationLanguage.collectAsStateWithLifecycle()
     val shape = RoundedCornerShape(ALERT_CORNER)
     val appLocale = AppCompatDelegate.getApplicationLocales().get(0) ?: Locale.getDefault()
@@ -117,17 +113,9 @@ fun TranslationLanguageDialog(
         Column(
             modifier = Modifier
                 .width(ALERT_WIDTH)
-                .clip(shape)
-                .then(
-                    if (reduceDynamicBlur) {
-                        Modifier.background(MaterialTheme.colorScheme.surface)
-                    } else {
-                        Modifier.optimizedHazeEffect(
-                            state = hazeState,
-                            style = HazeMaterials.regular(MaterialTheme.colorScheme.surface),
-                        )
-                    },
-                )
+                // Glass, Frost or Solid, as the app style has it, like every
+                // other options window; see [popupSurface].
+                .popupSurface(shape, hazeState)
                 .clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() },
