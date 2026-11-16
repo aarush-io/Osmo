@@ -1227,7 +1227,10 @@ fun NowPlayingScreen(
     // [MusicVideoSurface] — and takes the place of any animated cover.
     // An episode plays its video only while the "…" menu's switch is on.
     val episodeVideoOn by EpisodeVideo.on.collectAsStateWithLifecycle()
-    val musicVideo = showsMusicVideo(song) && song.videoId !in audioOnlyVideos &&
+    // Video quality Off for mobile data: on mobile data the song plays as
+    // audio with its cover, as a song set to audio only does.
+    val videoOff by PlayerSettings.videoOff.collectAsStateWithLifecycle()
+    val musicVideo = showsMusicVideo(song) && song.videoId !in audioOnlyVideos && !videoOff &&
         (song.isVideo || !song.isEpisode || episodeVideoOn)
     val restoredPlayerScreen = remember { PlayerSettings.lastPlayerScreen.value }
     var queueOpen by remember {

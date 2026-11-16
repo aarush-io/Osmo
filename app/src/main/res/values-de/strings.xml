@@ -261,6 +261,7 @@
     <string name="video_quality">Videoqualität</string>
     <string name="video_quality_subtitle">Für Musikvideos und für ein Musikvideo, das als Canvas eines Titels gezeigt wird. Maximale Qualität verwendet bis zu 4K. Sie braucht viel mehr Daten und Akku und kann auf schwachen Geräten langsam sein.</string>
     <string name="video_quality_mobile">Mobile Daten</string>
+    <string name="video_quality_mobile_off_note">Mit mobilen Daten wird kein Canvas und kein Video abgespielt. Der Player zeigt das Cover, und die Musik läuft wie gewohnt. Ein mit einem heruntergeladenen Song gespeichertes Canvas wird weiterhin abgespielt.</string>
     <string name="video_quality_max">Maximale Qualität</string>
     <string name="high_performance_mode">Hochleistungsmodus</string>
     <string name="high_performance_subtitle">Fordert eine höhere Bildwiederholrate an</string>

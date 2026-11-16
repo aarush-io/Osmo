@@ -173,6 +173,7 @@ import com.music.bitchord.data.model.artworkAt
 import com.music.bitchord.data.model.durationMillis
 import com.music.bitchord.data.model.isSameTrackAs
 import com.music.bitchord.data.settings.AppSettings
+import com.music.bitchord.data.settings.VideoQuality
 import com.music.bitchord.data.canvas.ArtistSignature
 import com.music.bitchord.data.canvas.ArtistSignatureRepository
 import com.music.bitchord.data.canvas.SignatureInkTransformation
@@ -844,15 +845,20 @@ fun DetailScreen(
     // photograph, and neither is something a label publishes a canvas for.
     val canvasEnabled by AppSettings.animatedCanvas.collectAsStateWithLifecycle()
     val animatedArt by AppSettings.animatedArt.collectAsStateWithLifecycle()
+    val metered by AppSettings.meteredConnection.collectAsStateWithLifecycle()
+    // Video quality Off for mobile data: on mobile data the banner keeps its
+    // still picture, for an album and for an artist.
+    val videoQualityMobile by AppSettings.videoQualityMobile.collectAsStateWithLifecycle()
+    val videoOff = VideoQuality.videoOff(videoQualityMobile, metered)
     // The credit line the header shows is the artist as far as the catalogue
     // services are concerned. A browse card's subtitle sometimes omits it, in
     // which case the tracks themselves know who it is.
     val credit = page.headerLines(songs.size).first.ifBlank { songs.firstOrNull()?.artist.orEmpty() }
     var canvas by remember(page.browseId) { mutableStateOf<CanvasArtwork?>(null) }
-    LaunchedEffect(page.browseId, page.title, credit, canvasEnabled, animatedArt.clipOrder) {
+    LaunchedEffect(page.browseId, page.title, credit, canvasEnabled, animatedArt.clipOrder, videoOff) {
         // An artist's clip is set below, by the lookup that finds it.
         if (isArtist) return@LaunchedEffect
-        if (!canvasEnabled || page.type != BrowseType.ALBUM) {
+        if (!canvasEnabled || videoOff || page.type != BrowseType.ALBUM) {
             canvas = null
             return@LaunchedEffect
         }
@@ -878,14 +884,15 @@ fun DetailScreen(
         delay(DialLaunch.OPEN_MS.toLong())
         launchSettled = true
     }
-    val metered by AppSettings.meteredConnection.collectAsStateWithLifecycle()
     // An artist's clip comes with the same Apple lookup as its photograph.
     // Video is heavy, so on a metered connection only where the player's own
     // canvases are allowed over cellular too: the same rule as the player.
     // Worked out here rather than in an effect, so the banner knows in the same
     // frame as the photo whether a clip is coming and holds the photo for it.
     val canvasOverCellular by AppSettings.canvasOverCellular.collectAsStateWithLifecycle()
-    val artistVideo = appleArt?.videoUrl?.takeIf { isArtist && canvasEnabled && (metered != true || canvasOverCellular) }
+    val artistVideo = appleArt?.videoUrl?.takeIf {
+        isArtist && canvasEnabled && !videoOff && (metered != true || canvasOverCellular)
+    }
     val artistCanvas = remember(artistVideo) { artistVideo?.let { CanvasArtwork(url = it) } }
     val bannerCanvas = if (isArtist) artistCanvas else canvas
 

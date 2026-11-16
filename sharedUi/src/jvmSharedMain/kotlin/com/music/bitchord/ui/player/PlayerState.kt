@@ -67,11 +67,16 @@ internal fun rememberCanvasLookup(song: Song): CanvasLookup {
     val animatedArt by PlayerSettings.animatedArt.collectAsStateWithLifecycle()
     val clipOrder = animatedArt.clipOrder
     val meteredConnection by PlayerSettings.meteredConnection.collectAsStateWithLifecycle()
+    val videoOff by PlayerSettings.videoOff.collectAsStateWithLifecycle()
     // The switch turns the feature off outright; this is the narrower "not
     // over cellular" case — see [PlayerSettings.canvasOverCellular] for why a
     // clip's own loop makes that worth guarding separately from a still image.
-    val canvasAllowedNow = canvasEnabled &&
-        (meteredConnection != true || canvasOverCellular || PlayerPlatform.host.hasDownloadedCanvas(song.videoId))
+    // Video quality Off for mobile data wins over that switch: on mobile data
+    // only a clip saved with a download plays.
+    val canvasAllowedNow = canvasEnabled && (
+        PlayerPlatform.host.hasDownloadedCanvas(song.videoId) ||
+            (!videoOff && (meteredConnection != true || canvasOverCellular))
+        )
     // Keyed on the song's identity rather than its videoId: a version switch
     // swaps the videoId for another cut of the *same* song, and a canvas is
     // searched for by title and artist — resetting here threw the clip out
@@ -152,14 +157,17 @@ internal fun rememberNextCanvas(position: PlaybackPosition, durationMs: Long, ne
     val animatedArt by PlayerSettings.animatedArt.collectAsStateWithLifecycle()
     val clipOrder = animatedArt.clipOrder
     val meteredConnection by PlayerSettings.meteredConnection.collectAsStateWithLifecycle()
+    val videoOff by PlayerSettings.videoOff.collectAsStateWithLifecycle()
     // Derived, so the twice-a-second playhead recomposes nothing here until
     // the answer actually flips.
     val due by remember(position, durationMs) {
         derivedStateOf { nextCanvasDue(position.positionMs, durationMs) }
     }
     val target = next?.takeUnless { it.isVideo }
-    val allowed = target != null && canvasEnabled &&
-        (meteredConnection != true || canvasOverCellular || PlayerPlatform.host.hasDownloadedCanvas(target.videoId))
+    val allowed = target != null && canvasEnabled && (
+        PlayerPlatform.host.hasDownloadedCanvas(target.videoId) ||
+            (!videoOff && (meteredConnection != true || canvasOverCellular))
+        )
     var found by remember(target?.videoId) { mutableStateOf<CanvasArtwork?>(null) }
     LaunchedEffect(target?.videoId, target?.albumName, due, allowed, clipOrder) {
         if (target == null || !due || !allowed) return@LaunchedEffect

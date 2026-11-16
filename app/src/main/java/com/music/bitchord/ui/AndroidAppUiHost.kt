@@ -29,7 +29,8 @@ object AndroidAppUiHost : AppUiHost {
     }
 
     override suspend fun releaseMotion(album: String, artist: String): CanvasArtwork? {
-        if (!AppSettings.animatedCanvas.value || album.isBlank() || artist.isBlank()) return null
+        // Video quality Off for mobile data: the card keeps its still picture.
+        if (!AppSettings.animatedCanvas.value || AppSettings.videoOffNow || album.isBlank() || artist.isBlank()) return null
         return CanvasRepository.canvasForAlbum(album, artist)
     }
 
@@ -38,7 +39,7 @@ object AndroidAppUiHost : AppUiHost {
      * the artist from the card costs nothing more.
      */
     override suspend fun artistMotion(browseId: String, artistName: String): CanvasArtwork? {
-        if (!AppSettings.animatedCanvas.value) return null
+        if (!AppSettings.animatedCanvas.value || AppSettings.videoOffNow) return null
         val art = AppleArtistArtRepository.artFor(artistName)
         return art?.videoUrl?.let { CanvasArtwork(url = it) }
     }
