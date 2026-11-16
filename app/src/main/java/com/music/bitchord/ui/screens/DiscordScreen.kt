@@ -57,11 +57,10 @@ import coil3.compose.AsyncImage
 import com.music.bitchord.R
 import com.music.bitchord.data.NerdStats
 import com.music.bitchord.data.discord.DiscordRPC
+import com.music.bitchord.data.discord.PresenceLinks
 import com.music.bitchord.data.discord.SuperProperties
 import com.music.bitchord.data.discord.discordAudioQualityLine
-import com.music.bitchord.data.model.CARD_ART_PX
 import com.music.bitchord.data.model.Song
-import com.music.bitchord.data.model.artworkAt
 import com.music.bitchord.data.settings.AppSettings
 import com.music.bitchord.ui.components.ChoiceAlert
 import com.music.bitchord.ui.components.DiscordTokenAlert
@@ -574,9 +573,12 @@ private fun RichPresencePreview(
 
         Row(verticalAlignment = Alignment.Top) {
             val artShape = RoundedCornerShape(6.dp)
-            if (song?.thumbnailUrl != null) {
+            if (song != null) {
+                // The picture Discord will get, not the one the player shows:
+                // a local file's cover never reaches Discord, so the preview
+                // shows Dial's placeholder for it, as the card will.
                 AsyncImage(
-                    model = song.artworkAt(CARD_ART_PX),
+                    model = PresenceLinks.artUrl(song),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.size(84.dp).clip(artShape).thumbnailBorder(artShape),
@@ -629,16 +631,17 @@ private fun RichPresencePreview(
             val chosen = text.ifEmpty { fallback }
             if (song != null) DiscordRPC.resolveVariables(chosen, song) else chosen
         }
-        if (button1Visible) {
+        // A local file has no YouTube Music page, so Discord gets no listen
+        // button for it, and the preview leaves it out too.
+        val listenUrl = song?.let(PresenceLinks::listenUrl)
+        if (button1Visible && (song == null || listenUrl != null)) {
             Spacer(Modifier.height(12.dp))
             PresenceButton(
                 label = resolved(button1Text, DiscordRPC.DEFAULT_BUTTON_1),
-                enabled = song != null,
+                enabled = listenUrl != null,
                 onClick = {
-                    song?.let {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW, DiscordRPC.watchUrl(it).toUri()),
-                        )
+                    listenUrl?.let {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, it.toUri()))
                     }
                 },
             )
