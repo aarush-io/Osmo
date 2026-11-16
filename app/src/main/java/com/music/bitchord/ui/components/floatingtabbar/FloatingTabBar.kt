@@ -802,25 +802,50 @@ private fun SharedTransitionScope.ExpandedTabs(
     }
     pill.stepDp = tabStepPx / density.density
 
-    // The pill rests in its tab's cell and lifts to stand [PILL_GROW_HEIGHT]
-    // taller than the whole bar, keeping the cell's proportions as it grows.
+    // The pill rests in its tab's cell. The glass lens lifts to stand
+    // [PILL_GROW_HEIGHT] taller than the whole bar, keeping the cell's
+    // proportions as it grows; it is drawn over the bar, outside its clip.
+    //
+    // The Frost and Solid pill is drawn inside the bar, under the tabs, and so
+    // inside the bar's clip: grown past the bar it was cut flat along the
+    // bar's top and bottom edges. It lifts to fill the bar instead — the
+    // bar's inset taken up on every side — and is never drawn past the bar
+    // ([fitInsideBar]), so the lift's overshoot and the travel's squash cannot
+    // reach the edge either.
     val contentPadding = sizes.tabBarContentPadding
     val padLeftPx = with(density) { contentPadding.calculateLeftPadding(layoutDirection).toPx() }
     val padTopPx = with(density) { contentPadding.calculateTopPadding().toPx() }
     val padBottomPx = with(density) { contentPadding.calculateBottomPadding().toPx() }
     val rowHeightPx = rowSize.height.toFloat()
     val restSize = Size(tabWidthPx, rowHeightPx)
-    val liftedHeightPx = rowHeightPx + padTopPx + padBottomPx +
-        with(density) { PILL_GROW_HEIGHT.toPx() }
-    val liftedSize = if (rowHeightPx > 0f) {
-        Size(liftedHeightPx * tabWidthPx / rowHeightPx, liftedHeightPx)
-    } else {
-        restSize
+    val barHeightPx = rowHeightPx + padTopPx + padBottomPx
+    val liftedSize = when {
+        rowHeightPx <= 0f -> restSize
+        glassPill -> {
+            val liftedHeightPx = barHeightPx + with(density) { PILL_GROW_HEIGHT.toPx() }
+            Size(liftedHeightPx * tabWidthPx / rowHeightPx, liftedHeightPx)
+        }
+        else -> Size(tabWidthPx + padTopPx + padBottomPx, barHeightPx)
     }
     // Where the pill's centre is in the row, for a position in tab steps.
     val pillCenterInRow: (Float) -> Offset = { position ->
         val x = position * tabStepPx + tabWidthPx / 2f
         Offset(if (isRtl) rowSize.width - x else x, rowHeightPx / 2f)
+    }
+    val padRightPx = with(density) { contentPadding.calculateRightPadding(layoutDirection).toPx() }
+    val flatPillSize: () -> Size = {
+        val live = pill.liveSize(restSize, liftedSize)
+        if (glassPill) {
+            live
+        } else {
+            fitInsideBar(
+                size = live,
+                centerX = pillCenterInRow(pill.position).x,
+                left = -padLeftPx,
+                right = rowSize.width + padRightPx,
+                barHeight = barHeightPx,
+            )
+        }
     }
     val showPill = selectedTabIndex >= 0 && tabWidthPx > 0f
 
@@ -871,7 +896,7 @@ private fun SharedTransitionScope.ExpandedTabs(
                             .matchParentSize()
                             .pillPlacement(
                                 center = { pillCenterInRow(pill.position) },
-                                size = { pill.liveSize(restSize, liftedSize) },
+                                size = flatPillSize,
                             ),
                     )
                 }

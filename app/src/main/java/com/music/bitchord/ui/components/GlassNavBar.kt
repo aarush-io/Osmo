@@ -259,6 +259,9 @@ fun GlassNavBar(
                         )
                     },
                     onClick = onClick,
+                    // No ripple: the glyph's press bounce is the feedback,
+                    // as in the plain bar.
+                    indication = null,
                 )
             } else {
                 tab(
@@ -285,6 +288,12 @@ fun GlassNavBar(
                         )
                     },
                     onClick = onClick,
+                    // No ripple. It was drawn in the tab's cell, under the
+                    // pill, and showed as a second, smaller shape inside it
+                    // (inside the lens too, which refracts the tab row). The
+                    // pill and the glyph's press bounce are the feedback, as
+                    // in the plain bar.
+                    indication = null,
                 )
             }
         }
