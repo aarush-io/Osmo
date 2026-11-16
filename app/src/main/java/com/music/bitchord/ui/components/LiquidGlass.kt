@@ -365,6 +365,29 @@ fun Modifier.lightweightLiquidGlass(
 }
 
 /**
+ * The fill and hairline [liquidGlass] gives a surface in the Frost or Solid
+ * style, with no backdrop: for a control drawn inside the list the bars'
+ * glass samples, which must look as the same control does when it is held
+ * over the pages with the real [liquidGlass]. Frost is the theme's surface at
+ * the bars' see-through strength ([frostFill]), Solid the theme's surface.
+ * [carriesText] keeps a light theme's frost dense enough for black text, as
+ * [liquidGlass] does. Null in the Glass style, which has its own look here
+ * ([lightweightLiquidGlass]).
+ */
+@Composable
+internal fun Modifier.styleSurfaceWithoutBackdrop(shape: CornerBasedShape, carriesText: Boolean): Modifier? {
+    val light = isLightTheme()
+    val fill = when (appStyle()) {
+        AppStyle.GLASS -> return null
+        AppStyle.FROST -> frostFill().let { if (carriesText && light) it.legibleOnLight() else it }
+        AppStyle.SOLID -> MaterialTheme.colorScheme.surface
+    }
+    return clip(shape)
+        .background(fill, shape)
+        .border(GLASS_EDGE_WIDTH, surfaceEdgeColor(!light), shape)
+}
+
+/**
  * Glass's light and edge on a control that keeps its own solid fill — the
  * detail pages' Play circle, beside glass buttons it should read as one set
  * with. A sheen down from the top and the same rim as the glass buttons, plus
