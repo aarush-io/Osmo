@@ -135,6 +135,8 @@ class AndroidPlayerHost(context: Context) : PlayerHost {
 
     override fun rememberedCanvasAspect(url: String): Float? = rememberedCanvasFrameAspect(url)
 
+    override fun hasRememberedMusicVideoFrame(videoId: String): Boolean = musicVideoFrameHeld(videoId)
+
     @Composable
     override fun CanvasVideo(spec: CanvasVideoSpec, modifier: Modifier) = AndroidCanvasVideo(spec, modifier)
 

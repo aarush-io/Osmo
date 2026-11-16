@@ -94,10 +94,16 @@ internal fun rememberCanvasLookup(song: Song): CanvasLookup {
     var canvas by remember(song.title, song.artist) {
         mutableStateOf(if (canvasAllowedNow) PlayerPlatform.host.cachedCanvas(song) else null)
     }
-    var settled by remember(song.videoId) { mutableStateOf(false) }
     // Picked from the ⋯ menu: the album's animated cover instead of the track's clip.
     val canvasFixes by CanvasAudioFixes.state.collectAsStateWithLifecycle()
     val albumArt = song.videoId in canvasFixes.albumArtCanvas
+    // Settled at once for a track whose search has found no clip before, with
+    // the same question. Started unsettled, a song back from a skip held its
+    // music video stand-in back for the [ALBUM_SETTLE_MS] wait, so its cover
+    // showed first and the video came in over it. A clip found before needs
+    // nothing here: it is in the cache, so the first pass above has it.
+    val settledKey = SettledLookups.key(song, clipOrder, albumArt)
+    var settled by remember(song.videoId) { mutableStateOf(canvasAllowedNow && SettledLookups.has(settledKey)) }
     LaunchedEffect(song.videoId, song.albumName, canvasAllowedNow, clipOrder, albumArt) {
         if (!canvasAllowedNow) {
             canvas = null
@@ -126,11 +132,31 @@ internal fun rememberCanvasLookup(song: Song): CanvasLookup {
         // than pulling a playing clip out from under itself.
         canvas = PlayerPlatform.host.canvasFor(song) ?: canvas
         settled = true
+        if (canvas == null) SettledLookups.add(settledKey)
     }
 
     // A clip saved with a download, or carried over from before the switch
     // was turned off, still answers to the kinds allowed now.
     return CanvasLookup(canvas?.takeIf { it.kind in clipOrder }, settled, canvasAllowedNow)
+}
+
+/**
+ * The Canvas lookups that ended with no clip this session, by track and
+ * question (see [rememberCanvasLookup]). Main thread only, as the lookups are.
+ */
+private object SettledLookups {
+    private val keys = object : LinkedHashMap<String, Unit>(64, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Unit>?): Boolean = size > 200
+    }
+
+    fun key(song: Song, clipOrder: List<*>, albumArt: Boolean): String =
+        "${song.videoId}|$clipOrder|$albumArt"
+
+    fun has(key: String): Boolean = keys.containsKey(key)
+
+    fun add(key: String) {
+        keys[key] = Unit
+    }
 }
 
 /**

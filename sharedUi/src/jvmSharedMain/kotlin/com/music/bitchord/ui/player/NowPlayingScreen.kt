@@ -1416,8 +1416,18 @@ fun NowPlayingScreen(
         val preloaded = canvas?.let { preloads[it.url] }?.takeIf { it.rendered || it.aspect > 0f }
         when {
             canvas == null -> CanvasSeed.NONE
+            // A music video comes back with its last frame (a skip back to
+            // it, say) the way a clip does: up at once, over the last cover.
+            // Mounted as new, it stayed off until the last song's fade was
+            // through, and then cut in over the cover.
             canvas.musicVideoId != null ->
-                if (canvas.url == lastPresentedCanvasUrl) CanvasSeed(true, 0f, null, false) else CanvasSeed.NONE
+                if (canvas.url == lastPresentedCanvasUrl ||
+                    PlayerPlatform.host.hasRememberedMusicVideoFrame(canvas.musicVideoId)
+                ) {
+                    CanvasSeed(true, 0f, null, false)
+                } else {
+                    CanvasSeed.NONE
+                }
             preloaded != null ->
                 CanvasSeed(preloaded.rendered, preloaded.aspect, preloaded.frame, preloaded.rendered)
             else -> PlayerPlatform.host.rememberedCanvasAspect(canvas.url)

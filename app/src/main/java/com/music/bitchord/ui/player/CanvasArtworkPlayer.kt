@@ -734,6 +734,10 @@ private const val PLACEHOLDER_REFRESH_MS = 3_000L
 /** See [PlayerHost.rememberedCanvasAspect]. */
 internal fun rememberedCanvasFrameAspect(url: String): Float? = CanvasFrameMemory.aspect(url)
 
+/** See [PlayerHost.hasRememberedMusicVideoFrame]: what [AndroidMusicVideoCanvas] stands in with. */
+internal fun musicVideoFrameHeld(videoId: String): Boolean =
+    videoId in MusicVideoCanvasMemory.revealed && CanvasFrameMemory.get("$MUSIC_VIDEO_FRAME_KEY$videoId") != null
+
 /**
  * The view's whole picture as it is shown, at most [maxPx] on its longest edge;
  * null without one.
