@@ -286,6 +286,9 @@ private const val CANVAS_DROP_GRACE_MS = 1_200L
 /** How long the last track's clip takes to fade out when the song changes. */
 private const val CANVAS_OUTGOING_FADE_MS = 650
 
+/** The longest the last cover is held for a music video whose song version is looked up. */
+private const val SONG_VERSION_HOLD_MS = 5_000L
+
 /** How long a skip from a Canvas waits for the next full-size cover before it fades the clip out. */
 private const val CANVAS_HANDOFF_FULL_COVER_WAIT_MS = 400L
 
@@ -1010,6 +1013,14 @@ fun NowPlayingScreen(
     /** A version switch (video vs audio-only), triggered from the player's
      * menu, is fetching and measuring the target cut. */
     audioVersionSwitching: Boolean,
+    /**
+     * [song] is a music video that is about to change to its song version,
+     * which is still being looked up. It plays as audio only, so it is never
+     * shown as a video, and its thumbnail is not the cover to show either:
+     * the last cover (or the last song's Canvas) stays until the song's own
+     * cover is known, for at most [SONG_VERSION_HOLD_MS].
+     */
+    songVersionPending: Boolean = false,
     /** The player has just swapped this item to a higher-quality source. */
     qualityUpgraded: Boolean,
     queue: List<Song>,
@@ -1120,9 +1131,24 @@ fun NowPlayingScreen(
     // A music video playing as audio only has its thumbnail for a cover. Marked
     // so the request is made afresh the moment the track turns audio-only, and
     // the image loader crops the frame's letterbox bars off it for the sleeve.
-    val remoteArt = rememberRemoteArtworkUrl(song)?.let {
+    val shownArt = rememberRemoteArtworkUrl(song)?.let {
         if (song.isVideo && song.videoId in audioOnlyVideos) "$it#audio-only" else it
     }
+    // A music video changing to its song version keeps the last cover until
+    // the song's is known — see [songVersionPending]. Shown, its thumbnail
+    // came in first and the song's cover flashed in over it a moment later.
+    // Bounded, so a lookup that never answers still lets the thumbnail in.
+    var songVersionWaitOver by remember(song.videoId) { mutableStateOf(false) }
+    LaunchedEffect(song.videoId, songVersionPending) {
+        if (!songVersionPending) return@LaunchedEffect
+        delay(SONG_VERSION_HOLD_MS)
+        songVersionWaitOver = true
+    }
+    val holdingArt = songVersionPending && !songVersionWaitOver
+    // The cover last shown while nothing was held. Plain: read only here.
+    val lastShownArt = remember { arrayOfNulls<String>(1) }
+    val remoteArt = if (holdingArt) lastShownArt[0] else shownArt
+    SideEffect { if (!holdingArt) lastShownArt[0] = shownArt }
     // The player's text and glyphs take a faint cast of the accent — see
     // [ProvidePlayerInk]. The body is left at its old indent to keep this wrap
     // out of everyone's diffs. The brighter the sleeve, the further the ink
@@ -1226,8 +1252,11 @@ fun NowPlayingScreen(
     // [MusicVideoSurface] — and takes the place of any animated cover.
     // An episode plays its video only while the "…" menu's switch is on.
     val episodeVideoOn by EpisodeVideo.on.collectAsStateWithLifecycle()
+    // Never as a video while its song version is looked up: it plays as
+    // audio only either way, and the frame or two before that was known put
+    // the player in its video layout and straight back.
     val musicVideo = showsMusicVideo(song) && song.videoId !in audioOnlyVideos &&
-        (song.isVideo || !song.isEpisode || episodeVideoOn)
+        !songVersionPending && (song.isVideo || !song.isEpisode || episodeVideoOn)
     val restoredPlayerScreen = remember { PlayerSettings.lastPlayerScreen.value }
     var queueOpen by remember {
         mutableStateOf(restoredPlayerScreen == LastPlayerScreen.QUEUE)
@@ -1980,9 +2009,15 @@ fun NowPlayingScreen(
     // Not when the next song's own clip is already up: the two crossfade.
     val currentArt by rememberUpdatedState(art)
     val currentClipUp by rememberUpdatedState(canvasRenderedState)
+    val currentlyHoldingArt by rememberUpdatedState(holdingArt)
     LaunchedEffect(outgoingClip) {
         if (outgoingClip == null) return@LaunchedEffect
         outgoingFade.snapTo(1f)
+        // While a music video's song version is looked up the sleeve holds
+        // the last song's cover, which is loaded: waited on as the next
+        // cover, it let the clip go at once and showed that old cover.
+        // Bounded by the hold itself (see [songVersionPending]).
+        snapshotFlow { currentlyHoldingArt }.first { !it }
         withTimeoutOrNull(CANVAS_HANDOFF_FULL_COVER_WAIT_MS) {
             snapshotFlow { currentArt.loaded || currentClipUp.value }.first { it }
         } ?: withTimeoutOrNull(CANVAS_HANDOFF_ANY_COVER_WAIT_MS) {

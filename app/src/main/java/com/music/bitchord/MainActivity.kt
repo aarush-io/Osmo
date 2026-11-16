@@ -3151,6 +3151,16 @@ private fun BitChordApp(
             albumName = current.albumName ?: extra.albumName,
         )
     }
+    // A music video plays as its song version: shown as that song from the
+    // first frame when the song is already known, else with the last cover
+    // held until it is. The same rule as the switch below this, which skips
+    // a party, a video kept from the menu and one fixed to keep its audio.
+    val shownTrack = com.music.bitchord.ui.player.rememberShownTrack(
+        playing = playerSong,
+        autoSwitch = playerSong != null && playerSong.isVideo && !partyState.inParty &&
+            playerSong.videoId != keepVideoId && playerSong.videoId != convertedVideoId &&
+            !CanvasAudioFixes.keepsVideoAudio(playerSong.videoId),
+    )
     // The three-dot menu snapshots the track into songActions when it's opened,
     // so a menu opened before the lookup above resolves would otherwise be
     // stuck without album/artist rows even after the ids come in. Keep it in
@@ -3168,6 +3178,12 @@ private fun BitChordApp(
         durationMs = player.durationMs,
         next = player.queue.getOrNull(player.queueIndex + 1),
     )
+    // The song versions of music videos beside this track, found ahead of a skip.
+    com.music.bitchord.ui.player.SongVersionLookahead(
+        next = player.queue.getOrNull(player.queueIndex + 1),
+        previous = player.queue.getOrNull(player.queueIndex - 1),
+        enabled = !partyState.inParty,
+    )
 
     // The player's whole parameter list, kept apart from the sheet that
     // mounts it so the sheet's own setup reads on its own.
@@ -3176,7 +3192,7 @@ private fun BitChordApp(
             it.videoId == convertedAudioId || it.videoId == convertedVideoId || it.videoId == keepVideoId ||
             it.videoId == YtMusicRepository.cachedAudioVersion(song.videoId)?.videoId ||
             it.videoId == YtMusicRepository.cachedVideoVersion(song.videoId)?.videoId
-        } ?: song
+        } ?: shownTrack?.song?.takeIf { song.videoId == playerSong?.videoId } ?: song
         val displayedSong = activeRadioSeed
             ?.takeIf { (videoId, _) -> effectiveSong.radioName == null && videoId == effectiveSong.videoId }
             ?.let { (videoId, name) ->
@@ -3210,6 +3226,7 @@ private fun BitChordApp(
             position = player.position,
             durationMs = player.durationMs,
             audioVersionSwitching = switchingAudioVersion,
+            songVersionPending = shownTrack?.versionPending == true && effectiveSong.videoId == song.videoId,
             qualityUpgraded = player.isQualityUpgraded,
             onPlayPause = {
                 togglePlayPause()
