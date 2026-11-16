@@ -172,6 +172,7 @@ import com.music.bitchord.ui.theme.rememberArtworkControlsBandLuminance
 import com.music.bitchord.ui.theme.controlsBandLuminance
 import com.music.bitchord.ui.theme.rememberArtworkTopBandLuminance
 import com.music.bitchord.ui.theme.stableStatusBarTop
+import com.music.bitchord.ui.utils.leaveTopEdgeToSystem
 import com.music.bitchord.ui.theme.topBandScrimAlpha
 import com.music.bitchord.ui.LyricsProviderState
 import com.music.bitchord.ui.components.optimizedHazeEffect
@@ -2269,6 +2270,9 @@ fun NowPlayingScreen(
     } else {
         WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     }
+    // Whether the player has the status bar hidden right now — see the
+    // HideStatusBar call further down, which sets it.
+    val statusBarAwayState = remember { mutableStateOf(false) }
     // What sits between the status bar and the artwork: the drag strip. Read
     // in three places — the strip itself,
     // the scrim drawn over it and the banner's own height — which all have to
@@ -3238,6 +3242,10 @@ fun NowPlayingScreen(
             .fillMaxSize()
             .onSizeChanged { playerBounds = it }
             .then(dockHost)
+            // With the status bar hidden, a swipe down from the top edge is
+            // the system's (it shows the bar, and a second swipe opens the
+            // notification shade), not a pull that minimizes the player.
+            .leaveTopEdgeToSystem(active = { statusBarAwayState.value }, edge = statusBarTop)
             .background(Color.Black),
     ) {
         // Everything but the drawers and popups below, recorded whole for their
@@ -3628,7 +3636,7 @@ fun NowPlayingScreen(
         val playerLanded by remember(dock) {
             derivedStateOf { dock == null || dock.openFraction() >= 1f }
         }
-        var statusBarAway by remember { mutableStateOf(false) }
+        var statusBarAway by statusBarAwayState
         LaunchedEffect(playerLanded, hidePlayerStatusBar, dock == null) {
             if (playerLanded && hidePlayerStatusBar) {
                 // Without the dock ("Reduce animation") the sheet slides up on
