@@ -2098,6 +2098,18 @@ fun NowPlayingScreen(
         label = "canvasCompact",
     )
     val canvasCompactAtRest by remember { derivedStateOf { canvasCompact.value == 0f } }
+    // With no lyric line to show (an instrumental, or no lyrics found), the
+    // compact Canvas controls fold the line's slot away as well, so the song
+    // and artist sit down on the transport instead of a line's height above it.
+    // Its own value rather than [canvasCompact]: an answer that comes in while
+    // the controls are already compact still moves the credits down smoothly.
+    val noLyricLine = !lyricStripShown ||
+        (lyricsUnavailable && lyricsTranslation.displayedLyrics.isEmpty())
+    val lyricSlotFold = animateFloatAsState(
+        targetValue = if (canvasCompactMode && noLyricLine) 1f else 0f,
+        animationSpec = tween(SPOTIFY_CANVAS_CONTROLS_ANIMATION_MS, easing = FastOutSlowInEasing),
+        label = "lyricSlotFold",
+    )
     // How compact the control deck is: under the queue and lyrics, or over a
     // Canvas in the mode above. Read only in layout and draw lambdas.
     val deckCompact: () -> Float = { maxOf(queueCompact.value, canvasCompact.value) }
@@ -5255,6 +5267,7 @@ fun NowPlayingScreen(
             // accompanied by a dedicated lyrics button in the bottom row. Its
             // one-line slot remains, invisibly, so opening lyrics cannot grow
             // the half-player merely to make room for the source label.
+            Box(Modifier.fillMaxWidth().collapseBy { lyricSlotFold.value }) {
             if (!lyricsOpen && lyricStripShown) {
                 CurrentLyricStrip(
                     lines = lyricsTranslation.displayedLyrics,
@@ -5281,6 +5294,7 @@ fun NowPlayingScreen(
                         .offset(y = 6.dp)
                         .padding(vertical = 4.dp),
                 )
+            }
             }
             if (lyricsOpen) {
                 LyricsStatusWithChange(
