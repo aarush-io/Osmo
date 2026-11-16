@@ -54,6 +54,14 @@ interface PlayerHost {
      */
     fun rememberedCanvasAspect(url: String): Float? = null
 
+    /**
+     * Whether a music video Canvas for [videoId] has made its entrance and
+     * still has its last frame held: mounted again, it stands in with that
+     * frame from its first frame on screen, as a clip with
+     * [rememberedCanvasAspect] does.
+     */
+    fun hasRememberedMusicVideoFrame(videoId: String): Boolean = false
+
     /** The looping clip over the cover, decoded however this platform decodes video. */
     @Composable
     fun CanvasVideo(spec: CanvasVideoSpec, modifier: Modifier)
