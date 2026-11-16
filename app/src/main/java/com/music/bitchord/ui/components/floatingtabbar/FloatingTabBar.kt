@@ -886,8 +886,13 @@ private fun SharedTransitionScope.ExpandedTabs(
                     )
                     .clip(shapes.tabBarShape)
                     .then(tabBarContentModifier())
-                    .padding(contentPadding)
+                    // Size animation outside the padding: animateContentSize
+                    // clips to its own bounds, and inside the padding that cut
+                    // the lifted Frost/Solid pill flat a bar's inset short of
+                    // the bar's top and bottom. Here its bounds are the bar's,
+                    // which is clipped to its shape anyway.
                     .animateContentSize()
+                    .padding(contentPadding)
             ) {
                 if (showPill && (!glassPill || pill.isFlat)) {
                     FlatSelectionPill(
