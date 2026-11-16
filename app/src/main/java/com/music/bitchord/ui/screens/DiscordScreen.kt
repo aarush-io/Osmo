@@ -1,5 +1,6 @@
 package com.music.bitchord.ui.screens
 
+import com.music.bitchord.ui.components.frostedSurfaceColor
 import com.music.bitchord.playback.PlaybackPosition
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
@@ -416,7 +417,10 @@ private fun DiscordAccountCard(
     icon: ImageVector,
     onConnect: () -> Unit,
 ) {
-    val cardColor = MaterialTheme.colorScheme.surfaceVariant
+    // The settings cards' own fill, so the card follows the app style (Glass,
+    // Frost or Solid) as the groups under it do. It was the plain theme
+    // colour, a solid grey box over a Glass or Frost page.
+    val cardColor = frostedSurfaceColor(MaterialTheme.colorScheme.surfaceVariant)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -515,7 +519,7 @@ private fun NoticeCard(text: String, onDismiss: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(GroupShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .background(frostedSurfaceColor(MaterialTheme.colorScheme.surfaceVariant))
                 .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 4.dp),
         ) {
             Text(
