@@ -1418,7 +1418,7 @@ fun NowPlayingScreen(
             // through, and then cut in over the cover.
             canvas.musicVideoId != null ->
                 if (canvas.url == lastPresentedCanvasUrl ||
-                    PlayerPlatform.host.hasRememberedMusicVideoFrame(canvas.musicVideoId)
+                    canvas.musicVideoId?.let { PlayerPlatform.host.hasRememberedMusicVideoFrame(it) } == true
                 ) {
                     CanvasSeed(true, 0f, null, false)
                 } else {
