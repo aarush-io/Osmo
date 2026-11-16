@@ -96,6 +96,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.Snapshot
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
@@ -284,6 +285,12 @@ private const val CANVAS_DROP_GRACE_MS = 1_200L
 
 /** How long the last track's clip takes to fade out when the song changes. */
 private const val CANVAS_OUTGOING_FADE_MS = 650
+
+/** How long a skip from a Canvas waits for the next full-size cover before it fades the clip out. */
+private const val CANVAS_HANDOFF_FULL_COVER_WAIT_MS = 400L
+
+/** Then how long it waits for any copy of that cover, small or full. */
+private const val CANVAS_HANDOFF_ANY_COVER_WAIT_MS = 1_600L
 
 /** How much smaller the transport and the action row get under an open queue. */
 private const val COMPACT_TRANSPORT_SHRINK = 0.3f
@@ -1433,15 +1440,6 @@ fun NowPlayingScreen(
     // read only at the moment a song moves on, never drawn.
     val lastShownClip = remember { arrayOfNulls<CanvasArtwork>(1) }
     val lastShownAspect = remember { floatArrayOf(0f) }
-    LaunchedEffect(outgoingClip) {
-        if (outgoingClip == null) return@LaunchedEffect
-        outgoingFade.snapTo(1f)
-        outgoingFade.animateTo(0f, tween(durationMillis = CANVAS_OUTGOING_FADE_MS, easing = FastOutSlowInEasing))
-        outgoingClip = null
-        // Ready for the next handoff, whose first frame is drawn before this
-        // effect gets to run again.
-        outgoingFade.snapTo(1f)
-    }
     // A clip that is up from its first frame — loaded ahead of its song, or
     // standing in from its remembered frame on a skip back — needs nothing
     // over the last song's clip: that one fades out over it. Over the last
@@ -1969,6 +1967,28 @@ fun NowPlayingScreen(
     // never fires again. Keyed on the cover there is nothing to reset: the
     // bitmap really is still loaded, so the state stays true.
     val art = rememberPlayerArtwork(remoteArt)
+    // The last track's clip leaves only once the next cover has something to
+    // show: the full-size copy, or failing that its small one, with the same
+    // bounds as [OutgoingArtwork]. Faded at once, it went out over the sleeve
+    // before the new cover had loaded, and the sleeve still held the last
+    // song's cover, so a skip from a Canvas flashed the old album art.
+    // Not when the next song's own clip is already up: the two crossfade.
+    val currentArt by rememberUpdatedState(art)
+    val currentClipUp by rememberUpdatedState(canvasRenderedState)
+    LaunchedEffect(outgoingClip) {
+        if (outgoingClip == null) return@LaunchedEffect
+        outgoingFade.snapTo(1f)
+        withTimeoutOrNull(CANVAS_HANDOFF_FULL_COVER_WAIT_MS) {
+            snapshotFlow { currentArt.loaded || currentClipUp.value }.first { it }
+        } ?: withTimeoutOrNull(CANVAS_HANDOFF_ANY_COVER_WAIT_MS) {
+            snapshotFlow { currentArt.loaded || currentArt.previewLoaded || currentClipUp.value }.first { it }
+        }
+        outgoingFade.animateTo(0f, tween(durationMillis = CANVAS_OUTGOING_FADE_MS, easing = FastOutSlowInEasing))
+        outgoingClip = null
+        // Ready for the next handoff, whose first frame is drawn before this
+        // effect gets to run again.
+        outgoingFade.snapTo(1f)
+    }
     // Sticky, unlike [PlayerArtwork.loaded]: the banner is the shape of the player rather
     // than a property of the track in it. Waiting on each new cover would
     // collapse the banner into a card and blow it back out on every skip —
@@ -4555,8 +4575,10 @@ fun NowPlayingScreen(
                             .fillMaxSize()
                             .drawWithContent { if (art.loaded || !canvasRendered) drawContent() },
                     )
-                    // The last track's cover, fading out over this one.
-                    OutgoingArtwork(art, Modifier.fillMaxSize())
+                    // The last track's cover, fading out over this one. Not
+                    // when a Canvas was playing over that cover: the clip
+                    // fades straight into this cover instead.
+                    OutgoingArtwork(art, Modifier.fillMaxSize(), lastCoverHidden = leavingClip != null)
 
                     // Where the clip plays when it can't have the banner:
                     // inside the same clip as the still art, taking the

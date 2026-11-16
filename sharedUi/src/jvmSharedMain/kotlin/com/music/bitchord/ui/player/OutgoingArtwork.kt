@@ -30,9 +30,19 @@ import kotlinx.coroutines.withTimeoutOrNull
  *
  * Two tracks off one album share a [PlayerArtwork] (it is keyed on the cover),
  * so skipping between them has nothing to fade and doesn't.
+ *
+ * [lastCoverHidden] is read in the pass the cover changes: true when the last
+ * track's cover was not on screen at all, because its Canvas was playing over
+ * it. That cover is then not brought back. Brought back, it showed for a
+ * moment between the last song's Canvas and the next song's cover, which read
+ * as a flash of the old album art on every skip from a Canvas.
  */
 @Composable
-internal fun OutgoingArtwork(art: PlayerArtwork, modifier: Modifier = Modifier) {
+internal fun OutgoingArtwork(
+    art: PlayerArtwork,
+    modifier: Modifier = Modifier,
+    lastCoverHidden: Boolean = false,
+) {
     val reduceAnimation by PlayerSettings.reduceAnimation.collectAsStateWithLifecycle()
     val history = remember { ArtworkHistory() }
     // Decided in composition, in the very pass that hands the sleeve its new
@@ -45,7 +55,7 @@ internal fun OutgoingArtwork(art: PlayerArtwork, modifier: Modifier = Modifier) 
         val previous = history.fade
         val from = previous?.from?.takeIf { !previous.done && previous.alpha.value > 0.5f }
             ?: history.settled
-        ArtworkFade(from?.takeIf { it !== art && !reduceAnimation }).also { history.fade = it }
+        ArtworkFade(from?.takeIf { it !== art && !reduceAnimation && !lastCoverHidden }).also { history.fade = it }
     }
 
     LaunchedEffect(fade) {
