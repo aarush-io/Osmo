@@ -1678,6 +1678,10 @@ fun NowPlayingScreen(
     // [QUEUE_CARRY_FRACTION] has to fall back to 0 just as surely as one that
     // carried has to finish reaching 1.
     var queueReleased by remember { mutableIntStateOf(0) }
+    // How collapsed the sleeve is for the lyrics, and for the queue once its own
+    // slide has let go — see [p]. Declared up here because the queue's settle
+    // below has to move it too.
+    val sleeveCollapse = remember { Animatable(if (lyricsOpen || queueOpen) 1f else 0f) }
 
     // Back out of the lyrics panel to the player, and only from the player
     // itself out to the mini player.
@@ -1776,6 +1780,13 @@ fun NowPlayingScreen(
     LaunchedEffect(queueOpen, queueDragging, queueReleased) {
         if (queueDragging) return@LaunchedEffect
         val target = if (queueOpen) 1f else 0f
+        // The slide below is what the sleeve follows until it lands; then [p]
+        // hands over to [sleeveCollapse]. That one has to be there already.
+        // Left to its own 420ms ease from the release, it was still part way
+        // when a swipe-down or back swipe close (a shorter slide) landed, and
+        // the sleeve jumped back up by that much and eased down again: the
+        // bounce at the end of the close.
+        if (!lyricsOpen) sleeveCollapse.snapTo(target)
         val from = queueSlide.floatValue
         if (from == target) return@LaunchedEffect
         animate(
@@ -1796,7 +1807,11 @@ fun NowPlayingScreen(
         Animatable(if (restoredPlayerScreen == LastPlayerScreen.MAIN) 0f else 1f)
     }
     LaunchedEffect(queueOpen, lyricsOpen, queueDragging, queueReleased) {
-        if (queueDragging && !lyricsOpen) {
+        // A release part way (a drag or a back swipe let go) settles the slide
+        // in less than [QUEUE_TRAVEL_MS]; a fresh 420ms ease from there let the
+        // controls arrive after the sleeve. They ride the slide instead.
+        val slideMidway = queueSlide.floatValue > 0f && queueSlide.floatValue < 1f
+        if (!lyricsOpen && (queueDragging || slideMidway)) {
             snapshotFlow { queueSlide.floatValue }.collect { queueCompact.snapTo(it) }
         } else {
             queueCompact.animateTo(
@@ -1865,11 +1880,12 @@ fun NowPlayingScreen(
     }
     // How collapsed the sleeve is, whichever surface asked for it — one 420ms
     // ease for the queue and the lyrics both.
-    val animatedCollapse = animateFloatAsState(
-        targetValue = if (lyricsOpen || queueOpen) 1f else 0f,
-        animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing),
-        label = "sleeveCollapse",
-    )
+    LaunchedEffect(lyricsOpen, queueOpen) {
+        sleeveCollapse.animateTo(
+            targetValue = if (lyricsOpen || queueOpen) 1f else 0f,
+            animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing),
+        )
+    }
     // A queue tap/drag already owns a 420ms progress value. Reusing it avoids
     // driving this large layout from two independent animations on every frame.
     // Lyrics retain the ordinary collapse animation; switching queue -> lyrics
@@ -1884,7 +1900,7 @@ fun NowPlayingScreen(
     val p: () -> Float = {
         val queueOwnsCollapse = !lyricsOpen &&
             (queueOpen || queueDragging || queueSlide.floatValue > 0.001f)
-        if (queueOwnsCollapse) queueSlide.floatValue else animatedCollapse.value
+        if (queueOwnsCollapse) queueSlide.floatValue else sleeveCollapse.value
     }
     val collapseStarted by remember { derivedStateOf { p() > 0f } }
     val collapseAtRest by remember { derivedStateOf { p() == 0f } }
