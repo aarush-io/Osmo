@@ -352,8 +352,14 @@ object MusicVideoEngine {
      */
     private fun wanted(): Pair<String, Song?>? {
         val song = controller?.currentMediaItem?.toSong() ?: return null
+        // Video quality Off for mobile data: no picture streams. The player
+        // does not ask for one then (see NowPlayingScreen); this is the same
+        // rule here, so no other surface can start a stream. Only a stand-in
+        // saved with a download plays, because it uses no data.
+        val videoOff = AppSettings.videoOffNow
         // A podcast episode's picture is its own too, though it is filed as audio.
         if (song.isVideo || song.isEpisode) {
+            if (videoOff) return null
             // An episode set to audio only has no picture to decode.
             if (!song.isVideo && !EpisodeVideo.on.value) return null
             return (song.videoId to null).takeIf {
@@ -363,6 +369,7 @@ object MusicVideoEngine {
         val paired = CanvasAudioFixes.pairedVideo(song.videoId)
         val picture = paired ?: VideoCanvases.pictureFor(song.videoId) ?: return null
         if (picture in noPicture) return null
+        if (videoOff && CanvasDownloads.storedVideo(picture) == null) return null
         // A still picture is no better than the backdrop — unless picked by hand.
         if (paired == null && picture in stillVideos) return null
         // "Doesn't match" hides a video the app found, never one picked by hand.
@@ -424,6 +431,12 @@ object MusicVideoEngine {
         }?.apply()
         _quality.value = _quality.value.copy(held = height)
         val id = loadedId ?: return
+        // Video quality Off for mobile data was picked: stop the picture, do
+        // not ask for it again.
+        if (wanted()?.first != id) {
+            unload()
+            return
+        }
         streams.remove(id)
         stepDown.remove(id)
         load(id, standInSong())

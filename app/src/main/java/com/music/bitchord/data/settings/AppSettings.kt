@@ -636,6 +636,13 @@ object AppSettings {
     val videoQualityNow: VideoQuality
         get() = VideoQuality.forConnection(videoQualityWifi.value, videoQualityMobile.value, meteredConnection.value)
 
+    /**
+     * True when no Canvas and no video may load now: the phone is on mobile
+     * data and the mobile data video quality is Off. See [VideoQuality.videoOff].
+     */
+    val videoOffNow: Boolean
+        get() = VideoQuality.videoOff(videoQualityMobile.value, meteredConnection.value)
+
     /** Automatically collapses the lower controls after Spotify Canvas settles. */
     val spotifyCanvasAutoHide = MutableStateFlow(true)
 
@@ -1173,9 +1180,17 @@ object AppSettings {
         keepHome.value = prefs.getBoolean(KEY_KEEP_HOME, !lowRamDevice)
         canvasOverCellular.value = prefs.getBoolean(KEY_CANVAS_OVER_CELLULAR, false)
         videoQualityWifi.value =
-            VideoQuality.decode(prefs.getString(KEY_VIDEO_QUALITY_WIFI, null), VideoQuality.WIFI_DEFAULT)
+            VideoQuality.decode(
+                prefs.getString(KEY_VIDEO_QUALITY_WIFI, null),
+                VideoQuality.WIFI_DEFAULT,
+                allowed = VideoQuality.WIFI_CHOICES,
+            )
         videoQualityMobile.value =
-            VideoQuality.decode(prefs.getString(KEY_VIDEO_QUALITY_MOBILE, null), VideoQuality.MOBILE_DEFAULT)
+            VideoQuality.decode(
+                prefs.getString(KEY_VIDEO_QUALITY_MOBILE, null),
+                VideoQuality.MOBILE_DEFAULT,
+                allowed = VideoQuality.MOBILE_CHOICES,
+            )
         spotifyCanvasAutoHide.value = prefs.getBoolean(KEY_SPOTIFY_CANVAS_AUTO_HIDE, true)
         prioritizeSpotifyCanvas.value = prefs.getBoolean(KEY_PRIORITIZE_SPOTIFY_CANVAS, false)
         animatedArt.value = com.music.bitchord.data.canvas.AnimatedArtPrefs(
