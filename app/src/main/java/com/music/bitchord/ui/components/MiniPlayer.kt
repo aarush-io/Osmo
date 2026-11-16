@@ -52,7 +52,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.music.bitchord.data.model.ROW_ART_PX
 import com.music.bitchord.data.model.Song
 import com.music.bitchord.data.model.artworkAt
@@ -424,6 +423,12 @@ fun MiniPlayer(
     /** The playhead, drawn along the bar's bottom edge; read only when drawing. */
     position: PlaybackPosition? = null,
     durationMs: Long = 0L,
+    /**
+     * [song] is a music video whose song version is still being looked up:
+     * it plays as audio only, and the last cover stays until the song's is
+     * known (see [com.music.bitchord.ui.player.ShownTrack]).
+     */
+    songVersionPending: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val reduceDynamicBlur by AppSettings.reduceDynamicBlur.collectAsStateWithLifecycle()
@@ -525,7 +530,10 @@ fun MiniPlayer(
             // A video with no song version playing as audio only is a song
             // here: a square cover cropped from its thumbnail, no picture.
             val audioOnlyVideos by AudioOnlyVideos.ids.collectAsStateWithLifecycle()
-            val showsVideo = song.isVideo && song.videoId !in audioOnlyVideos
+            // Not while its song version is looked up: it is audio only
+            // either way, and for the frames before it was marked so the
+            // cover widened towards 16:9 and back.
+            val showsVideo = song.isVideo && song.videoId !in audioOnlyVideos && !songVersionPending
             val artWidth by animateDpAsState(
                 targetValue = if (showsVideo) VIDEO_ART_WIDTH else 40.dp,
                 label = "miniArtWidth",
@@ -538,9 +546,9 @@ fun MiniPlayer(
                     .thumbnailBorder(RoundedCornerShape(artCorner))
                     .background(MaterialTheme.colorScheme.surfaceVariant),
             ) {
-                AsyncImage(
+                MiniPlayerCover(
                     model = artUrl?.artworkAt(ROW_ART_PX),
-                    contentDescription = null,
+                    hold = songVersionPending,
                     contentScale = if (song.isVideo) ContentScale.Crop
                         else com.music.bitchord.ui.components.thumbnailContentScale(),
                     modifier = Modifier.fillMaxSize(),

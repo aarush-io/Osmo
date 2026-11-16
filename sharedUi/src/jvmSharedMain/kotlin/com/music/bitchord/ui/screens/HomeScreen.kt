@@ -74,8 +74,6 @@ import com.music.bitchord.data.model.HomeShelf
 import com.music.bitchord.data.model.ShelfLayout
 import com.music.bitchord.data.model.TopPickMood
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.music.bitchord.data.model.TopPick
@@ -487,10 +485,8 @@ fun HomeScreen(
         // Find Your Mood's Show all: every mood and activity, in a sheet over
         // Home rather than a page of its own, so closing it leaves Home where
         // it was.
-        ModalBottomSheet(
-            onDismissRequest = { showAllMoods = false },
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        ) {
+        // The app's own sheet, in its style, as every menu is.
+        AppUi.host.MenuSheet(onDismissRequest = { showAllMoods = false }) {
             Text(
                 text = stringResource(Res.string.find_your_mood),
                 style = MaterialTheme.typography.headlineMedium,

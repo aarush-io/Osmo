@@ -1,5 +1,6 @@
 package com.music.bitchord.ui.components
 
+import com.music.bitchord.ui.screens.destructiveRed
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -121,7 +122,7 @@ fun AccountProfileSelector(
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         if (selected && !managing) Icon(Icons.Rounded.Check, stringResource(R.string.selected_account), tint = MaterialTheme.colorScheme.primary)
-        if (managing) Text(stringResource(R.string.sign_out), color = MaterialTheme.colorScheme.error)
+        if (managing) Text(stringResource(R.string.sign_out), color = destructiveRed())
     }
 }
 

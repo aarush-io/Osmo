@@ -439,6 +439,7 @@ private fun RemoteLibrarySection(
             SettingsRow(
                 icon = Icons.Rounded.DeleteSweep,
                 title = disconnectTitle,
+                danger = true,
                 onClick = {
                     onDisconnect()
                     testResult = null

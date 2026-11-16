@@ -39,6 +39,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
@@ -60,6 +61,21 @@ object YtMusicRepository {
 
     fun cachedAudioVersion(videoId: String): Song? =
         CanvasAudioFixes.songPick(videoId) ?: audioVersionCache[videoId]
+
+    private val _audioVersionsFound = MutableStateFlow(0)
+
+    /**
+     * Goes up each time [resolveAudio] stores an answer, so a screen showing a
+     * music video's song version in its place (see [cachedAudioVersion]) hears
+     * that the answer is in. The number itself means nothing.
+     */
+    val audioVersionsFound: StateFlow<Int> = _audioVersionsFound.asStateFlow()
+
+    private fun rememberAudioVersion(videoId: String, version: Song) {
+        audioVersionCache[videoId] = version
+        _audioVersionsFound.update { it + 1 }
+    }
+
     fun cachedVideoVersion(videoId: String): Song? = videoVersionCache[videoId]
 
     // YouTube's own answer about a track: video or song, and its other half.
@@ -590,7 +606,7 @@ object YtMusicRepository {
         // that is the song, with no search to get it wrong.
         versionPair(song.videoId)?.counterpart?.takeIf { !it.isVideo }?.let { paired ->
             Log.d(TAG, "audio switch: '${song.title}' -> '${paired.title}' (YouTube's pairing)")
-            audioVersionCache[song.videoId] = paired
+            rememberAudioVersion(song.videoId, paired)
             return paired
         }
         val target = TrackMatcher.targetOf(song)
@@ -602,7 +618,7 @@ object YtMusicRepository {
                 .orEmpty()
             TrackMatcher.best(candidates, target)?.let { match ->
                 Log.d(TAG, "audio switch: '${song.title}' -> '${match.title}' ($query)")
-                audioVersionCache[song.videoId] = match
+                rememberAudioVersion(song.videoId, match)
                 return match
             }
             // Music-video timing is visual timing, not the audio release's
@@ -610,12 +626,12 @@ object YtMusicRepository {
             // song/artist match even when the video has a long intro or outro.
             TrackMatcher.bestOfficialAudioForVideo(candidates, target)?.let { match ->
                 Log.d(TAG, "audio switch: accepted video/runtime drift '${song.title}' -> '${match.title}' ($query)")
-                audioVersionCache[song.videoId] = match
+                rememberAudioVersion(song.videoId, match)
                 return match
             }
         }
         Log.w(TAG, "audio switch: no official song match for '${song.title}' by '${song.artist}'")
-        audioVersionCache[song.videoId] = song
+        rememberAudioVersion(song.videoId, song)
         return song
     }
 

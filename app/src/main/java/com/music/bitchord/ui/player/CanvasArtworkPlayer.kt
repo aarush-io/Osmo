@@ -734,6 +734,10 @@ private const val PLACEHOLDER_REFRESH_MS = 3_000L
 /** See [PlayerHost.rememberedCanvasAspect]. */
 internal fun rememberedCanvasFrameAspect(url: String): Float? = CanvasFrameMemory.aspect(url)
 
+/** See [PlayerHost.hasRememberedMusicVideoFrame]: what [AndroidMusicVideoCanvas] stands in with. */
+internal fun musicVideoFrameHeld(videoId: String): Boolean =
+    videoId in MusicVideoCanvasMemory.revealed && CanvasFrameMemory.get("$MUSIC_VIDEO_FRAME_KEY$videoId") != null
+
 /**
  * The view's whole picture as it is shown, at most [maxPx] on its longest edge;
  * null without one.
@@ -1126,9 +1130,14 @@ internal fun AndroidCanvasVideo(spec: CanvasVideoSpec, modifier: Modifier) {
 private fun AndroidMusicVideoCanvas(videoId: String, spec: CanvasVideoSpec, modifier: Modifier) {
     val foreground = rememberIsForeground()
     var textureView by remember { mutableStateOf<TextureView?>(null) }
-    DisposableEffect(textureView, foreground) {
+    // Leaving (its song has moved on, see [CanvasVideoSpec.leaving]), the
+    // view gives the one decoder up at once: the next song's picture must not
+    // be drawn into the clip that is fading out. The view keeps the last
+    // frame it was given, and that frame is what fades.
+    val leaving = spec.leaving
+    DisposableEffect(textureView, foreground, leaving) {
         val target = textureView
-        val release = if (target != null && foreground) {
+        val release = if (target != null && foreground && !leaving) {
             MusicVideoEngine.claim(target, MUSIC_VIDEO_CANVAS_PRIORITY)
         } else null
         onDispose { release?.invoke() }
@@ -1211,8 +1220,12 @@ private fun AndroidMusicVideoCanvas(videoId: String, spec: CanvasVideoSpec, modi
     val sweeping = revealed && wipe.value < 1f
     // Straight in when it is coming back: the Canvas never left.
     val returning = placeholder != null
+    // Leaving, the frame it holds stays whole: the engine has moved on to the
+    // next song, so this one is no longer [rendered], but the player fades it
+    // out itself, after the next cover is in. Faded here as well, it went out
+    // at once and showed the last song's cover under it.
     val alpha by animateFloatAsState(
-        targetValue = if (revealed) 1f else 0f,
+        targetValue = if (revealed || (leaving && revealedOnce)) 1f else 0f,
         animationSpec = tween(durationMillis = if (sweeping || returning) 0 else 650, easing = FastOutSlowInEasing),
         label = "musicVideoCanvasAlpha",
     )

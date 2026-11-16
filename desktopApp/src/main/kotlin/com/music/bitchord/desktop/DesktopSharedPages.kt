@@ -57,6 +57,12 @@ import kotlin.math.roundToInt
 /** The shared pages' settings and downloads, from the desktop's preferences. */
 internal object DesktopAppUiHost : AppUiHost {
 
+    @Composable
+    override fun MenuSheet(
+        onDismissRequest: () -> Unit,
+        content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit,
+    ) = com.music.bitchord.ui.PlainMenuSheet(onDismissRequest, content)
+
     private val persistence = DesktopPersistence()
 
     private val _homeRecentsViewType = MutableStateFlow(

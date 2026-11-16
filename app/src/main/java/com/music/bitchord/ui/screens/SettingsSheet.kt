@@ -1696,12 +1696,16 @@ fun SettingsScreen(
                 }
             }
             val videoQualityTitle = stringResource(R.string.video_quality)
-            val videoQualityOptions = listOf(
-                stringResource(R.string.video_quality_480),
-                stringResource(R.string.video_quality_1080),
-                stringResource(R.string.video_quality_max),
+            val videoQualityNames = mapOf(
+                VideoQuality.OFF to stringResource(R.string.off),
+                VideoQuality.P480 to stringResource(R.string.video_quality_480),
+                VideoQuality.P1080 to stringResource(R.string.video_quality_1080),
+                VideoQuality.MAX to stringResource(R.string.video_quality_max),
             )
-            row(videoQualityTitle, "music video", "canvas", "resolution", "480p", "1080p", "4k", "hd", "data", "wifi", "mobile") {
+            row(
+                videoQualityTitle, "music video", "canvas", "resolution", "480p", "1080p", "4k", "hd",
+                "data", "wifi", "mobile", "off", "cellular",
+            ) {
                 SettingsRow(
                     icon = Icons.Rounded.Videocam,
                     title = videoQualityTitle,
@@ -1709,7 +1713,8 @@ fun SettingsScreen(
                 )
                 VideoQualityChoice(
                     label = stringResource(R.string.video_quality_wifi),
-                    options = videoQualityOptions,
+                    choices = VideoQuality.WIFI_CHOICES,
+                    names = videoQualityNames,
                     selected = videoQualityWifi,
                     onSelect = {
                         AppSettings.setVideoQualityWifi(it)
@@ -1718,13 +1723,22 @@ fun SettingsScreen(
                 )
                 VideoQualityChoice(
                     label = stringResource(R.string.video_quality_mobile),
-                    options = videoQualityOptions,
+                    choices = VideoQuality.MOBILE_CHOICES,
+                    names = videoQualityNames,
                     selected = videoQualityMobile,
                     onSelect = {
                         AppSettings.setVideoQualityMobile(it)
                         MusicVideoEngine.onQualitySettingChanged(context)
                     },
                 )
+                if (videoQualityMobile == VideoQuality.OFF) {
+                    Text(
+                        text = stringResource(R.string.video_quality_mobile_off_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = TEXT_INSET, end = ROW_INSET, bottom = 14.dp),
+                    )
+                }
             }
             val staticBackgroundTitle = stringResource(R.string.static_background)
             row(staticBackgroundTitle, "background", "colour", "color", "ambient", "blobs", "animation", "still", "move") {
@@ -3743,7 +3757,10 @@ internal fun SettingsRow(
     iconPainter: Painter? = null,
     onClick: (() -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = null,
+    /** Red title and glyph, for a row that logs out or disconnects — see [destructiveRed]. */
+    danger: Boolean = false,
 ) {
+    val ink = if (danger) destructiveRed() else MaterialTheme.colorScheme.onBackground
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -3757,14 +3774,14 @@ internal fun SettingsRow(
             Icon(
                 painter = iconPainter,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onBackground,
+                tint = ink,
                 modifier = Modifier.size(ICON_SIZE),
             )
         } else if (icon != null) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onBackground,
+                tint = ink,
                 modifier = Modifier.size(ICON_SIZE),
             )
         }
@@ -3774,7 +3791,7 @@ internal fun SettingsRow(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = ink,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -3963,6 +3980,8 @@ internal fun SliderRow(
 internal fun DestructiveRow(
     label: String,
     enabled: Boolean = true,
+    /** Log out or disconnect: red text, as the system's own sign-out rows have. */
+    danger: Boolean = false,
     onClick: () -> Unit,
 ) {
     Box(
@@ -3975,16 +3994,26 @@ internal fun DestructiveRow(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.primary,
+            color = if (danger) destructiveRed() else MaterialTheme.colorScheme.primary,
         )
     }
 }
 
-/** One line of the video quality setting: the connection name above its three choices. */
+/**
+ * The red of a "Log out" or "Disconnect" option in the settings. Not the
+ * theme's error colour, which in the dark theme is a pale pink: the system red,
+ * a little lighter on a dark page so it reads as clearly as on a light one.
+ */
+@Composable
+internal fun destructiveRed(): Color =
+    if (MaterialTheme.colorScheme.background.luminance() < 0.5f) Color(0xFFFF453A) else Color(0xFFFF3B30)
+
+/** One line of the video quality setting: the connection name above its choices. */
 @Composable
 private fun VideoQualityChoice(
     label: String,
-    options: List<String>,
+    choices: List<VideoQuality>,
+    names: Map<VideoQuality, String>,
     selected: VideoQuality,
     onSelect: (VideoQuality) -> Unit,
 ) {
@@ -3995,9 +4024,9 @@ private fun VideoQualityChoice(
         modifier = Modifier.padding(start = TEXT_INSET, end = ROW_INSET, bottom = 6.dp),
     )
     SegmentedControl(
-        options = options,
-        selectedIndex = VideoQuality.entries.indexOf(selected),
-        onSelect = { index -> onSelect(VideoQuality.entries[index]) },
+        options = choices.map { names.getValue(it) },
+        selectedIndex = choices.indexOf(selected).coerceAtLeast(0),
+        onSelect = { index -> onSelect(choices[index]) },
         modifier = Modifier.padding(start = TEXT_INSET, end = ROW_INSET, bottom = 14.dp),
     )
 }

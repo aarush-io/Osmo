@@ -114,7 +114,7 @@ fun AccountAndScrobblingScreen(
                     onClick = onSwitchChannel,
                 )
                 FullWidthDivider()
-                DestructiveRow(label = stringResource(R.string.sign_out), onClick = onSignOut)
+                DestructiveRow(label = stringResource(R.string.sign_out), danger = true, onClick = onSignOut)
             }
         }
 
@@ -165,6 +165,7 @@ fun AccountAndScrobblingScreen(
                 FullWidthDivider()
                 DestructiveRow(
                     label = stringResource(R.string.spotify_disconnect),
+                    danger = true,
                     onClick = {
                         clearSpotifyWebSession()
                         AppSettings.setSpotifySpdcToken("")

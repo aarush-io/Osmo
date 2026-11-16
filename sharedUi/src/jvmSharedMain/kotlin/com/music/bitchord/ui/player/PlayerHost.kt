@@ -54,6 +54,14 @@ interface PlayerHost {
      */
     fun rememberedCanvasAspect(url: String): Float? = null
 
+    /**
+     * Whether a music video Canvas for [videoId] has made its entrance and
+     * still has its last frame held: mounted again, it stands in with that
+     * frame from its first frame on screen, as a clip with
+     * [rememberedCanvasAspect] does.
+     */
+    fun hasRememberedMusicVideoFrame(videoId: String): Boolean = false
+
     /** The looping clip over the cover, decoded however this platform decodes video. */
     @Composable
     fun CanvasVideo(spec: CanvasVideoSpec, modifier: Modifier)
@@ -242,6 +250,12 @@ interface PlayerSettingsSource {
     /** The provider picked by hand from the provider drawer; null while automatic. */
     val preferredLyricsSource: StateFlow<LyricsSource?> get() = NoPreferredLyricsSource
     val meteredConnection: StateFlow<Boolean?>
+    /**
+     * True when no Canvas and no video may load now: the phone is on mobile
+     * data and the video quality for mobile data is Off. A Canvas saved with
+     * a downloaded song still plays, because it uses no data.
+     */
+    val videoOff: StateFlow<Boolean> get() = VideoOffNever
     val preferUsbDac: StateFlow<Boolean>
     val prioritizeSpotifyCanvas: StateFlow<Boolean>
     /** Which moving artwork may show where the cover is, and which wins — see [AnimatedArtPrefs]. */
@@ -381,6 +395,14 @@ class CanvasVideoSpec(
     val bottomFade: Float,
     val bottomFadeEndPx: Float?,
     val pausedForTransition: Boolean,
+    /**
+     * The last song's clip, still on screen as it fades out over the next
+     * song's sleeve (the player's own fade, through [presentationAlpha]). A
+     * clip that shares a decoder with other surfaces — a music video standing
+     * in as the Canvas — gives the decoder up and holds the frame it shows,
+     * rather than fading itself out the moment its song stops feeding it.
+     */
+    val leaving: Boolean = false,
 )
 
 /**
@@ -405,6 +427,7 @@ fun CanvasArtworkPlayer(
     bottomFade: Float = 0f,
     bottomFadeEndPx: Float? = null,
     pausedForTransition: Boolean = false,
+    leaving: Boolean = false,
 ) {
     PlayerPlatform.host.CanvasVideo(
         CanvasVideoSpec(
@@ -423,6 +446,7 @@ fun CanvasArtworkPlayer(
             bottomFade = bottomFade,
             bottomFadeEndPx = bottomFadeEndPx,
             pausedForTransition = pausedForTransition,
+            leaving = leaving,
         ),
         modifier,
     )
@@ -459,6 +483,8 @@ internal fun rememberRemoteArtworkUrl(song: Song?): String? =
 @Composable
 internal fun AudioPipelineDialog(hazeState: HazeState, isPlaying: Boolean, onDismiss: () -> Unit) =
     PlayerPlatform.host.AudioPipelineDialog(hazeState, isPlaying, onDismiss)
+
+private val VideoOffNever: StateFlow<Boolean> = kotlinx.coroutines.flow.MutableStateFlow(false)
 
 private val CompactCanvasControlsOff: StateFlow<Boolean> = kotlinx.coroutines.flow.MutableStateFlow(false)
 private val NoOutputIcons: StateFlow<Map<String, String>> = kotlinx.coroutines.flow.MutableStateFlow(emptyMap())

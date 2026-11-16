@@ -1,9 +1,7 @@
 package com.my.kizzy.gateway
 
-import com.my.kizzy.gateway.entities.Heartbeat
 import com.my.kizzy.gateway.entities.Identify.Companion.toIdentifyPayload
 import com.my.kizzy.gateway.entities.Payload
-import com.my.kizzy.gateway.entities.Ready
 import com.my.kizzy.gateway.entities.Resume
 import com.my.kizzy.gateway.entities.op.OpCode
 import com.my.kizzy.gateway.entities.op.OpCode.DISPATCH
@@ -24,7 +22,6 @@ import io.ktor.client.request.header
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.close
-import io.ktor.websocket.readText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,7 +40,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import java.util.logging.Logger
 import kotlin.coroutines.CoroutineContext
@@ -224,12 +220,19 @@ open class DiscordWebSocket(
                 // works by cancelling the session underneath this.
                 session.incoming.receiveAsFlow().collect { frame ->
                     if (frame is Frame.Text) {
-                        val text = frame.readText()
+                        // Read off the bytes for the few fields used, never
+                        // decoded whole: see [GatewayFrame] for the READY
+                        // that ran the app out of memory when it was.
                         // Per frame, so one payload this build doesn't
                         // understand — an opcode or event Discord added since —
                         // can't take the connection down with it.
-                        runCatching { onMessage(json.decodeFromString(text)) }
-                            .onFailure { logger.warning("Gateway: bad payload: ${it.message}") }
+                        val header = GatewayFrame.scan(frame.data)
+                        if (header == null) {
+                            logger.warning("Gateway: bad payload (${frame.data.size} bytes)")
+                        } else {
+                            runCatching { onMessage(header) }
+                                .onFailure { logger.warning("Gateway: bad payload: ${it.message}") }
+                        }
                     }
                 }
                 val reason = session.closeReason.await()
@@ -298,13 +301,14 @@ open class DiscordWebSocket(
         websocket?.cancel()
     }
 
-    private suspend fun onMessage(payload: Payload) {
-        logger.info("Gateway received: op=${payload.op}, seq=${payload.s}, event=${payload.t}")
-        payload.s?.let {
+    private suspend fun onMessage(frame: GatewayFrame) {
+        val op = OpCode.entries.firstOrNull { it.value == frame.op } ?: OpCode.UNKNOWN
+        logger.info("Gateway received: op=$op, seq=${frame.s}, event=${frame.t}")
+        frame.s?.let {
             sequence = it
         }
-        when (payload.op) {
-            DISPATCH -> payload.handleDispatch()
+        when (op) {
+            DISPATCH -> handleDispatch(frame)
             HEARTBEAT -> sendHeartBeat()
             HEARTBEAT_ACK -> {
                 awaitingAck = false
@@ -312,17 +316,16 @@ open class DiscordWebSocket(
             }
             RECONNECT -> reconnectWebSocket()
             INVALID_SESSION -> handleInvalidSession()
-            HELLO -> payload.handleHello()
+            HELLO -> handleHello(frame)
             else -> {}
         }
     }
 
-    open fun Payload.handleDispatch() {
-        when (this.t.toString()) {
+    private fun handleDispatch(frame: GatewayFrame) {
+        when (frame.t) {
             "READY" -> {
-                val ready = json.decodeFromJsonElement<Ready>(this.d!!)
-                sessionId = ready.sessionId
-                resumeGatewayUrl = ready.resumeGatewayUrl + "/?v=9&encoding=json"
+                sessionId = frame.sessionId
+                resumeGatewayUrl = frame.resumeGatewayUrl?.let { "$it/?v=9&encoding=json" }
                 logger.info(
                     "Gateway READY: resume_gateway_url updated to $resumeGatewayUrl, " +
                         "session_id updated to $sessionId",
@@ -367,8 +370,8 @@ open class DiscordWebSocket(
         sendIdentify()
     }
 
-    private suspend fun Payload.handleHello() {
-        heartbeatInterval = json.decodeFromJsonElement<Heartbeat>(this.d!!).heartbeatInterval
+    private suspend fun handleHello(frame: GatewayFrame) {
+        heartbeatInterval = frame.heartbeatInterval ?: return
         logger.info("Gateway: Setting heartbeatInterval=$heartbeatInterval")
         // Handshake first, then heartbeats — the order Discord's own client uses,
         // and not worth deviating from. A gateway that answers the handshake with

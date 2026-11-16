@@ -1,6 +1,8 @@
 package com.music.bitchord.data.settings
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class VideoQualityTest {
@@ -45,5 +47,29 @@ class VideoQualityTest {
         assertEquals(VideoQuality.P480, VideoQuality.decode(null, VideoQuality.P480))
         assertEquals(VideoQuality.P1080, VideoQuality.decode("AUTO", VideoQuality.P1080))
         assertEquals(VideoQuality.MAX, VideoQuality.decode("MAX", VideoQuality.P480))
+    }
+
+    @Test
+    fun `off stops video only on mobile data`() {
+        assertTrue(VideoQuality.videoOff(VideoQuality.OFF, metered = true))
+        assertFalse(VideoQuality.videoOff(VideoQuality.OFF, metered = false))
+        // No network known: the Wi-Fi rule applies, as in forConnection.
+        assertFalse(VideoQuality.videoOff(VideoQuality.OFF, metered = null))
+        assertFalse(VideoQuality.videoOff(VideoQuality.P480, metered = true))
+    }
+
+    @Test
+    fun `off is a choice for mobile data only`() {
+        assertTrue(VideoQuality.OFF in VideoQuality.MOBILE_CHOICES)
+        assertFalse(VideoQuality.OFF in VideoQuality.WIFI_CHOICES)
+        assertEquals(VideoQuality.OFF, VideoQuality.MOBILE_CHOICES.first())
+        assertEquals(
+            VideoQuality.WIFI_DEFAULT,
+            VideoQuality.decode("OFF", VideoQuality.WIFI_DEFAULT, allowed = VideoQuality.WIFI_CHOICES),
+        )
+        assertEquals(
+            VideoQuality.OFF,
+            VideoQuality.decode("OFF", VideoQuality.MOBILE_DEFAULT, allowed = VideoQuality.MOBILE_CHOICES),
+        )
     }
 }
