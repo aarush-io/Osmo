@@ -396,6 +396,7 @@ fun DiscordScreen(
             SettingsGroup {
                 DestructiveRow(
                     label = stringResource(R.string.disconnect),
+                    danger = true,
                     onClick = { AppSettings.clearDiscordAccount() },
                 )
             }
