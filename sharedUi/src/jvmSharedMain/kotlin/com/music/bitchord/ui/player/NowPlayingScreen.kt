@@ -4097,8 +4097,12 @@ fun NowPlayingScreen(
                     } ?: regularTitleTop()
                     ).let { top ->
                     // Compact Canvas controls: the credits sit straight on top
-                    // of the shrunken deck.
-                    val compactTop = (maxHeight - HEADER_HEIGHT).coerceAtLeast(0.dp)
+                    // of the shrunken deck. With no lyric line there (see
+                    // [lyricSlotFold]) they also take the gap above the deck,
+                    // so they stand where the line would have, on the transport.
+                    val compactTop = (
+                        maxHeight - HEADER_HEIGHT + PANEL_DECK_GAP * lyricSlotFold.value
+                        ).coerceAtLeast(0.dp)
                     lerp(top, compactTop, canvasCompact.value)
                 }
                 fun titleStart(): Dp = lerp(0.dp, THUMB_SIZE + 12.dp, p())
