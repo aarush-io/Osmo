@@ -23,11 +23,11 @@ object PresenceLinks {
      *
      * The link names one commit, not a branch: the file is there from the
      * moment the commit is pushed, and a merge (never a squash) keeps the
-     * commit for good. The other two designs sit beside it in `docs/discord/`.
+     * commit for good. The other two designs (icon, wordmark) sit beside it in `docs/discord/`.
      */
     const val PLACEHOLDER_ART_URL =
         "https://raw.githubusercontent.com/steeben/Dial/" +
-            "0c2e1ddf39a1a71292cebe4893535b7fdacc6a66/docs/discord/presence-art-wordmark.png"
+            "0c2e1ddf39a1a71292cebe4893535b7fdacc6a66/docs/discord/presence-art-night.png"
 
     /** Discord draws the sleeve at roughly 96dp; 480px covers it on any density. */
     const val ART_PX = 480
