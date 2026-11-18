@@ -1248,18 +1248,12 @@ fun SettingsScreen(
                     )
                 }
             }
-            val playerThemeTitle = stringResource(R.string.player_theme)
-            row(playerThemeTitle, "background", "player", "mesh", "gradient", "legacy", "simple", "blur") {
+            val playerBlurStyleTitle = stringResource(R.string.player_blur_style)
+            row(playerBlurStyleTitle, "background", "player", "mesh", "gradient", "legacy", "simple", "blur", "theme") {
                 SettingsRow(
                     icon = Icons.Rounded.Gradient,
-                    title = playerThemeTitle,
-                    subtitle = stringResource(
-                        when (playerTheme) {
-                            PlayerTheme.DEFAULT -> R.string.player_theme_default_subtitle
-                            PlayerTheme.LEGACY -> R.string.player_theme_legacy_subtitle
-                            PlayerTheme.SIMPLE -> R.string.player_theme_simple_subtitle
-                        },
-                    ),
+                    title = playerBlurStyleTitle,
+                    subtitle = stringResource(R.string.player_blur_style_subtitle),
                 )
                 SegmentedControl(
                     options = PlayerTheme.entries.map {

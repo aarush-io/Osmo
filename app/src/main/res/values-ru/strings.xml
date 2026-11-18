@@ -912,7 +912,7 @@
 
     <string name="export_compatible_downloads">Экспорт совместимых загрузок</string>
 
-    <string name="player_theme">Тема плеера</string>
+    <string name="player_blur_style">Стиль размытия плеера</string>
 
     <string name="player_theme_default">По умолчанию</string>
 
@@ -920,11 +920,7 @@
 
     <string name="player_theme_simple">Простая</string>
 
-    <string name="player_theme_default_subtitle">Цвета обложки продолжаются под ней</string>
-
-    <string name="player_theme_simple_subtitle">Размытая обложка за всем плеером</string>
-
-    <string name="player_theme_legacy_subtitle">Возвращает мягкие анимированные цветные пятна из v1.5</string>
+    <string name="player_blur_style_subtitle">Стиль размытия под обложкой альбома</string>
 
     <string name="liquid_glass">Жидкое стекло</string>
 

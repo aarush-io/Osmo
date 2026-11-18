@@ -884,7 +884,7 @@
 
     <string name="export_compatible_downloads">संगत डाउनलोड निर्यात करें</string>
 
-    <string name="player_theme">प्लेयर थीम</string>
+    <string name="player_blur_style">प्लेयर ब्लर स्टाइल</string>
 
     <string name="player_theme_default">डिफ़ॉल्ट</string>
 
@@ -892,11 +892,7 @@
 
     <string name="player_theme_simple">सरल</string>
 
-    <string name="player_theme_default_subtitle">कवर के रंग उसके नीचे तक फैलते हैं</string>
-
-    <string name="player_theme_simple_subtitle">पूरे प्लेयर के पीछे धुंधला कवर</string>
-
-    <string name="player_theme_legacy_subtitle">v1.5 से प्लेयर के पीछे बहने वाले रंग लौटाएं</string>
+    <string name="player_blur_style_subtitle">एल्बम आर्ट के नीचे ब्लर की स्टाइल</string>
 
     <string name="liquid_glass">लिक्विड ग्लास</string>
 

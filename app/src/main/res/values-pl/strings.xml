@@ -922,7 +922,7 @@
 
     <string name="export_compatible_downloads">Eksportuj zgodne pobrane pliki</string>
 
-    <string name="player_theme">Motyw odtwarzacza</string>
+    <string name="player_blur_style">Styl rozmycia odtwarzacza</string>
 
     <string name="player_theme_default">Domyślny</string>
 
@@ -930,11 +930,7 @@
 
     <string name="player_theme_simple">Prosty</string>
 
-    <string name="player_theme_default_subtitle">Kolory okładki ciągną się pod nią</string>
-
-    <string name="player_theme_simple_subtitle">Rozmyta okładka za całym odtwarzaczem</string>
-
-    <string name="player_theme_legacy_subtitle">Przywraca płynne plamy kolorów z wersji v1.5</string>
+    <string name="player_blur_style_subtitle">Styl rozmycia pod okładką albumu</string>
 
     <string name="liquid_glass">Płynne szkło</string>
 

@@ -889,7 +889,7 @@
 
     <string name="export_compatible_downloads">Exportar downloads compatíveis</string>
 
-    <string name="player_theme">Tema do reprodutor</string>
+    <string name="player_blur_style">Estilo de desfoque do reprodutor</string>
 
     <string name="player_theme_default">Padrão</string>
 
@@ -897,11 +897,7 @@
 
     <string name="player_theme_simple">Simples</string>
 
-    <string name="player_theme_default_subtitle">As cores da capa continuam abaixo dela</string>
-
-    <string name="player_theme_simple_subtitle">A capa desfocada atrás de todo o reprodutor</string>
-
-    <string name="player_theme_legacy_subtitle">Traz de volta os tons suaves em movimento da v1.5</string>
+    <string name="player_blur_style_subtitle">O estilo do desfoque abaixo da capa do álbum</string>
 
     <string name="liquid_glass">Vidro Líquido</string>
 

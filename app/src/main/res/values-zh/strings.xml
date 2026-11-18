@@ -863,7 +863,7 @@
 
     <string name="export_compatible_downloads">导出兼容的下载</string>
 
-    <string name="player_theme">播放器主题</string>
+    <string name="player_blur_style">播放器模糊样式</string>
 
     <string name="player_theme_default">默认</string>
 
@@ -871,11 +871,7 @@
 
     <string name="player_theme_simple">简洁</string>
 
-    <string name="player_theme_default_subtitle">封面的色彩向下延续</string>
-
-    <string name="player_theme_simple_subtitle">在整个播放器背后显示模糊的封面</string>
-
-    <string name="player_theme_legacy_subtitle">恢复 v1.5 中播放器背后的流动色块效果</string>
+    <string name="player_blur_style_subtitle">专辑封面下方模糊效果的样式</string>
 
     <string name="liquid_glass">液态玻璃 (Liquid Glass)</string>
 
