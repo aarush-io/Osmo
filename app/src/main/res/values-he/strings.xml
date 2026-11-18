@@ -889,9 +889,15 @@
 
     <string name="export_compatible_downloads">ייצא הורדות תואמות</string>
 
-    <string name="legacy_mesh_gradient">גרדיאנט רשת קלאסי</string>
+    <string name="player_blur_style">סגנון טשטוש בנגן</string>
 
-    <string name="legacy_mesh_gradient_subtitle">מחזיר את כתמי הצבע הנעים מגרסה v1.5</string>
+    <string name="player_theme_default">ברירת מחדל</string>
+
+    <string name="player_theme_legacy">קלאסי</string>
+
+    <string name="player_theme_simple">פשוט</string>
+
+    <string name="player_blur_style_subtitle">סגנון הטשטוש מתחת לעטיפת האלבום</string>
 
     <string name="liquid_glass">זכוכית נוזלית</string>
 

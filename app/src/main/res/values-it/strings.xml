@@ -913,9 +913,15 @@
 
     <string name="export_compatible_downloads">Esporta download compatibili</string>
 
-    <string name="legacy_mesh_gradient">Gradiente fluido classico</string>
+    <string name="player_blur_style">Stile sfocatura del lettore</string>
 
-    <string name="legacy_mesh_gradient_subtitle">Ripristina le sfumature di colore animate dietro il lettore della v1.5</string>
+    <string name="player_theme_default">Predefinito</string>
+
+    <string name="player_theme_legacy">Classico</string>
+
+    <string name="player_theme_simple">Semplice</string>
+
+    <string name="player_blur_style_subtitle">Lo stile della sfocatura sotto la copertina dell\'album</string>
 
     <string name="lyrics_debug_logs">Log di debug dei testi</string>
 
