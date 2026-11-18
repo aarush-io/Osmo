@@ -10,6 +10,7 @@ import com.music.bitchord.data.model.TopPick
 import com.music.bitchord.data.model.TopPickKind
 import com.music.bitchord.data.model.TopPickMood
 import com.music.bitchord.data.model.WatchTarget
+import com.music.bitchord.data.model.isEpisode
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -66,6 +67,8 @@ object TopPicks {
         val artists: List<ArtistRef> = emptyList(),
         val songs: List<Song> = emptyList(),
         val genres: List<String> = emptyList(),
+        /** The video ids this app saw to be podcast episodes, which a history row may not say. */
+        val episodes: Set<String> = emptySet(),
     )
 
     suspend fun build(
@@ -76,7 +79,9 @@ object TopPicks {
         val historyAsync = async { YtMusicRepository.recentHistory().getOrNull().orEmpty() }
         val mixesAsync = async { findMixes(homeShelves) }
 
-        val history = historyAsync.await()
+        // Music only: a podcast episode in the history would put its show's
+        // channel on the row as an artist, or start a radio off the episode.
+        val history = historyAsync.await().filterNot { it.isEpisode || it.videoId in local.episodes }
         val ranked = weightedSample(rankArtists(history, local.artists).take(ARTIST_POOL), ARTISTS)
         val pages = ranked.map { artist ->
             async { YtMusicRepository.artistLanding(artist.browseId!!).getOrNull() }
@@ -164,7 +169,8 @@ object TopPicks {
     private suspend fun freshStation(pick: TopPick, target: WatchTarget): Result<List<Song>> = coroutineScope {
         val mixAsync = async { YtMusicRepository.watchQueue(target) }
         val history = YtMusicRepository.recentHistory().getOrNull().orEmpty()
-        val seeds = history.take(SEED_POOL).shuffled().take(SEED_RADIOS)
+        // A radio off a podcast episode is not music.
+        val seeds = history.filterNot { it.isEpisode }.take(SEED_POOL).shuffled().take(SEED_RADIOS)
         val radios = seeds.map { seed ->
             async {
                 YtMusicRepository.watchQueue(WatchTarget(playlistId = "RDAMVM${seed.videoId}", videoId = seed.videoId))

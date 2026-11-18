@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BitChord</string>
+    <string name="app_name">Osmo</string>
     <string name="playback_channel_name">กำลังเล่น</string>
     <string name="download_channel_name">การดาวน์โหลด</string>
     <string name="download_channel_description">เพลงที่กำลังบันทึกลงในโฟลเดอร์เพลงของคุณ</string>
@@ -352,7 +352,7 @@
     <string name="start_radio">เริ่มวิทยุ</string>
     <string name="playing_radio">กำลังเล่นวิทยุ %1$s</string>
     <string name="radio_started">เริ่มวิทยุ %1$s แล้ว</string>
-    <string name="saved_to_bitchord_folder">บันทึกลง Music/Dial แล้ว</string>
+    <string name="saved_to_bitchord_folder">บันทึกลง Music แล้ว</string>
     <string name="nothing_downloading">ไม่มีการดาวน์โหลด</string>
     <string name="nothing_to_explore">ยังไม่มีอะไรให้สำรวจตอนนี้</string>
     <string name="no_youtube_music_results">ไม่มีผลลัพธ์จาก YouTube Music</string>
@@ -506,7 +506,7 @@
     <string name="biggest_day_note">วันที่คุณฟังมากที่สุดคือ %1$s ด้วยเวลาฟัง %2$s</string>
     <string name="close_replay">ปิด Replay</string>
     <string name="couldnt_draw_picture">สร้างภาพไม่สำเร็จ</string>
-    <string name="default_replay_holder">ผู้ฟัง Dial</string>
+    <string name="default_replay_holder">ผู้ฟัง Osmo</string>
     <string name="different_albums">อัลบั้มที่แตกต่างกัน</string>
     <string name="genres_pending">แนวเพลงจะปรากฏขึ้นเมื่อประวัติการฟังของคุณเพิ่มมากขึ้น</string>
     <string name="hour_am">%1$d โมงเช้า</string>
@@ -532,7 +532,7 @@
     <string name="replay_artist_end"> คือคนที่คุณกลับมาฟังซ้ำแล้วซ้ำอีก</string>
     <string name="replay_artist_focus">หนึ่งศิลปิน</string>
     <string name="replay_artist_start">ตลอดทั้งเดือน </string>
-    <string name="replay_empty_description">ฟังเพลงเพิ่มอีกนิด แล้ว Dial จะเปลี่ยนประวัติการฟังของคุณให้เป็น Replay</string>
+    <string name="replay_empty_description">ฟังเพลงเพิ่มอีกนิด แล้ว Osmo จะเปลี่ยนประวัติการฟังของคุณให้เป็น Replay</string>
     <string name="replay_genre_end"> หล่อหลอมสไตล์เสียงเพลงของคุณ</string>
     <string name="replay_genre_focus">แนวเพลงของคุณ</string>
     <string name="replay_genre_start">รวมกันแล้ว </string>

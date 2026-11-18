@@ -22,6 +22,7 @@ import com.music.bitchord.data.lyrics.LyricsTranslation
 import com.music.bitchord.data.model.Song
 import com.music.bitchord.data.settings.AppSettings
 import com.music.bitchord.data.settings.LastPlayerScreen
+import com.music.bitchord.data.settings.VideoQuality
 import com.music.bitchord.playback.AudioOutputStatus
 import com.music.bitchord.playback.AudioRouting
 import com.music.bitchord.playback.audio.bitperfect.BitPerfectOutput
@@ -59,6 +60,7 @@ class AndroidPlayerHost(context: Context) : PlayerHost {
         override val canvasOverCellular get() = AppSettings.canvasOverCellular
         override val fullBleedArtwork get() = AppSettings.fullBleedArtwork
         override val hideSongStatus get() = AppSettings.hideSongStatus
+        override val hidePlayerStatusBar get() = AppSettings.hidePlayerStatusBar
         override val showQueueHistory get() = AppSettings.showQueueHistory
         override val hideVolumeBar get() = AppSettings.hideVolumeBar
         override val compactCanvasControls
@@ -76,6 +78,11 @@ class AndroidPlayerHost(context: Context) : PlayerHost {
         override val lyricsSourceOrder get() = AppSettings.lyricsSourceOrder
         override val preferredLyricsSource get() = AppSettings.preferredLyricsSource
         override val meteredConnection get() = AppSettings.meteredConnection
+        override val videoOff: StateFlow<Boolean> =
+            combine(AppSettings.videoQualityMobile, AppSettings.meteredConnection) { mobile, metered ->
+                VideoQuality.videoOff(mobile, metered)
+            }
+                .stateIn(scope, SharingStarted.Eagerly, AppSettings.videoOffNow)
         override val preferUsbDac get() = AppSettings.preferUsbDac
         override val prioritizeSpotifyCanvas get() = AppSettings.prioritizeSpotifyCanvas
         override val animatedArt get() = AppSettings.animatedArt
@@ -127,6 +134,8 @@ class AndroidPlayerHost(context: Context) : PlayerHost {
     override fun hasDownloadedCanvas(videoId: String): Boolean = CanvasDownloads.has(videoId)
 
     override fun rememberedCanvasAspect(url: String): Float? = rememberedCanvasFrameAspect(url)
+
+    override fun hasRememberedMusicVideoFrame(videoId: String): Boolean = musicVideoFrameHeld(videoId)
 
     @Composable
     override fun CanvasVideo(spec: CanvasVideoSpec, modifier: Modifier) = AndroidCanvasVideo(spec, modifier)

@@ -17,7 +17,7 @@ import com.music.bitchord.ui.components.IosSwitch
 
 /*
  * The rows developer options add to Advanced & experimental options, once
- * the Dial logo at the foot of Settings has been tapped ten times; see
+ * the Osmo mark at the foot of Settings has been tapped ten times; see
  * [DeveloperOptions].
  */
 

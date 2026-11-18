@@ -21,6 +21,35 @@ data class ArtistRef(
     val browseId: String? = null,
 )
 
+/**
+ * What a podcast episode's row on its show's page says beyond a track's.
+ *
+ * @property description The episode's notes, as its publisher wrote them.
+ * @property released When it came out, in YouTube Music's own words: "Oct 24",
+ * "Nov 14, 2025", or "1d ago" for the newest.
+ * @property playedPercent How much of it the account has played, 0 to 100;
+ * 0 when it was not started, or when no account is signed in.
+ * @property showId The `MPSP…` page of the show it is an episode of, where
+ * the row is away from that page and so names its show ("New episodes").
+ * @property views How many times it was played, as its row says it: "489K"
+ * where YouTube Music's text is English, its whole text ("48.9万 回視聴")
+ * otherwise.
+ */
+data class EpisodeInfo(
+    val description: String? = null,
+    val released: String? = null,
+    val playedPercent: Int = 0,
+    val showId: String? = null,
+    val views: String? = null,
+)
+
+/**
+ * Whether this is a podcast episode. The player shows an episode's own
+ * picture where the cover is, looks for no lyrics for it, and offers its
+ * comments in their place.
+ */
+val Song.isEpisode: Boolean get() = episode != null
+
 /** A playable YouTube Music track. */
 data class Song(
     val videoId: String,
@@ -141,6 +170,8 @@ data class Song(
      * non-history rows (e.g. search results, library).
      */
     val feedbackToken: String? = null,
+    /** What a podcast episode's row says beyond a track's; null for anything else. */
+    val episode: EpisodeInfo? = null,
 ) {
     /** Legacy derived property: true if and only if [queueTier] is [QueueTier.AUTOPLAY]. */
     val fromAutoplay: Boolean get() = queueTier == QueueTier.AUTOPLAY
@@ -410,7 +441,47 @@ data class ShelfItem(
      * picture the player can show. Drawn as a 16:9 card, as the web player does.
      */
     val isVideo: Boolean = false,
+    /** A podcast episode's runtime, as "2:43:00" or "34:00"; null for anything else. */
+    val durationText: String? = null,
+    /** A podcast episode, by the type its play action states. Not kept when the card is saved. */
+    val isPodcastEpisode: Boolean = false,
 )
+
+/** What the browse id of a podcast show's page starts with. */
+const val PODCAST_SHOW_PREFIX = "MPSP"
+
+/** Whether this card is a podcast show: it opens the show's page, and plays nothing by itself. */
+val ShelfItem.isPodcastShow: Boolean
+    get() = videoId == null && browseId?.startsWith(PODCAST_SHOW_PREFIX) == true
+
+/**
+ * Whether this card is podcast rather than music: a show, an episode, or one
+ * of YouTube Music's podcast lists ("Episodes for later", "New episodes").
+ * The music dial and "For you" leave these to the Podcasts page.
+ */
+val ShelfItem.isPodcast: Boolean
+    get() = isPodcastShow || isPodcastEpisode || durationText != null ||
+        browseId in PODCAST_LIST_IDS || browseId?.startsWith("spotify:show:") == true ||
+        browseId?.startsWith("spotify:episode:") == true
+
+/** YouTube Music's own podcast lists: "Episodes for later" and "New episodes", with and without "VL". */
+private val PODCAST_LIST_IDS = setOf("VLSE", "SE", "VLRDPN", "RDPN")
+
+/**
+ * These shelves without podcast content: Home is music. A card that is a show,
+ * an episode or a podcast list ([isPodcast]) goes, and a shelf that had only
+ * such cards goes too, so a shelf such as "Shows for you" is not shown in any
+ * language. A shelf that came with no cards stays as it was.
+ */
+fun List<HomeShelf>.musicOnly(): List<HomeShelf> = mapNotNull { shelf ->
+    if (shelf.items.isEmpty()) return@mapNotNull shelf
+    val music = shelf.items.filterNot { it.isPodcast }
+    when {
+        music.isEmpty() -> null
+        music.size == shelf.items.size -> shelf
+        else -> shelf.copy(items = music)
+    }
+}
 
 /** How a shelf's items are laid out — the web player's `ShelfLayout`, by the same rules. */
 enum class ShelfLayout {
@@ -507,6 +578,15 @@ fun List<HomeShelf>.withoutRepeatsOf(existing: List<HomeShelf>): List<HomeShelf>
     }
 }
 
+/**
+ * The Home shelves to take from a supplement browse. FEmusic_explore's "New music videos" is
+ * FEmusic_new_releases' "Music videos" again (same videos, same order), but [withoutRepeatsOf]
+ * compares only browsable items, so both came through. Explore's video shelf is dropped, by its
+ * layout and not its title, as the title comes in the account's language.
+ */
+fun homeSupplementShelves(browseId: String, shelves: List<HomeShelf>): List<HomeShelf> =
+    if (browseId == "FEmusic_explore") shelves.filterNot { it.layout == ShelfLayout.VIDEO } else shelves
+
 /** Share of the smaller shelf's items both must hold for one to count as a repeat of the other. */
 private const val REPEAT_SHELF_SHARE = 0.6
 
@@ -516,6 +596,16 @@ private fun HomeShelf.browseKeys(): Set<String> = items.mapNotNullTo(HashSet()) 
 data class HomeFeed(
     val shelves: List<HomeShelf>,
     val continuation: String?,
+)
+
+/**
+ * One of the category chips over YouTube Music's Home ("Relax", "Energize",
+ * "Workout" ...). [params] asks FEmusic_home for that category's feed, made
+ * for the signed-in account.
+ */
+data class HomeChip(
+    val title: String,
+    val params: String,
 )
 
 /** One server-defined group of the buttons shown on Explore. */

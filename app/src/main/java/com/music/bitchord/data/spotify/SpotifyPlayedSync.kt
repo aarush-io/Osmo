@@ -23,7 +23,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
 /**
- * Keeps the listener's "Played in Dial" playlist on Spotify: each song that
+ * Keeps the listener's "Played in Osmo" playlist on Spotify: each song that
  * counts as a play here is found on Spotify and added to it, once.
  *
  * See [SpotifyPlayedList] for why a playlist and not listening history. Only

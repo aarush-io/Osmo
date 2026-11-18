@@ -64,8 +64,8 @@ object LocalMediaRepository {
     }
 
     /**
-     * Retrieves all songs in the `Music/Dial` directory, combining app downloads
-     * with any local audio files present in that folder.
+     * Retrieves songs in the `Music/Osmo` and legacy `Music/Dial` directories,
+     * combining app downloads with other local audio files present there.
      *
      * The download record is the better source for a title and a credit — it
      * holds what the catalogue row said, not what a scanner guessed off a
@@ -94,8 +94,12 @@ object LocalMediaRepository {
                     MediaStore.Audio.Media.DATE_ADDED,
                     MediaStore.Audio.Media.DATE_MODIFIED,
                 )
-                val selection = "${MediaStore.MediaColumns.RELATIVE_PATH} LIKE ?"
-                val selectionArgs = arrayOf("%${DownloadStore.FOLDER}%")
+                val selection = "${MediaStore.MediaColumns.RELATIVE_PATH} LIKE ? OR " +
+                    "${MediaStore.MediaColumns.RELATIVE_PATH} LIKE ?"
+                val selectionArgs = arrayOf(
+                    "%${DownloadStore.FOLDER}%",
+                    "%${DownloadStore.LEGACY_FOLDER}%",
+                )
 
                 context.contentResolver.query(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -134,32 +138,34 @@ object LocalMediaRepository {
                     }
                 }
             } else {
-                val folder = File(
-                    android.os.Environment.getExternalStoragePublicDirectory(
-                        android.os.Environment.DIRECTORY_MUSIC,
-                    ),
-                    DownloadStore.FOLDER,
-                )
-                if (folder.exists() && folder.isDirectory) {
-                    folder.listFiles()?.forEach { file ->
-                        if (file.isFile && isAudioFileName(file.name)) {
-                            val uriStr = Uri.fromFile(file).toString()
-                            if (uriStr !in knownUris) {
-                                val modified = file.lastModified().takeIf { it > 0 }?.div(1_000)
-                                extraSongs.add(
-                                    buildSongFromUri(
-                                        context,
-                                        uriStr,
-                                        file.name,
-                                        ScannedTags(null, null, modified, modified),
-                                    ),
-                                )
+                for (folderName in listOf(DownloadStore.FOLDER, DownloadStore.LEGACY_FOLDER)) {
+                    val folder = File(
+                        android.os.Environment.getExternalStoragePublicDirectory(
+                            android.os.Environment.DIRECTORY_MUSIC,
+                        ),
+                        folderName,
+                    )
+                    if (folder.exists() && folder.isDirectory) {
+                        folder.listFiles()?.forEach { file ->
+                            if (file.isFile && isAudioFileName(file.name)) {
+                                val uriStr = Uri.fromFile(file).toString()
+                                if (uriStr !in knownUris) {
+                                    val modified = file.lastModified().takeIf { it > 0 }?.div(1_000)
+                                    extraSongs.add(
+                                        buildSongFromUri(
+                                            context,
+                                            uriStr,
+                                            file.name,
+                                            ScannedTags(null, null, modified, modified),
+                                        ),
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
-        }.onFailure { Log.w(TAG, "Failed scanning Music/Dial directory: ${it.message}") }
+        }.onFailure { Log.w(TAG, "Failed scanning app download folders: ${it.message}") }
 
         val filled = appDownloads.map { song ->
             val uri = song.localUri ?: return@map song
@@ -197,7 +203,7 @@ object LocalMediaRepository {
 
         val songs = mutableListOf<Song>()
         // This scan runs over every audio file on the device, which includes
-        // whatever this app has downloaded into Music/Dial alongside
+        // whatever this app has downloaded into Music/Osmo alongside
         // everything else — but by content URI, the only thing MediaStore
         // offers here, that download is indistinguishable from a file the
         // user copied on by hand. Reversing [Downloads.saved] hands a

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Dial</string>
+    <string name="app_name">Osmo</string>
     <string name="playback_channel_name">अभी चल रहा है</string>
     <string name="download_channel_name">डाउनलोड</string>
     <string name="download_channel_description">आपके संगीत फ़ोल्डर में सेव हो रहे गाने</string>
@@ -32,6 +32,15 @@
     <string name="audio_files_on_device">डिवाइस पर ऑडियो फ़ाइलें</string>
     <string name="on_device">डिवाइस पर</string>
     <string name="playlists">प्लेलिस्ट</string>
+    <string name="podcasts">पॉडकास्ट</string>
+    <string name="podcasts_dial_menu">पॉडकास्ट के विकल्प</string>
+    <string name="podcast">पॉडकास्ट</string>
+    <string name="read_more">और पढ़ें</string>
+    <string name="about_podcast">पॉडकास्ट के बारे में</string>
+    <string name="new_episode">नया एपिसोड</string>
+    <string name="episodes_for_later">बाद के लिए एपिसोड</string>
+    <string name="podcast_source">सुझाए गए शो</string>
+    <string name="podcast_source_both">दोनों</string>
     <string name="new_playlist">नई प्लेलिस्ट</string>
     <string name="saved_to_youtube_music">YouTube Music में सेव की गई</string>
     <string name="sign_in">साइन इन करें</string>
@@ -104,10 +113,10 @@
     <string name="dolby_atmos_open_failed">Dolby Atmos सेटिंग्स नहीं खोली जा सकीं</string>
     <string name="update_available">अपडेट उपलब्ध है: v%1$s</string>
     <string name="software_update">सॉफ़्टवेयर अपडेट</string>
-    <string name="update_available_body">Dial %1$s डाउनलोड के लिए उपलब्ध है।</string>
-    <string name="update_downloading_body">Dial %1$s डाउनलोड हो रहा है…</string>
-    <string name="update_ready_body">Dial %1$s इंस्टॉल के लिए तैयार है।</string>
-    <string name="update_failed_body">Dial %1$s डाउनलोड नहीं हो सका।</string>
+    <string name="update_available_body">Osmo %1$s डाउनलोड के लिए उपलब्ध है।</string>
+    <string name="update_downloading_body">Osmo %1$s डाउनलोड हो रहा है…</string>
+    <string name="update_ready_body">Osmo %1$s इंस्टॉल के लिए तैयार है।</string>
+    <string name="update_failed_body">Osmo %1$s डाउनलोड नहीं हो सका।</string>
     <string name="download_now">अभी डाउनलोड करें</string>
     <string name="install_now">अभी इंस्टॉल करें</string>
     <string name="later">बाद में</string>
@@ -135,7 +144,7 @@
     <string name="widget_previous">पिछला</string>
     <string name="widget_artwork">एल्बम आर्ट</string>
     <string name="widget_nothing_played">अभी तक कुछ नहीं चलाया गया</string>
-    <string name="widget_open_bitchord">Dial खोलें</string>
+    <string name="widget_open_bitchord">Osmo खोलें</string>
     <string name="widget_preview_title">गाने का शीर्षक</string>
     <string name="widget_preview_artist">कलाकार</string>
     <string name="widget_pill_label">अभी चल रहा है 4×1</string>
@@ -162,7 +171,7 @@
     <string name="cancel_all">सभी रद्द करें</string>
     <string name="language">भाषा</string>
     <string name="app_language">ऐप की भाषा</string>
-    <string name="app_language_description">Dial द्वारा उपयोग की जाने वाली भाषा चुनें।</string>
+    <string name="app_language_description">Osmo द्वारा उपयोग की जाने वाली भाषा चुनें।</string>
     <string name="english">अंग्रेज़ी</string>
     <string name="spanish">स्पैनिश</string>
     <string name="french">फ़्रेंच</string>
@@ -231,6 +240,8 @@
     <string name="hide_volume_bar_subtitle">मुख्य प्लेयर से वॉल्यूम स्लाइडर हटा देता है</string>
     <string name="hide_song_status">गाने का स्टेटस छिपाएँ</string>
     <string name="hide_song_status_subtitle">मुख्य प्लेयर में “यहाँ से चल रहा है” या “इन्होंने चलाया” टेक्स्ट छिपाता है</string>
+    <string name="hide_player_status_bar">स्टेटस बार छिपाएँ</string>
+    <string name="hide_player_status_bar_subtitle">मुख्य प्लेयर में स्टेटस बार और ऊपर की छाया छिपाता है</string>
     <string name="off">बंद</string>
     <string name="low">कम</string>
     <string name="medium">मध्यम</string>
@@ -247,18 +258,22 @@
     <string name="filter_non_music_audio">गैर-संगीत ऑडियो फ़िल्टर करें</string>
     <string name="filter_non_music_audio_subtitle">30 सेकंड से छोटे क्लिप, WAV फ़ाइलें, वॉइस नोट्स, रिकॉर्डिंग और सिस्टम साउंड छिपाता है</string>
     <string name="performance">परफ़ॉर्मेंस</string>
+    <string name="video_quality">वीडियो क्वालिटी</string>
+    <string name="video_quality_subtitle">म्यूज़िक वीडियो के लिए, और उस म्यूज़िक वीडियो के लिए जो किसी गाने के Canvas के रूप में दिखता है। अधिकतम क्वालिटी 4K तक का उपयोग करती है। इसमें बहुत ज़्यादा डेटा और बैटरी लगती है, और कमज़ोर फ़ोन पर यह धीमी हो सकती है।</string>
+    <string name="video_quality_mobile">मोबाइल डेटा</string>
+    <string name="video_quality_mobile_off_note">मोबाइल डेटा पर कोई Canvas या वीडियो नहीं चलता। प्लेयर कवर आर्ट दिखाता है और संगीत सामान्य रूप से चलता है। डाउनलोड किए गए गाने के साथ सहेजा गया Canvas फिर भी चलता है।</string>
+    <string name="video_quality_max">अधिकतम क्वालिटी</string>
     <string name="high_performance_mode">हाई परफ़ॉर्मेंस मोड</string>
-    <string name="high_performance_subtitle">पूरे एनिमेशन और ब्लर का उपयोग करता है, और डिस्प्ले का ज़्यादा रिफ़्रेश रेट मांगता है</string>
+    <string name="high_performance_subtitle">डिस्प्ले का ज़्यादा रिफ़्रेश रेट मांगता है</string>
     <string name="high_performance_active">%1$d Hz का अनुरोध किया गया। ज़रूरत पड़ने पर Android इसे कम कर सकता है।</string>
     <string name="beta">बीटा</string>
     <string name="refresh_rate">रिफ़्रेश रेट</string>
-    <string name="high_performance_before_enabling">चालू करने से पहले</string>
-    <string name="high_performance_battery_warning">पहले Dial की बैटरी उपयोग सेटिंग को “अप्रतिबंधित” पर सेट करें। ज़्यादा रिफ़्रेश रेट ज़्यादा बैटरी, CPU और GPU इस्तेमाल करते हैं, और इससे आपका डिवाइस गर्म हो सकता है।</string>
-    <string name="open_battery_settings">बैटरी सेटिंग्स खोलें</string>
-    <string name="enable_high_performance_title">हाई परफ़ॉर्मेंस मोड चालू करें?</string>
-    <string name="enable_high_performance_confirmation">इसे तभी चालू करें जब Dial की बैटरी उपयोग सेटिंग “अप्रतिबंधित” पर हो। डिवाइस गर्म होने या पावर कम होने पर Android फिर भी रिफ़्रेश रेट सीमित कर सकता है।</string>
+    <string name="high_performance_battery_needed">Osmo की बैटरी उपयोग सेटिंग को “अप्रतिबंधित” पर सेट करें। सेटिंग खोलने के लिए यहां टैप करें।</string>
+    <string name="disable_haptics">हैप्टिक्स बंद करें</string>
+    <string name="disable_haptics_subtitle">Osmo में सभी वाइब्रेशन फ़ीडबैक बंद करता है</string>
+    <string name="static_background">स्थिर बैकग्राउंड रंग</string>
+    <string name="static_background_subtitle">ऐप के पेजों के पीछे के रंगों की हलचल रोकता है</string>
     <string name="enable">चालू करें</string>
-    <string name="not_yet">अभी नहीं</string>
     <string name="activity">एक्टिविटी</string>
     <string name="activity_competing">प्रतिस्पर्धा</string>
     <string name="activity_dialog_message">कार्ड के ऊपर दिखाई जाने वाली क्रिया।</string>
@@ -291,7 +306,7 @@
     <string name="discord_presence_footer">ट्रैक, पोज़िशन या प्लेबैक स्थिति बदलने पर कार्ड अपडेट होता है। प्लेबैक रुकने पर यह साफ़ हो जाता है।</string>
     <string name="discord_show_audio_quality">ऑडियो क्वालिटी दिखाएँ</string>
     <string name="discord_show_audio_quality_subtitle">स्टेटस कार्ड पर Hi-Res, लॉसलेस और Dolby जानकारी</string>
-    <string name="discord_sign_in_footer">साइन इन करने पर Discord का लॉगिन पेज खुलता है। Dial में कुछ भी टाइप नहीं किया जाता।</string>
+    <string name="discord_sign_in_footer">साइन इन करने पर Discord का लॉगिन पेज खुलता है। Osmo में कुछ भी टाइप नहीं किया जाता।</string>
     <string name="discord_token">Discord टोकन</string>
     <string name="discord_token_description">अपना Discord खाता टोकन पेस्ट करें। यह इस डिवाइस पर एन्क्रिप्टेड रहता है और केवल Discord को भेजा जाता है।</string>
     <string name="discord_token_rejected">Discord ने वह टोकन अस्वीकार कर दिया।</string>
@@ -326,7 +341,7 @@
     <string name="downloads_finished">डाउनलोड · पूरे हुए</string>
     <string name="downloading_progress">डाउनलोड हो रहा है · %1$d%%</string>
     <string name="starting">शुरू हो रहा है</string>
-    <string name="saved_to_bitchord_folder">Music/Dial में सेव किया गया</string>
+    <string name="saved_to_bitchord_folder">Music में सेव किया गया</string>
     <string name="nothing_downloading">कुछ भी डाउनलोड नहीं हो रहा</string>
     <string name="nothing_to_explore">अभी एक्सप्लोर करने के लिए कुछ नहीं है</string>
     <string name="no_youtube_music_results">YouTube Music से कोई नतीजे नहीं मिले</string>
@@ -392,8 +407,8 @@
     <string name="lastfm_api_key">API कुंजी</string>
     <string name="lastfm_shared_secret">साझा सीक्रेट</string>
     <string name="lastfm_own_api_description">इस बिल्ड में Last.fm API खाता नहीं है। last.fm/api/account/create पर मुफ़्त में एक बनाएँ और उसकी API कुंजी और साझा सीक्रेट यहाँ पेस्ट करें।</string>
-    <string name="lastfm_browser_description">Dial को स्क्रॉबल करने की अनुमति देने के लिए आपको last.fm पर भेजा जाएगा। आपका पासवर्ड Last.fm के पास ही रहता है।</string>
-    <string name="lastfm_browser_waiting">last.fm पर Allow पर टैप करें, फिर यहाँ लौटें। Dial खुद साइन इन पूरा कर लेगा।</string>
+    <string name="lastfm_browser_description">Osmo को स्क्रॉबल करने की अनुमति देने के लिए आपको last.fm पर भेजा जाएगा। आपका पासवर्ड Last.fm के पास ही रहता है।</string>
+    <string name="lastfm_browser_waiting">last.fm पर Allow पर टैप करें, फिर यहाँ लौटें। Osmo खुद साइन इन पूरा कर लेगा।</string>
     <string name="lastfm_browser_sign_in">last.fm पर जारी रखें</string>
     <string name="lastfm_browser_done">मैंने अनुमति दे दी है</string>
     <string name="lastfm_use_password">इसके बजाय पासवर्ड का उपयोग करें</string>
@@ -466,10 +481,11 @@
     <string name="sleep_timer_custom">कस्टम</string>
     <string name="start_sleep_timer">टाइमर शुरू करें</string>
     <string name="sources_no_lossless">कोई भी चालू स्रोत लॉसलेस ऑडियो नहीं दे सकता। बिना ट्रांसकोडिंग के उपलब्ध लॉसलेस फ़ाइलें चलाने के लिए कस्टम मॉड्यूल जोड़ें।</string>
-    <string name="sources_order_footer">अगर किसी स्रोत के पास कोई ट्रैक नहीं है या उस तक पहुंचा नहीं जा सकता, तो Dial अगला स्रोत आज़माता है। YouTube से ऊपर के स्रोत बेहतर वर्शन मिलने पर उसकी रिकॉर्डिंग बदल सकते हैं।</string>
+    <string name="sources_order_footer">अगर किसी स्रोत के पास कोई ट्रैक नहीं है या उस तक पहुंचा नहीं जा सकता, तो Osmo अगला स्रोत आज़माता है। YouTube से ऊपर के स्रोत बेहतर वर्शन मिलने पर उसकी रिकॉर्डिंग बदल सकते हैं।</string>
     <string name="sources_order_header">स्रोत, इसी क्रम में आज़माए जाते हैं</string>
     <string name="sources_quality_capped">यह कनेक्शन हाई क्वालिटी से नीचे सेट है, इसलिए स्ट्रीम को उस सीमा में फिट करने के लिए ट्रांसकोड किया जाता है। डाउनलोड पर कोई असर नहीं पड़ता।</string>
     <string name="jiosaavn_mismatch_warning">गाने का गलत वर्शन मिल सकता है। अपने जोखिम पर चालू करें।</string>
+    <string name="monochrome_source_detail">लॉसलेस FLAC.</string>
     <string name="enable_jiosaavn">JioSaavn चालू करें?</string>
     <string name="enable_anyway">फिर भी चालू करें</string>
     <string name="sources_subtitle">ऑडियो कहां से आता है और किस क्रम में इस्तेमाल होता है</string>
@@ -512,7 +528,7 @@
     <string name="biggest_day_note">आपका सबसे बड़ा दिन %1$s था, जिसमें %2$s सुना गया।</string>
     <string name="close_replay">Replay बंद करें</string>
     <string name="couldnt_draw_picture">तस्वीर नहीं बन सकी</string>
-    <string name="default_replay_holder">Dial श्रोता</string>
+    <string name="default_replay_holder">Osmo श्रोता</string>
     <string name="different_albums">अलग-अलग एल्बम</string>
     <string name="genres_pending">आपके सुनने का इतिहास बढ़ने पर शैलियां दिखेंगी</string>
     <string name="hour_am">%1$d AM</string>
@@ -542,7 +558,7 @@
     <string name="replay_artist_end"> बार-बार सुना गया।</string>
     <string name="replay_artist_focus">एक कलाकार</string>
     <string name="replay_artist_start">पूरे महीने, </string>
-    <string name="replay_empty_description">थोड़ा और सुनें और Dial आपके इतिहास को एक Replay में बदल देगा।</string>
+    <string name="replay_empty_description">थोड़ा और सुनें और Osmo आपके इतिहास को एक Replay में बदल देगा।</string>
     <string name="replay_genre_end"> ने आपकी पसंद को आकार दिया।</string>
     <string name="replay_genre_focus">आपकी शैलियां</string>
     <string name="replay_genre_start">मिलकर, </string>
@@ -599,6 +615,12 @@
     <string name="sort_title_descending">वर्णानुक्रम (Z से A)</string>
     <string name="sort_date_added">जोड़ने की तारीख (नए सबसे पहले)</string>
     <string name="sort_date_modified">बदलाव की तारीख (नए सबसे पहले)</string>
+    <string name="sort_alphabetical">वर्णानुक्रम</string>
+    <string name="sort_date_modified_toggle">बदलाव की तारीख</string>
+    <string name="sort_a_to_z">A से Z</string>
+    <string name="sort_z_to_a">Z से A</string>
+    <string name="sort_newest_first">नए सबसे पहले</string>
+    <string name="sort_oldest_first">पुराने सबसे पहले</string>
     <string name="use_all_audio_folders">सभी ऑडियो फ़ोल्डर इस्तेमाल करें</string>
     <string name="use_all_audio_folders_subtitle">फ़ोल्डर की सीमा हटाएं और पूरे डिवाइस में संगीत स्कैन करें</string>
     <string name="album">एल्बम</string>
@@ -607,7 +629,7 @@
     <string name="webdav_subtitle">आपके सर्वर पर संगीत</string>
     <string name="webdav_not_configured">स्रोत में जाकर सर्वर कनेक्ट करें</string>
     <string name="webdav_empty">WebDAV सर्वर पर कोई ऑडियो फ़ाइल नहीं मिली। सेटिंग्स में URL जाँचें।</string>
-    <string name="webdav_description">Dial को किसी WebDAV संगीत फ़ोल्डर से जोड़ें — आपकी Nextcloud Music डायरेक्टरी या WebDAV सपोर्ट करने वाला कोई भी सर्वर।</string>
+    <string name="webdav_description">Osmo को किसी WebDAV संगीत फ़ोल्डर से जोड़ें — आपकी Nextcloud Music डायरेक्टरी या WebDAV सपोर्ट करने वाला कोई भी सर्वर।</string>
     <string name="webdav_server_url">सर्वर URL</string>
     <string name="webdav_server_url_hint">https://cloud.example.com/remote.php/dav/files/user/Music</string>
     <string name="webdav_disconnect">डिस्कनेक्ट करें</string>
@@ -624,7 +646,7 @@
     <string name="smb_subtitle">शेयर किए गए फ़ोल्डर में संगीत</string>
     <string name="smb_not_configured">स्रोत में जाकर शेयर कनेक्ट करें</string>
     <string name="smb_empty">SMB शेयर पर कोई ऑडियो फ़ाइल नहीं मिली। स्रोत में सर्वर जाँचें।</string>
-    <string name="smb_description">Dial को किसी शेयर किए गए संगीत फ़ोल्डर से जोड़ें — SMB वाला कोई NAS या Windows शेयर।</string>
+    <string name="smb_description">Osmo को किसी शेयर किए गए संगीत फ़ोल्डर से जोड़ें — SMB वाला कोई NAS या Windows शेयर।</string>
     <string name="smb_server_hint">nas.local or 192.168.1.10:4445</string>
     <string name="smb_share_hint">शेयर का नाम, जैसे Music</string>
     <string name="smb_folder_hint">फ़ोल्डर (वैकल्पिक)</string>
@@ -673,7 +695,7 @@
     </plurals>
     <string name="no_local_albums">यहां अभी तक कुछ भी किसी एल्बम या प्लेलिस्ट का हिस्सा नहीं है। पूरा एल्बम या प्लेलिस्ट डाउनलोड करें और यह यहां दिखेगा।</string>
     <string name="play_your_replay">अपना Replay चलाएं</string>
-    <string name="counted_on_device_with_bitchord">इस डिवाइस पर Dial के साथ गिना गया</string>
+    <string name="counted_on_device_with_bitchord">इस डिवाइस पर Osmo के साथ गिना गया</string>
     <string name="this_month">इस महीने</string>
     <string name="this_year">इस साल</string>
     <string name="all_time">अब तक</string>
@@ -724,7 +746,7 @@
     <string name="listen_together_code">पार्टी कोड</string>
     <string name="listen_together_code_footer">इसे बोलकर बताएँ या भेज दें। O और I इस्तेमाल नहीं होते, इसलिए “ओ” हमेशा शून्य है।</string>
     <string name="copy_code">कोड कॉपी करें</string>
-    <string name="listen_together_share_text">Dial पर मेरे साथ सुनो — पार्टी कोड %1$s</string>
+    <string name="listen_together_share_text">Osmo पर मेरे साथ सुनो — पार्टी कोड %1$s</string>
     <string name="listen_together_now_playing">अभी चल रहा है</string>
     <string name="listen_together_nothing_playing">अभी कुछ नहीं चल रहा</string>
     <string name="listen_together_listening">सुन रहे हैं · %2$d में से %1$d</string>
@@ -761,7 +783,7 @@
     <string name="listen_together_custom_server_dialog_message">यह पार्टी एक बाहरी सर्वर पर चल रही है:\n\n%1$s\n\nक्या आप अपना पार्टी सर्वर बदलकर पार्टी %2$s में शामिल होना चाहते हैं?</string>
     <string name="listen_together_custom_server_switch_and_join">बदलें और शामिल हों</string>
     <string name="listen_together_official_server_dialog_title">आधिकारिक सर्वर पर जाएँ?</string>
-    <string name="listen_together_official_server_dialog_message">यह पार्टी Dial के आधिकारिक सर्वर पर चल रही है।\n\nक्या आप आधिकारिक सर्वर पर लौटकर पार्टी %1$s में शामिल होना चाहते हैं?</string>
+    <string name="listen_together_official_server_dialog_message">यह पार्टी आधिकारिक सर्वर पर चल रही है।\n\nक्या आप आधिकारिक सर्वर पर लौटकर पार्टी %1$s में शामिल होना चाहते हैं?</string>
     <string name="listen_together_switch_failed_stayed_in_party">पार्टी में शामिल नहीं हो सके: %1$s। आप पार्टी %2$s में बने रहेंगे।</string>
     <string name="listen_together_switch_failed">पार्टी में शामिल नहीं हो सके: %1$s।</string>
     <string name="listen_together_ping">%1$d ms</string>
@@ -798,7 +820,7 @@
 
     <string name="add_addon">एडऑन जोड़ें</string>
 
-    <string name="add_addon_detail">Dial को किसी एडऑन सर्वर से कनेक्ट करें</string>
+    <string name="add_addon_detail">Osmo को किसी एडऑन सर्वर से कनेक्ट करें</string>
 
     <string name="addon_url_description">एडऑन का URL पेस्ट करें — रूट या manifest.json।</string>
 
@@ -1021,7 +1043,7 @@
 
     <string name="source_skipped_by_quality">%1$s पर उपयोग नहीं किया गया · गुणवत्ता %2$s पर सेट है</string>
 
-    <string name="source_unrecognised">Dial इस लिंक को पहचान नहीं सका</string>
+    <string name="source_unrecognised">Osmo इस लिंक को पहचान नहीं सका</string>
 
     <string name="start_radio">रेडियो शुरू करें</string>
 
@@ -1056,7 +1078,7 @@
 
     <string name="auto_login_title">Sign in to YouTube on your phone</string>
 
-    <string name="auto_login_subtitle">Open Dial on your phone to sign in</string>
+    <string name="auto_login_subtitle">Open Osmo on your phone to sign in</string>
 
     <string name="auto_empty_recents_title">No recent songs</string>
 
@@ -1090,7 +1112,7 @@
     <string name="smart_version_alignment">स्मार्ट ऑडियो अलाइनमेंट</string>
     <string name="smart_version_alignment_subtitle">ठीक मेल खाने वाला प्लेबैक पल ढूँढने के लिए ऑडियो वेवफ़ॉर्म का विश्लेषण करता है</string>
 
-    <string name="equalizer_footer">Shapes the sound inside Dial, before it reaches the system.</string>
+    <string name="equalizer_footer">Shapes the sound inside Osmo, before it reaches the system.</string>
 
     <string name="equalizer_dynamic">Dynamic</string>
 
@@ -1133,7 +1155,7 @@
 
     <string name="system_equalizer_subtitle">Your device\'s own panel</string>
 
-    <string name="system_equalizer_footer">Runs after Dial\'s, on the whole audio session. Using both applies both.</string>
+    <string name="system_equalizer_footer">Runs after Osmo\'s, on the whole audio session. Using both applies both.</string>
 
     <string name="eq_preset_flat">Flat</string>
 
@@ -1180,6 +1202,13 @@
     <string name="search_languages">Search languages</string>
 
     <string name="no_languages_match">No languages match</string>
+    <string name="language_and_location">भाषा और स्थान</string>
+    <string name="content_country">देश</string>
+    <string name="content_country_subtitle">सुझाव, चार्ट और नई रिलीज़ इस देश से आती हैं</string>
+    <string name="content_country_description">YouTube Music इस देश के लिए सुझाव, चार्ट और नई रिलीज़ देता है। Spotify आपके खाते का देश इस्तेमाल करता है।</string>
+    <string name="content_country_automatic">स्वचालित</string>
+    <string name="search_countries">देश खोजें</string>
+    <string name="no_countries_match">कोई देश नहीं मिला</string>
 
 
 
@@ -1373,8 +1402,8 @@
     <string name="version_switch_in_party">Everyone in Listen Together hears the same version</string>
     <string name="bit_perfect_output">बिट-परफ़ेक्ट आउटपुट</string>
     <string name="bit_perfect_bypassed_footer">बिट-परफ़ेक्ट आउटपुट तैयार है, इसलिए धुंधली सेटिंग्स बायपास हैं और Dolby Atmos वर्शन नहीं माँगे जाते। DAC डिस्कनेक्ट होने या मोड बंद होने पर ये फिर से काम करेंगी।</string>
-    <string name="bit_perfect_sheet_warning">ट्रैक को बिना बदलाव DAC पर भेजता है। इक्वलाइज़र, लाउडनेस नॉर्मलाइज़ेशन, क्रॉसफ़ेड, ऑटोमिक्स, प्लेबैक स्पीड और Dial का वॉल्यूम बायपास हो जाते हैं।</string>
-    <string name="bit_perfect_mode_off_subtitle">ऑडियो Android के मिक्सर और Dial के इफ़ेक्ट से होकर जाता है।</string>
+    <string name="bit_perfect_sheet_warning">ट्रैक को बिना बदलाव DAC पर भेजता है। इक्वलाइज़र, लाउडनेस नॉर्मलाइज़ेशन, क्रॉसफ़ेड, ऑटोमिक्स, प्लेबैक स्पीड और Osmo का वॉल्यूम बायपास हो जाते हैं।</string>
+    <string name="bit_perfect_mode_off_subtitle">ऑडियो Android के मिक्सर और Osmo के इफ़ेक्ट से होकर जाता है।</string>
     <string name="bit_perfect_mode_usb_android">USB DAC</string>
     <string name="bit_perfect_mode_usb_android_subtitle">Android 14 हर ट्रैक के अपने रेट और बिट डेप्थ पर DAC खोलता है, बिना मिक्सिंग या रीसैंपलिंग के।</string>
     <string name="bit_perfect_requires_android_14">Android 14 या उसके बाद का वर्शन चाहिए</string>
@@ -1382,13 +1411,13 @@
     <string name="bit_perfect_mode_dap_exclusive_subtitle">अपने DAC वाले म्यूज़िक प्लेयर के लिए। हर ट्रैक के अपने रेट पर हेडफ़ोन या लाइन आउटपुट को एक्सक्लूसिव रूप से खोलता है। हर डिवाइस एक्सक्लूसिव मोड नहीं देता।</string>
     <string name="bit_perfect_requires_android_8_1">Android 8.1 या उसके बाद का वर्शन चाहिए</string>
     <string name="bit_perfect_mode_usb_direct">USB DAC (डायरेक्ट ड्राइवर)</string>
-    <string name="bit_perfect_mode_usb_direct_subtitle">Dial किसी भी Android वर्शन पर DAC को खुद चलाता है और वॉल्यूम DAC पर ही सेट करता है। USB अनुमति माँगता है। सामान्य आउटपुट से काफ़ी तेज़ हो सकता है।</string>
+    <string name="bit_perfect_mode_usb_direct_subtitle">Osmo किसी भी Android वर्शन पर DAC को खुद चलाता है और वॉल्यूम DAC पर ही सेट करता है। USB अनुमति माँगता है। सामान्य आउटपुट से काफ़ी तेज़ हो सकता है।</string>
     <string name="dac_volume">DAC वॉल्यूम</string>
     <string name="dac_volume_subtitle">DAC पर ही सेट होता है; म्यूज़िक को स्केल नहीं किया जाता</string>
     <string name="usb_allow_fixed_volume">बिना वॉल्यूम कंट्रोल वाले DAC की अनुमति दें</string>
     <string name="usb_allow_fixed_volume_subtitle">वरना ऐसा DAC सामान्य आउटपुट से चलेगा</string>
     <string name="usb_allow_fixed_volume_confirm_title">फ़ुल स्केल पर चलाएँ?</string>
-    <string name="usb_allow_fixed_volume_confirm_message">Dial इस तरह के DAC का वॉल्यूम सेट नहीं कर सकता, इसलिए यह फ़ुल स्केल पर चलता है और सिर्फ़ DAC का अपना नॉब, अगर हो, आवाज़ नियंत्रित करता है। संवेदनशील हेडफ़ोन पर यह ख़तरनाक रूप से तेज़ हो सकता है।</string>
+    <string name="usb_allow_fixed_volume_confirm_message">Osmo इस तरह के DAC का वॉल्यूम सेट नहीं कर सकता, इसलिए यह फ़ुल स्केल पर चलता है और सिर्फ़ DAC का अपना नॉब, अगर हो, आवाज़ नियंत्रित करता है। संवेदनशील हेडफ़ोन पर यह ख़तरनाक रूप से तेज़ हो सकता है।</string>
     <string name="convert_for_limited_dac">कम क्षमता वाले DAC के लिए बदलें</string>
     <string name="convert_for_limited_dac_subtitle">आपके DAC की सीमा से ऊपर के ट्रैक को उसके सबसे ऊँचे फ़ॉर्मैट में बदलता है। ट्रैक शुरू होने में ज़्यादा समय लग सकता है और वे मूल के मुकाबले बिट-परफ़ेक्ट नहीं होंगे।</string>
     <string name="bit_perfect_confirm_title">बिट-परफ़ेक्ट आउटपुट चालू करें?</string>
@@ -1463,4 +1492,19 @@
     <string name="old_app_notice_body">पुराने ऐप की सेटिंग्स, लाइब्रेरी, सुनने का इतिहास और साइन-इन अपने आप नहीं आते। पुराने ऐप में सेटिंग्स, फिर आपका डेटा खोलें और डेटा एक्सपोर्ट करें पर टैप करें। फिर यहाँ डेटा इंपोर्ट करें पर टैप करके वह फ़ाइल चुनें। आपको फिर से साइन इन करना होगा।</string>
     <string name="old_app_notice_take_me_there">वहाँ ले चलें</string>
     <string name="old_app_notice_got_it">समझ गया</string>
+    <string name="episode_info">जानकारी</string>
+    <string name="episode_play_video">वीडियो चलाएँ</string>
+    <string name="search_podcasts_hint">पॉडकास्ट खोजें</string>
+    <string name="podcast_search_hint">शो और एपिसोड खोजें।</string>
+    <string name="podcast_search_library_hint">अपने फ़ॉलो किए गए शो, अपने डायल के शो और बाद के लिए एपिसोड में खोजें।</string>
+    <string name="podcast_search_failed">खोज नहीं हो सकी। फिर से कोशिश करें।</string>
+    <string name="podcast_search_none">“%1$s” के लिए कोई शो या एपिसोड नहीं।</string>
+    <string name="podcast_search_shows">शो</string>
+    <string name="podcast_search_episodes">एपिसोड</string>
+    <string name="episode_filter">एपिसोड फ़िल्टर करें</string>
+    <string name="episode_filter_all">सभी</string>
+    <string name="episode_filter_unplayed">नहीं चलाए गए</string>
+    <string name="episode_filter_in_progress">जारी</string>
+    <string name="episode_filter_played">चलाए गए</string>
+    <string name="episode_filter_none">इस फ़िल्टर में कोई एपिसोड नहीं।</string>
 </resources>

@@ -202,10 +202,10 @@ object Backup {
                 ?.use { it.readBytes().decodeToString() }
                 ?: error("Couldn't open that file")
             val file = runCatching { json.decodeFromString(BackupFile.serializer(), text) }
-                .getOrElse { error("That doesn't look like a Dial backup") }
+                .getOrElse { error("That doesn't look like an Osmo backup") }
             require(file.app == APP_TAG) { "That backup is from another app" }
             require(file.version <= SCHEMA_VERSION) {
-                "That backup was written by a newer version of Dial"
+                "That backup was written by a newer version of Osmo"
             }
 
             ListeningStats.importAll(file.listening)

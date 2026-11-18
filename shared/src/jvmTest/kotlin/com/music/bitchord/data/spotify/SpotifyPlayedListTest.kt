@@ -9,7 +9,7 @@ class SpotifyPlayedListTest {
     @Test
     fun thePlaylistIsCreatedPrivate() {
         assertEquals(
-            """{"name":"Played in Dial","description":"${SpotifyPlayedList.DESCRIPTION}","public":false}""",
+            """{"name":"Played in Osmo","description":"${SpotifyPlayedList.DESCRIPTION}","public":false}""",
             SpotifyPlayedList.createBody(),
         )
     }
@@ -21,7 +21,7 @@ class SpotifyPlayedListTest {
 
     @Test
     fun readsTheNewPlaylistsId() {
-        assertEquals("p1", SpotifyPlayedList.createdId("""{"id":"p1","name":"Played in Dial"}"""))
+        assertEquals("p1", SpotifyPlayedList.createdId("""{"id":"p1","name":"Played in Osmo"}"""))
         assertNull(SpotifyPlayedList.createdId("""{"error":{"status":403}}"""))
         assertNull(SpotifyPlayedList.createdId("nope"))
     }
@@ -77,7 +77,7 @@ class SpotifyPlayedListTest {
     @Test
     fun theWebPlayerMakesThePlaylistByNameAndAnswersWithItsUri() {
         assertEquals(
-            """{"ops":[{"kind":"UPDATE_LIST_ATTRIBUTES","updateListAttributes":{"newAttributes":{"values":{"name":"Played in Dial"}}}}]}""",
+            """{"ops":[{"kind":"UPDATE_LIST_ATTRIBUTES","updateListAttributes":{"newAttributes":{"values":{"name":"Played in Osmo"}}}}]}""",
             SpotifyPlayedList.webCreateBody(),
         )
         assertEquals("p1", SpotifyPlayedList.webCreatedId("""{"uri":"spotify:playlist:p1","revision":"r"}"""))

@@ -93,7 +93,7 @@ object ListeningRecorder {
         val counts = !playCounted && playedThisTrack >= threshold
         if (counts) {
             playCounted = true
-            // The listener's "Played in Dial" playlist on Spotify, when they keep one.
+            // The listener's "Played in Osmo" playlist on Spotify, when they keep one.
             com.music.bitchord.data.spotify.SpotifyPlayedSync.onPlayed(song)
         }
 

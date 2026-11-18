@@ -146,10 +146,10 @@ fun ReplayCreditCard(
                 )
                 Spacer(Modifier.width(10.dp))
                 Icon(
-                    painter = painterResource(Res.drawable.ic_dial_logo),
+                    painter = painterResource(Res.drawable.ic_osmo_mark),
                     contentDescription = null,
                     tint = Color.White,
-                    // Dial's 3x4 grid, 160 wide by 220 tall.
+                    // Osmo's mark, 160 wide by 220 tall.
                     modifier = Modifier.size(width = 16.dp, height = 22.dp),
                 )
             }

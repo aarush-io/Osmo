@@ -24,6 +24,11 @@
     <string name="choose_lyrics_provider">Chọn nguồn lời bài hát</string>
     <string name="clear">Xóa</string>
     <string name="close_lyrics">Đóng lời bài hát</string>
+    <string name="comments">Bình luận</string>
+    <string name="comments_off">Bình luận đã bị tắt</string>
+    <string name="comments_unavailable">Không thể tải bình luận</string>
+    <string name="more_comments">Thêm bình luận</string>
+    <string name="no_comments">Không có bình luận</string>
     <string name="data_saver">Data-Saver</string>
     <string name="decrease_lyrics_offset">Decrease lyrics offset</string>
     <string name="downgraded_from">↓ từ %1$s</string>
@@ -191,9 +196,9 @@
     <string name="subscriptions">Đã đăng ký</string>
     <string name="switch_to_grid_view">Chuyển sang dạng lưới</string>
     <string name="switch_to_list_view">Chuyển sang dạng danh sách</string>
-    <string name="your_replay">Dial Replay của bạn</string>
+    <string name="your_replay">Osmo Replay của bạn</string>
     <string name="your_listening_experience">Trải nghiệm nghe nhạc của bạn</string>
-    <string name="default_replay_holder">Người nghe Dial</string>
+    <string name="default_replay_holder">Người nghe Osmo</string>
     <string name="member_since">Thành viên từ</string>
     <string name="import_spotify">Nhập từ Spotify</string>
     <string name="import_spotify_subtitle">Từ liên kết danh sách phát</string>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BitChord</string>
+    <string name="app_name">Osmo</string>
     <string name="playback_channel_name">Wird wiedergegeben</string>
     <string name="download_channel_name">Downloads</string>
     <string name="download_channel_description">Songs, die in deinem Musikordner gespeichert werden</string>
@@ -330,7 +330,7 @@
     <string name="downloads_finished">Downloads · fertig</string>
     <string name="downloading_progress">Wird heruntergeladen · %1$d%%</string>
     <string name="starting">Wird gestartet</string>
-    <string name="saved_to_bitchord_folder">In Music/Dial gespeichert</string>
+    <string name="saved_to_bitchord_folder">In Music gespeichert</string>
     <string name="nothing_downloading">Nichts wird heruntergeladen</string>
     <string name="nothing_to_explore">Gerade nichts zu entdecken</string>
     <string name="no_youtube_music_results">Keine Ergebnisse von YouTube Music</string>
@@ -492,7 +492,7 @@
     <string name="biggest_day_note">Dein größter Tag war %1$s mit %2$s Hörzeit.</string>
     <string name="close_replay">Replay schließen</string>
     <string name="couldnt_draw_picture">Das Bild konnte nicht erstellt werden</string>
-    <string name="default_replay_holder">Dial-Hörer</string>
+    <string name="default_replay_holder">Osmo-Hörer</string>
     <string name="different_albums">Verschiedene Alben</string>
     <string name="genres_pending">Genres erscheinen, sobald dein Hörverlauf wächst</string>
     <string name="hour_am">%1$d Uhr vorm.</string>
@@ -518,7 +518,7 @@
     <string name="replay_artist_end"> zurück.</string>
     <string name="replay_artist_focus">Ein Künstler</string>
     <string name="replay_artist_start">Den ganzen Monat kehrtest du immer wieder zu </string>
-    <string name="replay_empty_description">Höre etwas mehr, und Dial verwandelt deinen Verlauf in ein Replay.</string>
+    <string name="replay_empty_description">Höre etwas mehr, und Osmo verwandelt deinen Verlauf in ein Replay.</string>
     <string name="replay_genre_end"> deinen Sound.</string>
     <string name="replay_genre_focus">Deine Genres</string>
     <string name="replay_genre_start">Zusammen prägten </string>

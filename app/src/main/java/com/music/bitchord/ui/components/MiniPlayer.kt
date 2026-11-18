@@ -52,7 +52,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.music.bitchord.data.model.ROW_ART_PX
 import com.music.bitchord.data.model.Song
 import com.music.bitchord.data.model.artworkAt
@@ -339,12 +338,15 @@ internal fun Modifier.miniPlayerGestures(
  * them into a position only on the frames it is actually flying to them, so a
  * bar folding and unfolding on every scroll pays nothing for this.
  *
+ * [bordered] says this cover wears [thumbnailBorder], so the player's artwork
+ * takes that line on as it lands — see [PlayerDock.miniArtEdge].
+ *
  * Stands aside while the player's own artwork is on its way to or from here.
  * Read at draw, off the sheet's offset — a layer property per frame of the
  * sheet's travel, never a recomposition of the bar.
  */
 @Composable
-internal fun Modifier.playerDockArt(dock: PlayerDock?, corner: Dp): Modifier {
+internal fun Modifier.playerDockArt(dock: PlayerDock?, corner: Dp, bordered: Boolean = false): Modifier {
     if (dock == null) return this
     val placed = remember { arrayOfNulls<LayoutCoordinates>(1) }
     DisposableEffect(dock) {
@@ -353,7 +355,7 @@ internal fun Modifier.playerDockArt(dock: PlayerDock?, corner: Dp): Modifier {
     return this
         .onPlaced { coordinates ->
             placed[0] = coordinates
-            dock.reportMiniArt(coordinates, corner)
+            dock.reportMiniArt(coordinates, corner, bordered)
         }
         .graphicsLayer { alpha = if (dock.coversMiniArt) 0f else 1f }
 }
@@ -421,6 +423,12 @@ fun MiniPlayer(
     /** The playhead, drawn along the bar's bottom edge; read only when drawing. */
     position: PlaybackPosition? = null,
     durationMs: Long = 0L,
+    /**
+     * [song] is a music video whose song version is still being looked up:
+     * it plays as audio only, and the last cover stays until the song's is
+     * known (see [com.music.bitchord.ui.player.ShownTrack]).
+     */
+    songVersionPending: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val reduceDynamicBlur by AppSettings.reduceDynamicBlur.collectAsStateWithLifecycle()
@@ -522,7 +530,10 @@ fun MiniPlayer(
             // A video with no song version playing as audio only is a song
             // here: a square cover cropped from its thumbnail, no picture.
             val audioOnlyVideos by AudioOnlyVideos.ids.collectAsStateWithLifecycle()
-            val showsVideo = song.isVideo && song.videoId !in audioOnlyVideos
+            // Not while its song version is looked up: it is audio only
+            // either way, and for the frames before it was marked so the
+            // cover widened towards 16:9 and back.
+            val showsVideo = song.isVideo && song.videoId !in audioOnlyVideos && !songVersionPending
             val artWidth by animateDpAsState(
                 targetValue = if (showsVideo) VIDEO_ART_WIDTH else 40.dp,
                 label = "miniArtWidth",
@@ -530,14 +541,14 @@ fun MiniPlayer(
             Box(
                 modifier = Modifier
                     .size(width = artWidth, height = 40.dp)
-                    .playerDockArt(dock, artCorner)
+                    .playerDockArt(dock, artCorner, bordered = true)
                     .clip(RoundedCornerShape(artCorner))
                     .thumbnailBorder(RoundedCornerShape(artCorner))
                     .background(MaterialTheme.colorScheme.surfaceVariant),
             ) {
-                AsyncImage(
+                MiniPlayerCover(
                     model = artUrl?.artworkAt(ROW_ART_PX),
-                    contentDescription = null,
+                    hold = songVersionPending,
                     contentScale = if (song.isVideo) ContentScale.Crop
                         else com.music.bitchord.ui.components.thumbnailContentScale(),
                     modifier = Modifier.fillMaxSize(),

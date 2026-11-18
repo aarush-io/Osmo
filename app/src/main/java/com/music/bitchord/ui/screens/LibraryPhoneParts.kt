@@ -151,7 +151,7 @@ fun LibrarySource.label(): String = stringResource(
 
 /**
  * A library's mark: YouTube Music's own for that one, the Downloads arrow for
- * the device's, and BitChord Dial's squares for both together.
+ * the device's, and Osmo's mark for both together.
  */
 @Composable
 fun LibrarySourceIcon(source: LibrarySource, tint: Color, modifier: Modifier = Modifier) {

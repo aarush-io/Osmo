@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Dial</string>
+    <string name="app_name">Osmo</string>
     <string name="playback_channel_name">正在播放</string>
     <string name="download_channel_name">下載</string>
     <string name="download_channel_description">正在儲存到你的音樂資料夾的歌曲</string>
@@ -31,6 +31,15 @@
     <string name="audio_files_on_device">裝置上的音訊檔案</string>
     <string name="on_device">裝置內</string>
     <string name="playlists">播放列表</string>
+    <string name="podcasts">Podcast</string>
+    <string name="podcasts_dial_menu">Podcast 選項</string>
+    <string name="podcast">Podcast</string>
+    <string name="read_more">展開</string>
+    <string name="about_podcast">關於這個 Podcast</string>
+    <string name="new_episode">新單集</string>
+    <string name="episodes_for_later">稍後聆聽的單集</string>
+    <string name="podcast_source">推薦節目</string>
+    <string name="podcast_source_both">兩者</string>
     <string name="new_playlist">新建播放列表</string>
     <string name="saved_to_youtube_music">已儲存到 YouTube Music</string>
     <string name="sign_in">登入</string>
@@ -99,10 +108,10 @@
     <string name="dolby_atmos_open_failed">無法開啟杜比全景聲設定</string>
     <string name="update_available">有可用更新：v%1$s</string>
     <string name="software_update">軟體更新</string>
-    <string name="update_available_body">Dial %1$s 現已可供下載。</string>
-    <string name="update_downloading_body">正在下載 Dial %1$s…</string>
-    <string name="update_ready_body">Dial %1$s 已準備好安裝。</string>
-    <string name="update_failed_body">無法下載 Dial %1$s。</string>
+    <string name="update_available_body">Osmo %1$s 現已可供下載。</string>
+    <string name="update_downloading_body">正在下載 Osmo %1$s…</string>
+    <string name="update_ready_body">Osmo %1$s 已準備好安裝。</string>
+    <string name="update_failed_body">無法下載 Osmo %1$s。</string>
     <string name="download_now">立即下載</string>
     <string name="install_now">立即安裝</string>
     <string name="later">以後再說</string>
@@ -130,7 +139,7 @@
     <string name="widget_previous">上一首</string>
     <string name="widget_artwork">專輯封面</string>
     <string name="widget_nothing_played">尚未播放任何內容</string>
-    <string name="widget_open_bitchord">開啟 Dial</string>
+    <string name="widget_open_bitchord">開啟 Osmo</string>
     <string name="widget_preview_title">歌曲標題</string>
     <string name="widget_preview_artist">藝人</string>
     <string name="widget_pill_label">正在播放 4×1</string>
@@ -157,7 +166,7 @@
     <string name="cancel_all">取消全部</string>
     <string name="language">語言</string>
     <string name="app_language">應用語言</string>
-    <string name="app_language_description">選擇 Dial 使用的語言。</string>
+    <string name="app_language_description">選擇 Osmo 使用的語言。</string>
     <string name="english">英語</string>
     <string name="spanish">西班牙語</string>
     <string name="french">法語</string>
@@ -228,6 +237,8 @@
     <string name="hide_volume_bar_subtitle">從主播放器中移除音量滑塊</string>
     <string name="hide_song_status">隱藏歌曲狀態</string>
     <string name="hide_song_status_subtitle">隱藏主播放器中的“播放自”或“播放者”文字</string>
+    <string name="hide_player_status_bar">隱藏狀態列</string>
+    <string name="hide_player_status_bar_subtitle">在主播放器中隱藏狀態列和頂部陰影</string>
     <string name="off">關閉</string>
     <string name="low">低</string>
     <string name="medium">中</string>
@@ -244,18 +255,22 @@
     <string name="filter_non_music_audio">過濾非音樂音訊</string>
     <string name="filter_non_music_audio_subtitle">隱藏時長低於 30 秒的片段、WAV 檔案、語音備忘錄、錄音和系統提示音</string>
     <string name="performance">效能</string>
+    <string name="video_quality">影片畫質</string>
+    <string name="video_quality_subtitle">適用於音樂影片，以及作為歌曲 Canvas 顯示的音樂影片。最高畫質最高使用 4K，會消耗更多數據和電量，在效能較弱的手機上可能較慢。</string>
+    <string name="video_quality_mobile">行動數據</string>
+    <string name="video_quality_mobile_off_note">使用行動數據時不播放 Canvas 或影片。播放器顯示封面，音樂照常播放。隨已下載歌曲儲存的 Canvas 仍會播放。</string>
+    <string name="video_quality_max">最高畫質</string>
     <string name="high_performance_mode">高效能模式</string>
-    <string name="high_performance_subtitle">使用完整動畫和模糊效果，並請求更高的螢幕重新整理率</string>
+    <string name="high_performance_subtitle">請求更高的螢幕重新整理率</string>
     <string name="high_performance_active">已請求 %1$d Hz。Android 可能會在需要時降低此數值。</string>
     <string name="beta">測試版</string>
     <string name="refresh_rate">重新整理率</string>
-    <string name="high_performance_before_enabling">啟用前</string>
-    <string name="high_performance_battery_warning">請先將 Dial 的電量使用設定為“不受限制”。更高的重新整理率會消耗更多電量、CPU 和 GPU 資源，並可能使裝置發熱。</string>
-    <string name="open_battery_settings">開啟電量設定</string>
-    <string name="enable_high_performance_title">要啟用高效能模式嗎？</string>
-    <string name="enable_high_performance_confirmation">僅當 Dial 的電量使用設定為“不受限制”時才啟用。裝置發熱或電量不足時，Android 仍可能限制重新整理率。</string>
+    <string name="high_performance_battery_needed">請將 Osmo 的電量使用設定為“不受限制”。點選這裡開啟設定。</string>
+    <string name="disable_haptics">停用觸覺回饋</string>
+    <string name="disable_haptics_subtitle">停止 Osmo 中的所有震動回饋</string>
+    <string name="static_background">靜態背景顏色</string>
+    <string name="static_background_subtitle">停止應用程式頁面背後顏色的移動</string>
     <string name="enable">啟用</string>
-    <string name="not_yet">暫不</string>
     <string name="activity">活動</string>
     <string name="activity_competing">競賽</string>
     <string name="activity_dialog_message">顯示在卡片上方的動詞。</string>
@@ -288,7 +303,7 @@
     <string name="discord_presence_footer">當曲目、播放進度或播放狀態發生變化時，卡片會隨之更新；播放停止時會清除。</string>
     <string name="discord_show_audio_quality">顯示音質</string>
     <string name="discord_show_audio_quality_subtitle">在狀態卡片上顯示 Hi-Res、無損和 Dolby 規格</string>
-    <string name="discord_sign_in_footer">登入會開啟 Discord 的登入頁面，你不會在 Dial 中輸入任何內容。</string>
+    <string name="discord_sign_in_footer">登入會開啟 Discord 的登入頁面，你不會在 Osmo 中輸入任何內容。</string>
     <string name="discord_token">Discord 令牌</string>
     <string name="discord_token_description">貼上你的 Discord 賬號令牌。它會在此裝置上加密儲存，且只會傳送給 Discord。</string>
     <string name="discord_token_rejected">Discord 拒絕了該令牌。</string>
@@ -323,7 +338,7 @@
     <string name="downloads_finished">下載 · 已完成</string>
     <string name="downloading_progress">正在下載 · %1$d%%</string>
     <string name="starting">正在開始</string>
-    <string name="saved_to_bitchord_folder">已儲存到 Music/Dial</string>
+    <string name="saved_to_bitchord_folder">已儲存到 Music</string>
     <string name="nothing_downloading">當前沒有下載任務</string>
     <string name="nothing_to_explore">目前沒有可探索的內容</string>
     <string name="no_youtube_music_results">YouTube Music 沒有搜尋結果</string>
@@ -380,8 +395,8 @@
     <string name="lastfm_api_key">API 金鑰</string>
     <string name="lastfm_shared_secret">共用密鑰</string>
     <string name="lastfm_own_api_description">此版本沒有 Last.fm API 帳戶。請在 last.fm/api/account/create 免費建立一個，然後在此貼上其 API 金鑰和共用密鑰。</string>
-    <string name="lastfm_browser_description">你將前往 last.fm 授權 Dial 進行 Scrobbling。你的密碼只會留在 Last.fm。</string>
-    <string name="lastfm_browser_waiting">在 last.fm 上點按「允許」，然後返回這裡。Dial 會自動完成登入。</string>
+    <string name="lastfm_browser_description">你將前往 last.fm 授權 Osmo 進行 Scrobbling。你的密碼只會留在 Last.fm。</string>
+    <string name="lastfm_browser_waiting">在 last.fm 上點按「允許」，然後返回這裡。Osmo 會自動完成登入。</string>
     <string name="lastfm_browser_sign_in">在 last.fm 上繼續</string>
     <string name="lastfm_browser_done">我已允許存取</string>
     <string name="lastfm_use_password">改用密碼</string>
@@ -454,10 +469,11 @@
     <string name="sleep_timer_custom">自訂</string>
     <string name="start_sleep_timer">開始計時</string>
     <string name="sources_no_lossless">已啟用的來源均無法提供無損音訊。新增自定義模組即可播放可用的無損檔案，而無需轉碼。</string>
-    <string name="sources_order_footer">如果某個來源沒有該曲目或無法訪問，Dial 會嘗試下一個來源。排在 YouTube 之前的來源如果返回更好的版本，可以替換其錄音。</string>
+    <string name="sources_order_footer">如果某個來源沒有該曲目或無法訪問，Osmo 會嘗試下一個來源。排在 YouTube 之前的來源如果返回更好的版本，可以替換其錄音。</string>
     <string name="sources_order_header">來源，按此順序嘗試</string>
     <string name="sources_quality_capped">此連線的設定低於高品質，因此串流會被轉碼以符合該限制，下載不受影響。</string>
     <string name="jiosaavn_mismatch_warning">可能匹配到歌曲的錯誤版本。啟用風險自負。</string>
+    <string name="monochrome_source_detail">無損 FLAC。</string>
     <string name="enable_jiosaavn">啟用 JioSaavn？</string>
     <string name="enable_anyway">仍然啟用</string>
     <string name="sources_subtitle">音訊的來源及使用順序</string>
@@ -499,7 +515,7 @@
     <string name="biggest_day_note">你收聽最多的一天是 %1$s，共收聽了 %2$s。</string>
     <string name="close_replay">關閉 Replay</string>
     <string name="couldnt_draw_picture">無法生成圖片</string>
-    <string name="default_replay_holder">Dial 聽眾</string>
+    <string name="default_replay_holder">Osmo 聽眾</string>
     <string name="different_albums">不同專輯</string>
     <string name="genres_pending">隨著收聽記錄增多，流派資訊會逐漸顯示</string>
     <string name="hour_am">上午%1$d點</string>
@@ -529,7 +545,7 @@
     <string name="replay_artist_end">讓你一聽再聽。</string>
     <string name="replay_artist_focus">同一位藝人</string>
     <string name="replay_artist_start">整月裡，</string>
-    <string name="replay_empty_description">再多聽一會兒，Dial 就會把你的收聽記錄變成一份 Replay。</string>
+    <string name="replay_empty_description">再多聽一會兒，Osmo 就會把你的收聽記錄變成一份 Replay。</string>
     <string name="replay_genre_end">塑造了你的聽感。</string>
     <string name="replay_genre_focus">你的流派</string>
     <string name="replay_genre_start">總的來說，</string>
@@ -582,6 +598,12 @@
     <string name="sort_title_descending">按字母順序（Z 到 A）</string>
     <string name="sort_date_added">新增日期（最新優先）</string>
     <string name="sort_date_modified">修改日期（最新優先）</string>
+    <string name="sort_alphabetical">依字母順序</string>
+    <string name="sort_date_modified_toggle">修改日期</string>
+    <string name="sort_a_to_z">A 到 Z</string>
+    <string name="sort_z_to_a">Z 到 A</string>
+    <string name="sort_newest_first">最新優先</string>
+    <string name="sort_oldest_first">最舊優先</string>
     <string name="use_all_audio_folders">使用所有音訊資料夾</string>
     <string name="use_all_audio_folders_subtitle">取消資料夾限制，掃描整個裝置上的音樂</string>
     <string name="album">專輯</string>
@@ -590,7 +612,7 @@
     <string name="webdav_subtitle">你伺服器上的音樂</string>
     <string name="webdav_not_configured">請在“來源”中連線伺服器</string>
     <string name="webdav_empty">WebDAV 伺服器上沒有找到音訊檔案。請在設定中檢查 URL。</string>
-    <string name="webdav_description">將 Dial 指向一個 WebDAV 音樂資料夾 — 你的 Nextcloud 音樂目錄或任何支援 WebDAV 的伺服器。</string>
+    <string name="webdav_description">將 Osmo 指向一個 WebDAV 音樂資料夾 — 你的 Nextcloud 音樂目錄或任何支援 WebDAV 的伺服器。</string>
     <string name="webdav_server_url">伺服器 URL</string>
     <string name="webdav_server_url_hint">https://cloud.example.com/remote.php/dav/files/user/Music</string>
     <string name="webdav_disconnect">斷開連線</string>
@@ -607,7 +629,7 @@
     <string name="smb_subtitle">共享資料夾中的音樂</string>
     <string name="smb_not_configured">請在“來源”中連線共享</string>
     <string name="smb_empty">SMB 共享中沒有找到音訊檔案。請在“來源”中檢查伺服器。</string>
-    <string name="smb_description">將 Dial 指向一個共享音樂資料夾 — 支援 SMB 的 NAS 或 Windows 共享。</string>
+    <string name="smb_description">將 Osmo 指向一個共享音樂資料夾 — 支援 SMB 的 NAS 或 Windows 共享。</string>
     <string name="smb_server_hint">nas.local or 192.168.1.10:4445</string>
     <string name="smb_share_hint">共享名稱，例如 Music</string>
     <string name="smb_folder_hint">資料夾（可選）</string>
@@ -655,7 +677,7 @@
     </plurals>
     <string name="no_local_albums">這裡還沒有任何屬於專輯或播放列表的內容。下載完整的專輯或播放列表後，它們會顯示在這裡。</string>
     <string name="play_your_replay">播放你的 Replay</string>
-    <string name="counted_on_device_with_bitchord">由 Dial 在此裝置上統計</string>
+    <string name="counted_on_device_with_bitchord">由 Osmo 在此裝置上統計</string>
     <string name="this_month">本月</string>
     <string name="this_year">今年</string>
     <string name="all_time">全部時間</string>
@@ -706,7 +728,7 @@
     <string name="listen_together_code">派對程式碼</string>
     <string name="listen_together_code_footer">讀出來或發出去。字母 O 和 I 不會用到，所以“歐”永遠是零。</string>
     <string name="copy_code">複製程式碼</string>
-    <string name="listen_together_share_text">在 Dial 上和我一起聽 — 派對程式碼 %1$s</string>
+    <string name="listen_together_share_text">在 Osmo 上和我一起聽 — 派對程式碼 %1$s</string>
     <string name="listen_together_now_playing">正在播放</string>
     <string name="listen_together_nothing_playing">還沒有播放任何內容</string>
     <string name="listen_together_listening">正在收聽 · %1$d / %2$d</string>
@@ -743,7 +765,7 @@
     <string name="listen_together_custom_server_dialog_message">此派對託管在外部伺服器上：\n\n%1$s\n\n要切換派對伺服器並加入派對 %2$s 嗎？</string>
     <string name="listen_together_custom_server_switch_and_join">切換並加入</string>
     <string name="listen_together_official_server_dialog_title">切換到官方伺服器？</string>
-    <string name="listen_together_official_server_dialog_message">此派對託管在 Dial 官方伺服器上。\n\n要切換回官方伺服器並加入派對 %1$s 嗎？</string>
+    <string name="listen_together_official_server_dialog_message">此派對託管在 官方伺服器上。\n\n要切換回官方伺服器並加入派對 %1$s 嗎？</string>
     <string name="listen_together_switch_failed_stayed_in_party">無法加入派對：%1$s。仍留在派對 %2$s 中。</string>
     <string name="listen_together_switch_failed">無法加入派對：%1$s。</string>
     <string name="listen_together_ping">%1$d ms</string>
@@ -779,9 +801,9 @@
 
     <string name="add_addon">新增外掛</string>
 
-    <string name="add_addon_detail">將 Dial 指向你自建或獲取連結的外掛伺服器</string>
+    <string name="add_addon_detail">將 Osmo 指向你自建或獲取連結的外掛伺服器</string>
 
-    <string name="addon_url_description">貼上外掛網址 — 根目錄或 manifest.json 均可。Dial 會讀取其搜尋和流式播放內容，並透過標準 HTTP 請求曲目。</string>
+    <string name="addon_url_description">貼上外掛網址 — 根目錄或 manifest.json 均可。Osmo 會讀取其搜尋和流式播放內容，並透過標準 HTTP 請求曲目。</string>
 
     <string name="advanced_options">高階選項</string>
 
@@ -1002,7 +1024,7 @@
 
     <string name="source_skipped_by_quality">未在 %1$s 上使用 · 音質已設為 %2$s</string>
 
-    <string name="source_unrecognised">Dial 無法識別該連結</string>
+    <string name="source_unrecognised">Osmo 無法識別該連結</string>
 
     <string name="start_radio">開啟電臺</string>
 
@@ -1037,7 +1059,7 @@
 
     <string name="auto_login_title">Sign in to YouTube on your phone</string>
 
-    <string name="auto_login_subtitle">Open Dial on your phone to sign in</string>
+    <string name="auto_login_subtitle">Open Osmo on your phone to sign in</string>
 
     <string name="auto_empty_recents_title">No recent songs</string>
 
@@ -1071,7 +1093,7 @@
     <string name="smart_version_alignment">智慧音訊對齊</string>
     <string name="smart_version_alignment_subtitle">分析音訊波形，精確匹配對應的播放時刻</string>
 
-    <string name="equalizer_footer">Shapes the sound inside Dial, before it reaches the system.</string>
+    <string name="equalizer_footer">Shapes the sound inside Osmo, before it reaches the system.</string>
 
     <string name="equalizer_dynamic">Dynamic</string>
 
@@ -1114,7 +1136,7 @@
 
     <string name="system_equalizer_subtitle">Your device\'s own panel</string>
 
-    <string name="system_equalizer_footer">Runs after Dial\'s, on the whole audio session. Using both applies both.</string>
+    <string name="system_equalizer_footer">Runs after Osmo\'s, on the whole audio session. Using both applies both.</string>
 
     <string name="eq_preset_flat">Flat</string>
 
@@ -1161,6 +1183,13 @@
     <string name="search_languages">Search languages</string>
 
     <string name="no_languages_match">No languages match</string>
+    <string name="language_and_location">語言和地區</string>
+    <string name="content_country">國家/地區</string>
+    <string name="content_country_subtitle">推薦、排行榜和新發行內容來自此國家/地區</string>
+    <string name="content_country_description">YouTube Music 會提供此國家/地區的推薦、排行榜和新發行內容。Spotify 使用你帳戶的國家/地區。</string>
+    <string name="content_country_automatic">自動</string>
+    <string name="search_countries">搜尋國家/地區</string>
+    <string name="no_countries_match">沒有相符的國家/地區</string>
 
 
 
@@ -1352,8 +1381,8 @@
     <string name="version_switch_in_party">Everyone in Listen Together hears the same version</string>
     <string name="bit_perfect_output">位元完美輸出</string>
     <string name="bit_perfect_bypassed_footer">位元完美輸出已就緒，因此變灰的設定會被略過，也不會要求 Dolby Atmos 版本。中斷 DAC 連線或關閉此模式後，它們會恢復運作。</string>
-    <string name="bit_perfect_sheet_warning">將曲目原樣傳送到 DAC。均衡器、響度標準化、交叉淡入淡出、Automix、播放速度和 Dial 的音量都會被略過。</string>
-    <string name="bit_perfect_mode_off_subtitle">音訊會經過 Android 的混音器和 Dial 的音效。</string>
+    <string name="bit_perfect_sheet_warning">將曲目原樣傳送到 DAC。均衡器、響度標準化、交叉淡入淡出、Automix、播放速度和 Osmo 的音量都會被略過。</string>
+    <string name="bit_perfect_mode_off_subtitle">音訊會經過 Android 的混音器和 Osmo 的音效。</string>
     <string name="bit_perfect_mode_usb_android">USB DAC</string>
     <string name="bit_perfect_mode_usb_android_subtitle">Android 14 會以每首曲目本身的取樣率和位元深度開啟 DAC，不進行混音或重新取樣。</string>
     <string name="bit_perfect_requires_android_14">需要 Android 14 或以上版本</string>
@@ -1361,13 +1390,13 @@
     <string name="bit_perfect_mode_dap_exclusive_subtitle">適用於內建 DAC 的音樂播放器。以每首曲目本身的取樣率獨佔開啟耳機或線路輸出。並非所有裝置都允許獨佔模式。</string>
     <string name="bit_perfect_requires_android_8_1">需要 Android 8.1 或以上版本</string>
     <string name="bit_perfect_mode_usb_direct">USB DAC（直接驅動）</string>
-    <string name="bit_perfect_mode_usb_direct_subtitle">Dial 可在任何 Android 版本上直接驅動 DAC，並在 DAC 上設定音量。需要 USB 權限。聲音可能比一般輸出大得多。</string>
+    <string name="bit_perfect_mode_usb_direct_subtitle">Osmo 可在任何 Android 版本上直接驅動 DAC，並在 DAC 上設定音量。需要 USB 權限。聲音可能比一般輸出大得多。</string>
     <string name="dac_volume">DAC 音量</string>
     <string name="dac_volume_subtitle">在 DAC 本身設定；音樂資料不會被縮放</string>
     <string name="usb_allow_fixed_volume">允許沒有音量控制的 DAC</string>
     <string name="usb_allow_fixed_volume_subtitle">否則這類 DAC 會透過一般輸出播放</string>
     <string name="usb_allow_fixed_volume_confirm_title">以滿刻度播放？</string>
-    <string name="usb_allow_fixed_volume_confirm_message">Dial 無法設定這類 DAC 的音量，因此會以滿刻度播放，只有 DAC 本身的旋鈕（如果有）才能控制響度。使用靈敏的耳機時，聲音可能大到危險。</string>
+    <string name="usb_allow_fixed_volume_confirm_message">Osmo 無法設定這類 DAC 的音量，因此會以滿刻度播放，只有 DAC 本身的旋鈕（如果有）才能控制響度。使用靈敏的耳機時，聲音可能大到危險。</string>
     <string name="convert_for_limited_dac">為低規格 DAC 轉換</string>
     <string name="convert_for_limited_dac_subtitle">將超出 DAC 上限的曲目轉換為其支援的最高格式。曲目可能需要更久才能開始播放，且相對原始音訊不再是位元完美。</string>
     <string name="bit_perfect_confirm_title">開啟位元完美輸出？</string>
@@ -1442,4 +1471,19 @@
     <string name="old_app_notice_body">舊應用程式中的設定、資料庫、收聽紀錄和登入資訊不會自動搬移。在舊應用程式中開啟「設定」>「你的資料」，點選「匯出資料」。接著在這裡點選「匯入資料」並選擇該檔案。你需要重新登入。</string>
     <string name="old_app_notice_take_me_there">帶我前往</string>
     <string name="old_app_notice_got_it">知道了</string>
+    <string name="episode_info">資訊</string>
+    <string name="episode_play_video">播放影片</string>
+    <string name="search_podcasts_hint">搜尋 Podcast</string>
+    <string name="podcast_search_hint">搜尋節目和單集。</string>
+    <string name="podcast_search_library_hint">在你追蹤的節目、轉盤上的節目和稍後收聽的單集中搜尋。</string>
+    <string name="podcast_search_failed">無法搜尋，請再試一次。</string>
+    <string name="podcast_search_none">沒有與「%1$s」相關的節目或單集。</string>
+    <string name="podcast_search_shows">節目</string>
+    <string name="podcast_search_episodes">單集</string>
+    <string name="episode_filter">篩選單集</string>
+    <string name="episode_filter_all">全部</string>
+    <string name="episode_filter_unplayed">未播放</string>
+    <string name="episode_filter_in_progress">播放中</string>
+    <string name="episode_filter_played">已播放</string>
+    <string name="episode_filter_none">此篩選條件下沒有單集。</string>
 </resources>

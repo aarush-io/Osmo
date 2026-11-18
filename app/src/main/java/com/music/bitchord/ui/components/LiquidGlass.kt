@@ -23,7 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalDensity
@@ -363,6 +365,29 @@ fun Modifier.lightweightLiquidGlass(
 }
 
 /**
+ * The fill and hairline [liquidGlass] gives a surface in the Frost or Solid
+ * style, with no backdrop: for a control drawn inside the list the bars'
+ * glass samples, which must look as the same control does when it is held
+ * over the pages with the real [liquidGlass]. Frost is the theme's surface at
+ * the bars' see-through strength ([frostFill]), Solid the theme's surface.
+ * [carriesText] keeps a light theme's frost dense enough for black text, as
+ * [liquidGlass] does. Null in the Glass style, which has its own look here
+ * ([lightweightLiquidGlass]).
+ */
+@Composable
+internal fun Modifier.styleSurfaceWithoutBackdrop(shape: CornerBasedShape, carriesText: Boolean): Modifier? {
+    val light = isLightTheme()
+    val fill = when (appStyle()) {
+        AppStyle.GLASS -> return null
+        AppStyle.FROST -> frostFill().let { if (carriesText && light) it.legibleOnLight() else it }
+        AppStyle.SOLID -> MaterialTheme.colorScheme.surface
+    }
+    return clip(shape)
+        .background(fill, shape)
+        .border(GLASS_EDGE_WIDTH, surfaceEdgeColor(!light), shape)
+}
+
+/**
  * Glass's light and edge on a control that keeps its own solid fill — the
  * detail pages' Play circle, beside glass buttons it should read as one set
  * with. A sheen down from the top and the same rim as the glass buttons, plus
@@ -397,6 +422,38 @@ private val GLASS_SHEEN = Brush.verticalGradient(
     0.5f to Color.White.copy(alpha = 0.04f),
     1f to Color.Transparent,
 )
+
+/**
+ * A colour laid on a glass control as more glass, not as paint over it: the
+ * chosen Home category chip. Under the control's own content it draws [fill],
+ * then the sheen of [glassSheen] across its top half; over it, the glass
+ * highlight (Glass style, Liquid Glass on) and the rim. The light and the rim
+ * go as [fill]'s alpha does, so a chip that fades its fill out fades them too
+ * and is left the material it was on. Put it inside the control's own
+ * material ([liquidGlass] or [lightweightLiquidGlass]): an opaque background
+ * there hid that material's light and rim.
+ */
+@Composable
+fun Modifier.glassAccentFill(shape: CornerBasedShape, fill: Color): Modifier {
+    val strength = fill.alpha
+    if (strength <= 0f) return this
+    val useGlass = LocalLiquidGlassEnabled.current && isGlassSupported() && appStyle() == AppStyle.GLASS
+    val highlight = remember(strength) { Highlight.Default.copy(alpha = strength) }
+    val shapeProvider = remember(shape) { ShapeProvider { shape } }
+    return drawBehind {
+        val outline = shape.createOutline(size, layoutDirection, this)
+        drawOutline(outline, fill)
+        drawOutline(outline, GLASS_SHEEN, alpha = strength)
+    }
+        .then(
+            if (useGlass) {
+                HighlightElement(shapeProvider = shapeProvider, highlight = { highlight })
+            } else {
+                Modifier
+            },
+        )
+        .border(GLASS_EDGE_WIDTH, GLASS_EDGE_COLOR.copy(alpha = GLASS_EDGE_COLOR.alpha * strength), shape)
+}
 
 /**
  * Renders this composable as a liquid glass surface sampling [LocalAppBackdrop]:

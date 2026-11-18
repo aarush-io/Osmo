@@ -6,15 +6,20 @@ import com.music.bitchord.data.innertube.InnertubeParser
 import com.music.bitchord.data.model.Account
 import com.music.bitchord.data.model.AccountChannel
 import com.music.bitchord.data.model.isExactArtistMatch
+import com.music.bitchord.data.model.isEpisode
+import com.music.bitchord.data.model.isPodcastShow
 import com.music.bitchord.data.model.normalizedArtistName
 import com.music.bitchord.data.model.ArtistPage
 import com.music.bitchord.data.model.BrowseType
+import com.music.bitchord.data.model.HomeChip
 import com.music.bitchord.data.model.HomeFeed
 import com.music.bitchord.data.model.HomeShelf
+import com.music.bitchord.data.model.homeSupplementShelves
 import com.music.bitchord.data.model.LibraryPage
 import com.music.bitchord.data.model.LibraryState
 import com.music.bitchord.data.model.LikeStatus
 import com.music.bitchord.data.model.MoodGenreSection
+import com.music.bitchord.data.model.PODCAST_SHOW_PREFIX
 import com.music.bitchord.data.model.playlistMoves
 import com.music.bitchord.data.model.PlaylistPrivacy
 import com.music.bitchord.data.model.SearchFilter
@@ -31,6 +36,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
@@ -52,6 +61,21 @@ object YtMusicRepository {
 
     fun cachedAudioVersion(videoId: String): Song? =
         CanvasAudioFixes.songPick(videoId) ?: audioVersionCache[videoId]
+
+    private val _audioVersionsFound = MutableStateFlow(0)
+
+    /**
+     * Goes up each time [resolveAudio] stores an answer, so a screen showing a
+     * music video's song version in its place (see [cachedAudioVersion]) hears
+     * that the answer is in. The number itself means nothing.
+     */
+    val audioVersionsFound: StateFlow<Int> = _audioVersionsFound.asStateFlow()
+
+    private fun rememberAudioVersion(videoId: String, version: Song) {
+        audioVersionCache[videoId] = version
+        _audioVersionsFound.update { it + 1 }
+    }
+
     fun cachedVideoVersion(videoId: String): Song? = videoVersionCache[videoId]
 
     // YouTube's own answer about a track: video or song, and its other half.
@@ -102,7 +126,26 @@ object YtMusicRepository {
      */
     suspend fun home(): Result<HomeFeed> = call("home") {
         val home = Innertube.browse("FEmusic_home")
+        InnertubeParser.parseHomeChips(home).takeIf { it.isNotEmpty() }?.let { _homeChips.value = it }
         HomeFeed(InnertubeParser.parseHome(home), InnertubeParser.continuationToken(home))
+    }
+
+    private val _homeChips = MutableStateFlow<List<HomeChip>>(emptyList())
+
+    /**
+     * The category chips the last [home] answer carried, for the account it
+     * was read for. Empty until Home has been read once.
+     */
+    val homeChips: StateFlow<List<HomeChip>> = _homeChips.asStateFlow()
+
+    /**
+     * Home under one of its category chips ([homeChips]): the account's own
+     * mixes, quick picks and playlists for that category. More of it follows
+     * with [moreHome] and the continuation it gives.
+     */
+    suspend fun homeCategory(params: String): Result<HomeFeed> = call("home:chip") {
+        val response = Innertube.browse("FEmusic_home", params)
+        HomeFeed(InnertubeParser.parseHome(response), InnertubeParser.continuationToken(response))
     }
 
     /** Recently played is rendered independently, at the top of the Play page. */
@@ -110,7 +153,7 @@ object YtMusicRepository {
 
     /** Extra Play shelves are independently fetchable so each can appear as soon as it arrives. */
     suspend fun homeSupplement(browseId: String): Result<List<HomeShelf>> = call("home:$browseId") {
-        shelvesOf(browseId)
+        homeSupplementShelves(browseId, shelvesOf(browseId))
     }
 
     val HOME_SUPPLEMENT_BROWSE_IDS = listOf(
@@ -133,6 +176,99 @@ object YtMusicRepository {
     }
 
     /**
+     * Home under its Podcasts chip: now and then a shelf of shows picked for
+     * the listener ("Shows for you"), and always shelves of episodes by
+     * category, three to a page. See [InnertubeParser.parsePodcastShelves].
+     */
+    suspend fun podcastsHome(): Result<HomeFeed> = call("podcasts") {
+        val response = Innertube.browse("FEmusic_home", PODCASTS_CHIP_PARAMS)
+        HomeFeed(InnertubeParser.parsePodcastShelves(response), InnertubeParser.continuationToken(response))
+    }
+
+    /** More of [podcastsHome]'s shelves, by its continuation. */
+    suspend fun morePodcastsHome(token: String): Result<HomeFeed> = call("podcasts:more") {
+        val response = Innertube.browseContinuation(token)
+        HomeFeed(InnertubeParser.parsePodcastShelves(response), InnertubeParser.continuationToken(response))
+    }
+
+    /**
+     * The Podcasts landing page: shows to start with, the popular shows and
+     * episodes, then shows by category. The same for everyone, and always
+     * there, where [podcastsHome]'s picked shows are not.
+     */
+    suspend fun podcastsLanding(): Result<List<HomeShelf>> = call("podcasts:landing") {
+        InnertubeParser.parsePodcastShelves(Innertube.browse("FEmusic_non_music_audio"))
+    }
+
+    /**
+     * The newest episodes of the shows the account follows: YouTube Music's
+     * own "New episodes" playlist, first page. Each names its show
+     * ([com.music.bitchord.data.model.EpisodeInfo.showId]) and says how much
+     * of it was played. For a signed-in account; a guest has no such list.
+     */
+    suspend fun newEpisodes(): Result<List<Song>> = call("podcasts:new") {
+        val response = Innertube.browse(NEW_EPISODES)
+        InnertubeParser.parsePlaylistShelf(response)?.songs
+            ?: InnertubeParser.collectSongsDeep(response)
+    }
+
+    /** The shows the account follows, as the library lists them: first page. */
+    suspend fun followedShows(): Result<List<ShelfItem>> = call("podcasts:followed") {
+        InnertubeParser.parseLibraryItems(Innertube.browse(LIBRARY_PODCASTS)).filter { it.isPodcastShow }
+    }
+
+    /**
+     * The podcast shows a search for [query] finds, best first: for finding
+     * on YouTube Music a show that is known by its name only. Asked of the
+     * search's Podcasts tab, and where that has none, of the whole search.
+     */
+    suspend fun searchShows(query: String): Result<List<ShelfItem>> = call("search:shows") {
+        fun shows(response: JsonObject): List<ShelfItem> =
+            InnertubeParser.parseSearchPage(response, includeVideos = false).rows
+                .filterIsInstance<SearchResult.Browse>()
+                .map { it.item }
+                .filter { it.browseId.startsWith(PODCAST_SHOW_PREFIX) }
+                // "Podcast • Publisher": the tile's second line is who publishes it.
+                .map { ShelfItem(it.title, it.subtitle.substringAfterLast("•").trim(), it.thumbnailUrl, null, it.browseId) }
+        shows(Innertube.search(query, PODCASTS_SEARCH_PARAMS)).ifEmpty { shows(Innertube.search(query)) }
+    }
+
+    /**
+     * The podcast episodes a search for [query] finds, best first: the
+     * search's Episodes tab. Each names its show. Where that tab has none,
+     * the episodes of the whole search.
+     */
+    suspend fun searchEpisodes(query: String): Result<List<Song>> = call("search:episodes") {
+        fun episodes(response: JsonObject): List<Song> =
+            InnertubeParser.parseSearchPage(response, includeVideos = false).rows
+                .mapNotNull { row ->
+                    when (row) {
+                        is SearchResult.Track -> row.song
+                        is SearchResult.TopTrack -> row.song
+                        else -> null
+                    }
+                }
+                .filter { it.episode != null }
+                .distinctBy { it.videoId }
+        episodes(Innertube.search(query, EPISODES_SEARCH_PARAMS)).ifEmpty { episodes(Innertube.search(query)) }
+    }
+
+    /** The search's Episodes tab, in the form of [PODCASTS_SEARCH_PARAMS]. */
+    private const val EPISODES_SEARCH_PARAMS = "EgWKAQJIAWoKEAkQChAFEAMQBA=="
+
+    /** What Home's Podcasts chip sends as its browse params. */
+    private const val PODCASTS_CHIP_PARAMS = "ggMGSgQIDBAD"
+
+    /** The search's Podcasts tab, in the form of the other tabs' params (see [SearchFilter]). */
+    private const val PODCASTS_SEARCH_PARAMS = "EgWKAQJQAWoKEAkQChAFEAMQBA=="
+
+    /** YouTube Music's playlist of the followed shows' newest episodes. */
+    private const val NEW_EPISODES = "VLRDPN"
+
+    /** The library's list of followed shows. */
+    private const val LIBRARY_PODCASTS = "FEmusic_library_non_music_audio_list"
+
+    /**
      * The lead shelf: the account's listening history, newest first.
      *
      * YouTube's home already carries a "Listen again", but it ranks by how
@@ -151,7 +287,8 @@ object YtMusicRepository {
             emptyList()
         }
 
-        val allSongs = ytSongs.distinctBy { it.videoId }.take(RECENT_LIMIT)
+        // Home is music: an episode in the history is the Podcasts tab's.
+        val allSongs = ytSongs.filterNot { it.isEpisode }.distinctBy { it.videoId }.take(RECENT_LIMIT)
         if (allSongs.isEmpty()) return null
         return HomeShelf(
             title = RECENT_TITLE,
@@ -162,6 +299,8 @@ object YtMusicRepository {
                     thumbnailUrl = it.thumbnailUrl,
                     videoId = it.videoId,
                     browseId = null,
+                    // An episode in the history is not music: Home's speed dial leaves it out.
+                    isPodcastEpisode = it.isEpisode,
                 )
             },
         )
@@ -215,6 +354,14 @@ object YtMusicRepository {
     /** Removes a track from the account's listening history via its feedback token. */
     suspend fun removeFromHistory(token: String): Result<Unit> = call("removeFromHistory") {
         Innertube.sendFeedback(token)
+    }
+
+    /**
+     * The chosen country changed: mood and genre shelves were fetched for the
+     * old one, so they are fetched again on the next open.
+     */
+    fun onContentCountryChanged() {
+        moodGenreShelfCache.clear()
     }
 
     /** Forgets the shared history, so the next read fetches it fresh. */
@@ -333,7 +480,8 @@ object YtMusicRepository {
         val key = "$browseId:${params.orEmpty()}"
         moodGenreShelfCache[key]?.let { return Result.success(it) }
         return call("mood-genre:$browseId") {
-            InnertubeParser.parseHome(Innertube.browse(browseId, params))
+            // A mood's own page, not Home: it is shown as YouTube Music gives it.
+            InnertubeParser.parseHome(Innertube.browse(browseId, params), musicOnly = false)
         }.also { result -> result.getOrNull()?.let { moodGenreShelfCache.putIfAbsent(key, it) } }
     }
 
@@ -458,7 +606,7 @@ object YtMusicRepository {
         // that is the song, with no search to get it wrong.
         versionPair(song.videoId)?.counterpart?.takeIf { !it.isVideo }?.let { paired ->
             Log.d(TAG, "audio switch: '${song.title}' -> '${paired.title}' (YouTube's pairing)")
-            audioVersionCache[song.videoId] = paired
+            rememberAudioVersion(song.videoId, paired)
             return paired
         }
         val target = TrackMatcher.targetOf(song)
@@ -470,7 +618,7 @@ object YtMusicRepository {
                 .orEmpty()
             TrackMatcher.best(candidates, target)?.let { match ->
                 Log.d(TAG, "audio switch: '${song.title}' -> '${match.title}' ($query)")
-                audioVersionCache[song.videoId] = match
+                rememberAudioVersion(song.videoId, match)
                 return match
             }
             // Music-video timing is visual timing, not the audio release's
@@ -478,12 +626,12 @@ object YtMusicRepository {
             // song/artist match even when the video has a long intro or outro.
             TrackMatcher.bestOfficialAudioForVideo(candidates, target)?.let { match ->
                 Log.d(TAG, "audio switch: accepted video/runtime drift '${song.title}' -> '${match.title}' ($query)")
-                audioVersionCache[song.videoId] = match
+                rememberAudioVersion(song.videoId, match)
                 return match
             }
         }
         Log.w(TAG, "audio switch: no official song match for '${song.title}' by '${song.artist}'")
-        audioVersionCache[song.videoId] = song
+        rememberAudioVersion(song.videoId, song)
         return song
     }
 
@@ -510,6 +658,7 @@ object YtMusicRepository {
             return paired
         }
         val target = TrackMatcher.targetOf(song)
+        val seen = mutableListOf<Song>()
         for (query in TrackMatcher.queries(target)) {
             val candidates = search(query, SearchFilter.VIDEOS)
                 .getOrNull()
@@ -521,6 +670,15 @@ object YtMusicRepository {
                 videoVersionCache[song.videoId] = match
                 return match
             }
+            seen += candidates
+        }
+        // No title the matcher could read. The artist's own channel carrying
+        // a video as long as the song, with the song's title in its own, is
+        // the song's video however the upload is worded.
+        ArtistUploads.best(seen, song)?.let { match ->
+            Log.d(TAG, "video switch: '${song.title}' -> '${match.title}' (same length, on ${match.artist}'s channel)")
+            videoVersionCache[song.videoId] = match
+            return match
         }
         Log.w(TAG, "video switch: no video match for '${song.title}' by '${song.artist}'")
         videoVersionCache[song.videoId] = null
@@ -1087,7 +1245,7 @@ object YtMusicRepository {
         "Albums" to "FEmusic_liked_albums",
         "Artists" to "FEmusic_library_corpus_track_artists",
         "Subscriptions" to "FEmusic_library_corpus_artists",
-        "Podcasts" to "FEmusic_library_non_music_audio_list",
+        "Podcasts" to LIBRARY_PODCASTS,
     )
 
     // ---- Writes -------------------------------------------------------------

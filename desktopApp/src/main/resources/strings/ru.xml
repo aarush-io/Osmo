@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BitChord</string>
+    <string name="app_name">Osmo</string>
     <string name="playback_channel_name">Сейчас играет</string>
     <string name="download_channel_name">Загрузки</string>
     <string name="download_channel_description">Песни сохраняются в папку «Музыка»</string>
@@ -338,7 +338,7 @@
     <string name="downloads_finished">Загрузки · завершено</string>
     <string name="downloading_progress">Загрузка · %1$d%%</string>
     <string name="starting">Начало</string>
-    <string name="saved_to_bitchord_folder">Сохранено в Музыка/Dial</string>
+    <string name="saved_to_bitchord_folder">Сохранено в Музыка/Osmo</string>
     <string name="nothing_downloading">Ничего не загружается</string>
     <string name="nothing_to_explore">Сейчас нечего смотреть в обзоре</string>
     <string name="no_youtube_music_results">Нет результатов из YouTube Music</string>
@@ -510,7 +510,7 @@
     <string name="biggest_day_note">Ваш самый насыщенный день был %1$s — %2$s прослушивания.</string>
     <string name="close_replay">Закрыть Replay</string>
     <string name="couldnt_draw_picture">Не удалось создать изображение</string>
-    <string name="default_replay_holder">Слушатель Dial</string>
+    <string name="default_replay_holder">Слушатель Osmo</string>
     <string name="different_albums">Разные альбомы</string>
     <string name="genres_pending">Жанры появятся по мере роста вашей истории прослушивания</string>
     <string name="hour_am">%1$d утра</string>
@@ -536,7 +536,7 @@
     <string name="replay_artist_end"> не отпускал вас.</string>
     <string name="replay_artist_focus">Один исполнитель</string>
     <string name="replay_artist_start">Весь месяц </string>
-    <string name="replay_empty_description">Слушайте немного больше, и Dial превратит вашу историю в Replay.</string>
+    <string name="replay_empty_description">Слушайте немного больше, и Osmo превратит вашу историю в Replay.</string>
     <string name="replay_genre_end"> определили ваше звучание.</string>
     <string name="replay_genre_focus">Ваши жанры</string>
     <string name="replay_genre_start">Вместе </string>

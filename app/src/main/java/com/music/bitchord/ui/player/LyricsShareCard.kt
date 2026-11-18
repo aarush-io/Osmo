@@ -87,7 +87,7 @@ internal suspend fun renderLyricsShareCard(
     drawBackdrop(canvas, cover, 0f, cardH)
 
     // ── Header ──────────────────────────────────────────────────────────────
-    // The mark alone, at the top right: the 3×4 Dial squares and "dial." in
+    // The mark alone, at the top right: the Osmo ring and "osmo." in
     // the pixel face, white on whatever the backdrop is. Nothing else goes
     // above the passage: the picture is the verse, not a caption for it.
     val word = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -97,7 +97,7 @@ internal suspend fun renderLyricsShareCard(
         textAlign = Paint.Align.RIGHT
     }
     canvas.drawText(BRAND, CARD_W - CARD_MARGIN, HEADER_BASELINE, word)
-    drawDialMark(
+    drawOsmoMark(
         canvas,
         right = CARD_W - CARD_MARGIN - word.measureText(BRAND) - LOGO_GAP,
         bottom = HEADER_BASELINE,
@@ -272,7 +272,7 @@ private const val CARD_MARGIN = 72f
 private const val CARD_CONTENT_W = CARD_W - CARD_MARGIN * 2
 
 private const val LOGO_GAP = 22f
-private const val BRAND = "dial."
+private const val BRAND = "osmo."
 private const val BRAND_SIZE = 64f
 private const val BRAND_INK = 0xE6FFFFFF.toInt()
 
@@ -280,19 +280,12 @@ private const val BRAND_INK = 0xE6FFFFFF.toInt()
 private const val MARK_H = 56f
 
 /**
- * The Dial mark: three columns by four rows of rounded squares, the lit ones
+ * The Osmo mark: a hollow circle, drawn so it holds up at small sizes.
  * tracing the logo's path (A3, A4, B4, B3, B2, B1, C1) and the rest dim.
  * Same geometry as the splash: 40-unit squares on a 60-unit pitch, 8-unit
- * corners, scaled so the grid is [height] tall with its right edge at [right].
+ * corners, scaled so the Osmo ring is [height] tall with its right edge at [right].
  */
-private val MARK_LIT = arrayOf(
-    booleanArrayOf(false, true, true),
-    booleanArrayOf(false, true, false),
-    booleanArrayOf(true, true, false),
-    booleanArrayOf(true, true, false),
-)
-
-internal fun drawDialMark(
+internal fun drawOsmoMark(
     canvas: Canvas,
     right: Float,
     bottom: Float,
@@ -300,23 +293,23 @@ internal fun drawDialMark(
     ink: Int = BRAND_INK,
 ) {
     val scale = height / 220f
-    val left = right - 160f * scale
+    val width = 160f * scale
+    val left = right - width
     val top = bottom - height
-    val lit = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = ink }
-    val dim = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x33FFFFFF }
-    val box = RectF()
-    val corner = 8f * scale
-    for ((row, cells) in MARK_LIT.withIndex()) {
-        for ((col, on) in cells.withIndex()) {
-            val x = left + col * 60f * scale
-            val y = top + row * 60f * scale
-            box.set(x, y, x + 40f * scale, y + 40f * scale)
-            canvas.drawRoundRect(box, corner, corner, if (on) lit else dim)
-        }
+    val insetX = width * 0.12f
+    val insetY = height * 0.08f
+    val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = ink
+        style = Paint.Style.STROKE
+        strokeWidth = height * 0.11f
     }
+    canvas.drawOval(
+        RectF(left + insetX, top + insetY, right - insetX, bottom - insetY),
+        ring,
+    )
 }
 
-/** Tiny5 LCD, the face the Home title sets "Dial" in; the bold sans if it won't load. */
+/** Tiny5 LCD, the face the Home title sets "Osmo" in; the bold sans if it won't load. */
 internal fun pixelFont(context: Context): Typeface =
     runCatching { ResourcesCompat.getFont(context, R.font.tiny5_lcd_regular) }.getOrNull()
         ?: Typeface.DEFAULT_BOLD

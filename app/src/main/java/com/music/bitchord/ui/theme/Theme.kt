@@ -63,12 +63,12 @@ val SFProDisplay = FontFamily(
     Font(R.font.sf_pro_display_heavy, FontWeight.W800),
 )
 
-/** Metropolis ExtraBold, the face of the "Dial" title beside the Home logo. */
+/** Metropolis ExtraBold, the face of the "Osmo" title beside the Home mark. */
 val Metropolis = FontFamily(
     Font(R.font.metropolis_extrabold, FontWeight.W800),
 )
 
-/** Tiny5 LCD, the pixel face "DIAL" is set in within the Home title. */
+/** Tiny5 LCD, the pixel face "OSMO" is set in within the Home title. */
 val Tiny5Lcd = FontFamily(
     Font(R.font.tiny5_lcd_regular, FontWeight.W400),
 )

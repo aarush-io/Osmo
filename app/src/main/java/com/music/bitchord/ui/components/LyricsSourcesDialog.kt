@@ -62,8 +62,6 @@ import com.music.bitchord.data.lyrics.LyricsSource
 import com.music.bitchord.data.settings.AppSettings
 import com.music.bitchord.ui.player.edgeScrollSpeed
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
-import dev.chrisbanes.haze.materials.HazeMaterials
 
 /**
  * Which lyric databases the player is allowed to ask.
@@ -80,14 +78,12 @@ import dev.chrisbanes.haze.materials.HazeMaterials
  * whether the row is ticked — priority and participation are different
  * questions, and this is the one dialog for both.
  */
-@OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 fun LyricsSourcesDialog(
     hazeState: HazeState,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val reduceDynamicBlur by AppSettings.reduceDynamicBlur.collectAsStateWithLifecycle()
     val selected by AppSettings.lyricsSources.collectAsStateWithLifecycle()
     val savedOrder by AppSettings.lyricsSourceOrder.collectAsStateWithLifecycle()
     val prioritizeSyllableSync by AppSettings.prioritizeSyllableSync.collectAsStateWithLifecycle()
@@ -109,17 +105,9 @@ fun LyricsSourcesDialog(
         Column(
             modifier = Modifier
                 .width(ALERT_WIDTH)
-                .clip(shape)
-                .then(
-                    if (reduceDynamicBlur) {
-                        Modifier.background(MaterialTheme.colorScheme.surface)
-                    } else {
-                        Modifier.optimizedHazeEffect(
-                            state = hazeState,
-                            style = HazeMaterials.regular(MaterialTheme.colorScheme.surface),
-                        )
-                    },
-                )
+                // Glass, Frost or Solid, as the app style has it, like every
+                // other options window; see [popupSurface].
+                .popupSurface(shape, hazeState)
                 // Swallows the tap before it reaches the scrim behind, so
                 // touching the card itself never dismisses it.
                 .clickable(

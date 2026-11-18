@@ -13,7 +13,7 @@ import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
 
 /**
- * "Played in Dial": a private playlist on the listener's Spotify account that the songs played
+ * "Played in Osmo": a private playlist on the listener's Spotify account that the songs played
  * here are added to, so Spotify's recommendations have something to learn this listening from.
  *
  * Spotify takes no listening history from outside its own apps, and reporting plays that never
@@ -29,8 +29,9 @@ import kotlinx.serialization.json.putJsonObject
  */
 object SpotifyPlayedList {
 
-    const val NAME = "Played in Dial"
-    const val DESCRIPTION = "Songs played in Dial. Kept up to date by the app to help your recommendations."
+    const val NAME = "Played in Osmo"
+    private const val LEGACY_NAME = "Played in Dial"
+    const val DESCRIPTION = "Songs played in Osmo. Kept up to date by the app to help your recommendations."
 
     const val CREATE_URL = "https://api.spotify.com/v1/me/playlists"
 
@@ -105,7 +106,7 @@ object SpotifyPlayedList {
 
     /** [playlists] as the app lists them, without this one. */
     fun withoutPlayedList(playlists: List<SpotifyPlaylist>): List<SpotifyPlaylist> =
-        playlists.filterNot { it.name == NAME }
+        playlists.filterNot { it.name == NAME || it.name == LEGACY_NAME }
 
     // ---- The web player's own route -------------------------------------
 

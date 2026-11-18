@@ -23,7 +23,7 @@ import com.music.bitchord.R
 import com.music.bitchord.data.model.CARD_ART_PX
 import com.music.bitchord.data.model.artworkAt
 import com.music.bitchord.data.stats.ReplaySummary
-import com.music.bitchord.ui.player.drawDialMark
+import com.music.bitchord.ui.player.drawOsmoMark
 import com.music.bitchord.ui.player.pixelFont
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -405,7 +405,7 @@ private fun drawHeader(
         "Replay · $label"
     }
     canvas.drawText(title, MARGIN, 132f, type.heading(46f, 0xFFFFFFFF.toInt()))
-    // Dial's mark and "dial." in the pixel face, as the lyrics card carries
+    // Osmo's mark and "osmo." in the pixel face, as the lyrics card carries
     // them: the one artefact of this app that ends up in somebody else's chat.
     val brand = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         typeface = pixelFont(context)
@@ -414,7 +414,7 @@ private fun drawHeader(
         textAlign = Paint.Align.RIGHT
     }
     canvas.drawText(BRAND, POSTER_W - MARGIN, 132f, brand)
-    drawDialMark(
+    drawOsmoMark(
         canvas,
         right = POSTER_W - MARGIN - brand.measureText(BRAND) - LOGO_GAP,
         bottom = 132f,
@@ -758,10 +758,10 @@ private const val MARGIN = 72f
 
 /** The mark's drawn size. 730×484 in the vector, so this keeps its proportions. */
 private const val LOGO_GAP = 20f
-private const val BRAND = "dial."
+private const val BRAND = "osmo."
 private const val BRAND_SIZE = 48f
 
-/** Height of the 3×4 Dial squares beside the word; they stand on its baseline. */
+/** Height of the Osmo mark beside the word; they stand on its baseline. */
 private const val MARK_H = 42f
 
 /** The width type and artwork are laid out in. */

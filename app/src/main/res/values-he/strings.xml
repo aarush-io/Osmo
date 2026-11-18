@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Dial</string>
+    <string name="app_name">Osmo</string>
     <string name="playback_channel_name">מתנגן כעת</string>
     <string name="download_channel_name">הורדות</string>
     <string name="download_channel_description">שירים שנשמרים בתיקיית המוזיקה שלך</string>
@@ -34,6 +34,15 @@
     <string name="audio_files_on_device">קובצי אודיו במכשיר</string>
     <string name="on_device">במכשיר</string>
     <string name="playlists">פלייליסטים</string>
+    <string name="podcasts">פודקאסטים</string>
+    <string name="podcasts_dial_menu">אפשרויות פודקאסטים</string>
+    <string name="podcast">פודקאסט</string>
+    <string name="read_more">קראו עוד</string>
+    <string name="about_podcast">אודות הפודקאסט</string>
+    <string name="new_episode">פרק חדש</string>
+    <string name="episodes_for_later">פרקים להמשך</string>
+    <string name="podcast_source">תוכניות מומלצות</string>
+    <string name="podcast_source_both">שניהם</string>
     <string name="new_playlist">פלייליסט חדש</string>
     <string name="saved_to_youtube_music">נשמר ל-YouTube Music</string>
     <string name="sign_in">התחברות</string>
@@ -106,10 +115,10 @@
     <string name="dolby_atmos_open_failed">לא ניתן לפתוח את הגדרות Dolby Atmos</string>
     <string name="update_available">עדכון זמין: גרסה %1$s</string>
     <string name="software_update">עדכון תוכנה</string>
-    <string name="update_available_body">Dial %1$s זמין להורדה.</string>
-    <string name="update_downloading_body">מוריד את Dial %1$s…</string>
-    <string name="update_ready_body">Dial %1$s מוכן להתקנה.</string>
-    <string name="update_failed_body">לא ניתן היה להוריד את Dial %1$s.</string>
+    <string name="update_available_body">Osmo %1$s זמין להורדה.</string>
+    <string name="update_downloading_body">מוריד את Osmo %1$s…</string>
+    <string name="update_ready_body">Osmo %1$s מוכן להתקנה.</string>
+    <string name="update_failed_body">לא ניתן היה להוריד את Osmo %1$s.</string>
     <string name="download_now">הורדה עכשיו</string>
     <string name="install_now">התקנה עכשיו</string>
     <string name="later">מאוחר יותר</string>
@@ -137,7 +146,7 @@
     <string name="widget_previous">הקודם</string>
     <string name="widget_artwork">עטיפת אלבום</string>
     <string name="widget_nothing_played">עדיין לא הושמע דבר</string>
-    <string name="widget_open_bitchord">פתיחת Dial</string>
+    <string name="widget_open_bitchord">פתיחת Osmo</string>
     <string name="widget_preview_title">שם השיר</string>
     <string name="widget_preview_artist">אמן</string>
     <string name="widget_pill_label">מתנגן כעת 4×1</string>
@@ -164,7 +173,7 @@
     <string name="cancel_all">ביטול הכול</string>
     <string name="language">שפה</string>
     <string name="app_language">שפת האפליקציה</string>
-    <string name="app_language_description">בחירת השפה שבה ישתמש Dial.</string>
+    <string name="app_language_description">בחירת השפה שבה ישתמש Osmo.</string>
     <string name="english">אנגלית</string>
     <string name="spanish">ספרדית</string>
     <string name="french">צרפתית</string>
@@ -232,6 +241,8 @@
     <string name="hide_volume_bar_subtitle">מסיר את מחוון עוצמת הקול מהנגן הראשי</string>
     <string name="hide_song_status">הסתרת סטטוס השיר</string>
     <string name="hide_song_status_subtitle">מסתיר את הטקסט „מושמע מתוך” או „הושמע על ידי” בנגן הראשי</string>
+    <string name="hide_player_status_bar">הסתרת שורת המצב</string>
+    <string name="hide_player_status_bar_subtitle">מסתיר את שורת המצב ואת הצל העליון בנגן הראשי</string>
     <string name="off">כבוי</string>
     <string name="low">נמוך</string>
     <string name="medium">בינוני</string>
@@ -248,18 +259,22 @@
     <string name="filter_non_music_audio">סנן שמע שאינו מוזיקה</string>
     <string name="filter_non_music_audio_subtitle">מסתיר קטעים קצרים מ-30 שניות, קבצי WAV, הודעות קוליות, הקלטות וצלילי מערכת</string>
     <string name="performance">ביצועים</string>
+    <string name="video_quality">איכות וידאו</string>
+    <string name="video_quality_subtitle">לקליפים ולקליפ שמוצג כ-Canvas של שיר. איכות מרבית משתמשת בעד 4K. היא צורכת הרבה יותר נתונים וסוללה, ועלולה להיות איטית בטלפונים חלשים.</string>
+    <string name="video_quality_mobile">נתונים סלולריים</string>
+    <string name="video_quality_mobile_off_note">בנתונים סלולריים לא מתנגן Canvas או וידאו. הנגן מציג את תמונת העטיפה והמוזיקה מתנגנת כרגיל. Canvas שנשמר עם שיר שהורד עדיין מתנגן.</string>
+    <string name="video_quality_max">איכות מרבית</string>
     <string name="high_performance_mode">מצב ביצועים גבוהים</string>
-    <string name="high_performance_subtitle">משתמש באנימציות מלאות וטשטוש, ומבקש קצב רענון מסך גבוה יותר</string>
+    <string name="high_performance_subtitle">מבקש קצב רענון מסך גבוה יותר</string>
     <string name="high_performance_active">%1$d הרץ התבקש. מערכת אנדרואיד עשויה להפחית זאת במידת הצורך.</string>
     <string name="beta">בטא</string>
     <string name="refresh_rate">קצב רענון</string>
-    <string name="high_performance_before_enabling">לפני ההפעלה</string>
-    <string name="high_performance_battery_warning">תחילה הגדר את השימוש בסוללה של Dial ללא הגבלה. קצבי רענון גבוהים צורכים יותר סוללה, מעבד ומאיץ גרפי, ועשויים לחמם את המכשיר.</string>
-    <string name="open_battery_settings">פתח הגדרות סוללה</string>
-    <string name="enable_high_performance_title">להפעיל מצב ביצועים גבוהים?</string>
-    <string name="enable_high_performance_confirmation">הפעל רק אם השימוש בסוללה של Dial מוגדר ללא הגבלה. אנדרואיד עדיין יכולה להגביל את קצב הרענון כשהמכשיר חם או כשהסוללה חלשה.</string>
+    <string name="high_performance_battery_needed">הגדר את השימוש בסוללה של Osmo ללא הגבלה. הקש כאן כדי לפתוח את ההגדרות.</string>
+    <string name="disable_haptics">השבתת משוב רטט</string>
+    <string name="disable_haptics_subtitle">מפסיק את כל משוב הרטט ב-Osmo</string>
+    <string name="static_background">צבעי רקע סטטיים</string>
+    <string name="static_background_subtitle">עוצר את תנועת הצבעים שמאחורי דפי האפליקציה</string>
     <string name="enable">הפעל</string>
-    <string name="not_yet">עדיין לא</string>
     <string name="activity">פעילות</string>
     <string name="activity_competing">מתחרה</string>
     <string name="activity_dialog_message">הפועל המוצג מעל הכרטיס.</string>
@@ -292,7 +307,7 @@
     <string name="discord_presence_footer">הכרטיס מתעדכן כאשר הרצועה, המיקום או מצב ההפעלה משתנים. הוא נמחק כאשר ההפעלה נפסקת.</string>
     <string name="discord_show_audio_quality">הצגת איכות השמע</string>
     <string name="discord_show_audio_quality_subtitle">מפרטי Hi-Res, Lossless ו-Dolby בכרטיס הנוכחות</string>
-    <string name="discord_sign_in_footer">הכניסה פותחת את עמוד ההתחברות של דיסקורד. שום דבר אינו מוקלד ב-Dial.</string>
+    <string name="discord_sign_in_footer">הכניסה פותחת את עמוד ההתחברות של דיסקורד. שום דבר אינו מוקלד ב-Osmo.</string>
     <string name="discord_token">אסימון דיסקורד</string>
     <string name="discord_token_description">הדבק את אסימון החשבון שלך בדיסקורד. הוא נשאר מוצפן על המכשיר הזה ונשלח רק לדיסקורד.</string>
     <string name="discord_token_rejected">דיסקורד דחתה את האסימון הזה.</string>
@@ -327,7 +342,7 @@
     <string name="downloads_finished">הורדות · הסתיימו</string>
     <string name="downloading_progress">מוריד · %1$d%%</string>
     <string name="starting">מתחיל</string>
-    <string name="saved_to_bitchord_folder">נשמר ב-Music/Dial</string>
+    <string name="saved_to_bitchord_folder">נשמר ב-Music</string>
     <string name="nothing_downloading">שום דבר לא יורד</string>
     <string name="nothing_to_explore">אין מה לחקור כרגע</string>
     <string name="no_youtube_music_results">אין תוצאות מ-YouTube Music</string>
@@ -357,8 +372,8 @@
     <string name="lastfm_api_key">מפתח API</string>
     <string name="lastfm_shared_secret">סוד משותף</string>
     <string name="lastfm_own_api_description">בגרסה זו אין חשבון API של Last.fm. צור חשבון בחינם בכתובת last.fm/api/account/create והדבק כאן את מפתח ה-API והסוד המשותף.</string>
-    <string name="lastfm_browser_description">תועבר ל-last.fm כדי לאשר ל-Dial לבצע scrobbling. הסיסמה שלך נשארת אצל Last.fm.</string>
-    <string name="lastfm_browser_waiting">הקש על אישור ב-last.fm וחזור לכאן. Dial ישלים את ההתחברות בעצמו.</string>
+    <string name="lastfm_browser_description">תועבר ל-last.fm כדי לאשר ל-Osmo לבצע scrobbling. הסיסמה שלך נשארת אצל Last.fm.</string>
+    <string name="lastfm_browser_waiting">הקש על אישור ב-last.fm וחזור לכאן. Osmo ישלים את ההתחברות בעצמו.</string>
     <string name="lastfm_browser_sign_in">המשך ב-last.fm</string>
     <string name="lastfm_browser_done">אישרתי גישה</string>
     <string name="lastfm_use_password">השתמש בסיסמה במקום</string>
@@ -431,10 +446,11 @@
     <string name="sleep_timer_custom">מותאם אישית</string>
     <string name="start_sleep_timer">הפעל טיימר</string>
     <string name="sources_no_lossless">שום מקור מופעל אינו יכול לספק שמע ללא אובדן נתונים. הוסף מודול מותאם אישית כדי להפעיל קבצים זמינים ללא אובדן נתונים ללא המרה.</string>
-    <string name="sources_order_footer">אם למקור אין רצועה, Dial מנסה את הבא. מקורות מעל YouTube יכולים להחליפו כשהם מוצאים גרסה טובה יותר.</string>
+    <string name="sources_order_footer">אם למקור אין רצועה, Osmo מנסה את הבא. מקורות מעל YouTube יכולים להחליפו כשהם מוצאים גרסה טובה יותר.</string>
     <string name="sources_order_header">מקורות, נוסו בסדר זה</string>
     <string name="sources_quality_capped">חיבור זה מוגדר מתחת לאיכות גבוהה, ולכן השידורים מומרים כדי להתאים למגבלה. הורדות אינן מושפעות.</string>
     <string name="jiosaavn_mismatch_warning">עלול להתאים גרסה שגויה של שיר. ההפעלה על אחריותכם.</string>
+    <string name="monochrome_source_detail">FLAC ללא אובדן.</string>
     <string name="enable_jiosaavn">להפעיל את JioSaavn?</string>
     <string name="enable_anyway">להפעיל בכל זאת</string>
     <string name="sources_subtitle">מאיפה מגיע האודיו והסדר שבו נעשה שימוש</string>
@@ -476,7 +492,7 @@
     <string name="biggest_day_note">היום הגדול ביותר שלך היה %1$s עם %2$s של האזנה.</string>
     <string name="close_replay">סגור Replay</string>
     <string name="couldnt_draw_picture">לא ניתן ליצור תמונה</string>
-    <string name="default_replay_holder">מאזין Dial</string>
+    <string name="default_replay_holder">מאזין Osmo</string>
     <string name="different_albums">אלבומים שונים</string>
     <string name="genres_pending">ז\'אנרים יופיעו ככל שהיסטוריית ההאזנה שלך תגדל</string>
     <string name="hour_am">%1$d AM</string>
@@ -506,7 +522,7 @@
     <string name="replay_artist_end"> המשיך לחזור.</string>
     <string name="replay_artist_focus">אמן אחד</string>
     <string name="replay_artist_start">כל החודש, </string>
-    <string name="replay_empty_description">האזן קצת יותר ו-Dial יהפוך את ההיסטוריה שלך ל-Replay.</string>
+    <string name="replay_empty_description">האזן קצת יותר ו-Osmo יהפוך את ההיסטוריה שלך ל-Replay.</string>
     <string name="replay_genre_end"> עיצבו את הצליל שלך.</string>
     <string name="replay_genre_focus">הז\'אנרים שלך</string>
     <string name="replay_genre_start">ביחד, </string>
@@ -551,6 +567,12 @@
     <string name="sort_title_descending">אלפביתי (ת עד א)</string>
     <string name="sort_date_added">תאריך הוספה (מהחדש לישן)</string>
     <string name="sort_date_modified">תאריך שינוי (מהחדש לישן)</string>
+    <string name="sort_alphabetical">אלפביתי</string>
+    <string name="sort_date_modified_toggle">תאריך שינוי</string>
+    <string name="sort_a_to_z">א עד ת</string>
+    <string name="sort_z_to_a">ת עד א</string>
+    <string name="sort_newest_first">מהחדש לישן</string>
+    <string name="sort_oldest_first">מהישן לחדש</string>
     <string name="use_all_audio_folders">השתמש בכל תיקיות השמע</string>
     <string name="use_all_audio_folders_subtitle">מבטל את מגבלת התיקייה וסורק מוזיקה בכל המכשיר</string>
     <string name="album">אלבום</string>
@@ -559,7 +581,7 @@
     <string name="webdav_subtitle">מוזיקה בשרת שלכם</string>
     <string name="webdav_not_configured">חברו שרת בקטע „מקורות”</string>
     <string name="webdav_empty">לא נמצאו קובצי שמע בשרת ה-WebDAV. בדקו את הכתובת בהגדרות.</string>
-    <string name="webdav_description">כוונו את Dial לתיקיית מוזיקה ב-WebDAV — תיקיית המוזיקה שלכם ב-Nextcloud או כל שרת שתומך ב-WebDAV.</string>
+    <string name="webdav_description">כוונו את Osmo לתיקיית מוזיקה ב-WebDAV — תיקיית המוזיקה שלכם ב-Nextcloud או כל שרת שתומך ב-WebDAV.</string>
     <string name="webdav_server_url">כתובת השרת</string>
     <string name="webdav_server_url_hint">https://cloud.example.com/remote.php/dav/files/user/Music</string>
     <string name="webdav_disconnect">ניתוק</string>
@@ -576,7 +598,7 @@
     <string name="smb_subtitle">מוזיקה בתיקייה משותפת</string>
     <string name="smb_not_configured">חברו תיקייה משותפת בקטע „מקורות”</string>
     <string name="smb_empty">לא נמצאו קובצי שמע בתיקיית ה-SMB. בדקו את השרת בקטע „מקורות”.</string>
-    <string name="smb_description">כוונו את Dial לתיקיית מוזיקה משותפת — NAS או שיתוף Windows דרך SMB.</string>
+    <string name="smb_description">כוונו את Osmo לתיקיית מוזיקה משותפת — NAS או שיתוף Windows דרך SMB.</string>
     <string name="smb_server_hint">nas.local or 192.168.1.10:4445</string>
     <string name="smb_share_hint">שם השיתוף, למשל Music</string>
     <string name="smb_folder_hint">תיקייה (אופציונלי)</string>
@@ -621,7 +643,7 @@
     <string name="no_listening_history">אין היסטוריית האזנה</string>
     <string name="no_local_albums">שום דבר כאן לא שייך עדיין לאלבום או רשימת השמעה. הורד אלבום מלא או רשימת השמעה והם יופיעו כאן.</string>
     <string name="play_your_replay">הפעל את ה-Replay שלך</string>
-    <string name="counted_on_device_with_bitchord">נספר במכשיר זה עם Dial</string>
+    <string name="counted_on_device_with_bitchord">נספר במכשיר זה עם Osmo</string>
     <string name="this_month">החודש</string>
     <string name="this_year">השנה</string>
     <string name="all_time">כל הזמן</string>
@@ -729,7 +751,7 @@
     <string name="listen_together_code">קוד המסיבה</string>
     <string name="listen_together_code_footer">הקריאו אותו או שלחו אותו. האותיות O ו-I אינן בשימוש, ולכן O היא תמיד אפס.</string>
     <string name="copy_code">העתקת הקוד</string>
-    <string name="listen_together_share_text">תאזינו איתי ב-Dial — קוד מסיבה %1$s</string>
+    <string name="listen_together_share_text">תאזינו איתי ב-Osmo — קוד מסיבה %1$s</string>
     <string name="listen_together_now_playing">מתנגן כעת</string>
     <string name="listen_together_nothing_playing">עוד לא מתנגן כלום</string>
     <string name="listen_together_listening">מאזינים · %1$d מתוך %2$d</string>
@@ -766,7 +788,7 @@
     <string name="listen_together_custom_server_dialog_message">המסיבה הזו מתארחת בשרת חיצוני:\n\n%1$s\n\nלהחליף את שרת המסיבות ולהצטרף למסיבה %2$s?</string>
     <string name="listen_together_custom_server_switch_and_join">החלפה והצטרפות</string>
     <string name="listen_together_official_server_dialog_title">לעבור לשרת הרשמי?</string>
-    <string name="listen_together_official_server_dialog_message">המסיבה הזו מתארחת בשרת הרשמי של Dial.\n\nלחזור לשרת הרשמי ולהצטרף למסיבה %1$s?</string>
+    <string name="listen_together_official_server_dialog_message">המסיבה הזו מתארחת בשרת הרשמי של Osmo.\n\nלחזור לשרת הרשמי ולהצטרף למסיבה %1$s?</string>
     <string name="listen_together_switch_failed_stayed_in_party">לא ניתן להצטרף למסיבה: %1$s. נשארתם במסיבה %2$s.</string>
     <string name="listen_together_switch_failed">לא ניתן להצטרף למסיבה: %1$s.</string>
     <string name="listen_together_ping">%1$d ms</string>
@@ -803,7 +825,7 @@
 
     <string name="add_addon">הוסף תוסף</string>
 
-    <string name="add_addon_detail">חבר את Dial לשרת תוספים</string>
+    <string name="add_addon_detail">חבר את Osmo לשרת תוספים</string>
 
     <string name="addon_url_description">הדבק את כתובת ה-URL של התוסף — תיקיית שורש או manifest.json.</string>
 
@@ -1026,7 +1048,7 @@
 
     <string name="source_skipped_by_quality">לא בשימוש ב-%1$s · איכות הוגדרה ל-%2$s</string>
 
-    <string name="source_unrecognised">Dial לא זיהה את הקישור הזה</string>
+    <string name="source_unrecognised">Osmo לא זיהה את הקישור הזה</string>
 
     <string name="start_radio">הפעל רדיו</string>
 
@@ -1061,7 +1083,7 @@
 
     <string name="auto_login_title">Sign in to YouTube on your phone</string>
 
-    <string name="auto_login_subtitle">Open Dial on your phone to sign in</string>
+    <string name="auto_login_subtitle">Open Osmo on your phone to sign in</string>
 
     <string name="auto_empty_recents_title">No recent songs</string>
 
@@ -1095,7 +1117,7 @@
     <string name="smart_version_alignment">יישור אודיו חכם</string>
     <string name="smart_version_alignment_subtitle">ניתוח צורות הגל כדי למצוא בדיוק את רגע ההשמעה התואם</string>
 
-    <string name="equalizer_footer">Shapes the sound inside Dial, before it reaches the system.</string>
+    <string name="equalizer_footer">Shapes the sound inside Osmo, before it reaches the system.</string>
 
     <string name="equalizer_dynamic">Dynamic</string>
 
@@ -1138,7 +1160,7 @@
 
     <string name="system_equalizer_subtitle">Your device\'s own panel</string>
 
-    <string name="system_equalizer_footer">Runs after Dial\'s, on the whole audio session. Using both applies both.</string>
+    <string name="system_equalizer_footer">Runs after Osmo\'s, on the whole audio session. Using both applies both.</string>
 
     <string name="eq_preset_flat">Flat</string>
 
@@ -1185,6 +1207,13 @@
     <string name="search_languages">Search languages</string>
 
     <string name="no_languages_match">No languages match</string>
+    <string name="language_and_location">שפה ומיקום</string>
+    <string name="content_country">מדינה</string>
+    <string name="content_country_subtitle">המלצות, מצעדים ושירים חדשים מגיעים מהמדינה הזו</string>
+    <string name="content_country_description">YouTube Music נותן המלצות, מצעדים ושירים חדשים למדינה הזו. Spotify משתמש במדינה של החשבון שלך.</string>
+    <string name="content_country_automatic">אוטומטי</string>
+    <string name="search_countries">חיפוש מדינות</string>
+    <string name="no_countries_match">אין מדינות תואמות</string>
 
 
 
@@ -1378,8 +1407,8 @@
     <string name="version_switch_in_party">Everyone in Listen Together hears the same version</string>
     <string name="bit_perfect_output">פלט Bit-perfect</string>
     <string name="bit_perfect_bypassed_footer">פלט Bit-perfect מוכן, ולכן ההגדרות המעומעמות אינן פעילות ולא מתבקשות גרסאות Dolby Atmos. הן יפעלו שוב כשה-DAC ינותק או כשהמצב ייכבה.</string>
-    <string name="bit_perfect_sheet_warning">שולח את הרצועה ל-DAC ללא שינוי. האקולייזר, נרמול העוצמה, ה-Crossfade, ה-Automix, מהירות ההשמעה ועוצמת הקול של Dial אינם פעילים.</string>
-    <string name="bit_perfect_mode_off_subtitle">השמע עובר דרך המיקסר של Android והאפקטים של Dial.</string>
+    <string name="bit_perfect_sheet_warning">שולח את הרצועה ל-DAC ללא שינוי. האקולייזר, נרמול העוצמה, ה-Crossfade, ה-Automix, מהירות ההשמעה ועוצמת הקול של Osmo אינם פעילים.</string>
+    <string name="bit_perfect_mode_off_subtitle">השמע עובר דרך המיקסר של Android והאפקטים של Osmo.</string>
     <string name="bit_perfect_mode_usb_android">USB DAC</string>
     <string name="bit_perfect_mode_usb_android_subtitle">Android 14 פותח את ה-DAC בקצב ובעומק הסיביות של כל רצועה, ללא מיקס וללא דגימה מחדש.</string>
     <string name="bit_perfect_requires_android_14">נדרש Android 14 ומעלה</string>
@@ -1387,13 +1416,13 @@
     <string name="bit_perfect_mode_dap_exclusive_subtitle">לנגני מוזיקה עם DAC משלהם. פותח את יציאת האוזניות או הקו באופן בלעדי בקצב של כל רצועה. לא כל מכשיר מאפשר מצב בלעדי.</string>
     <string name="bit_perfect_requires_android_8_1">נדרש Android 8.1 ומעלה</string>
     <string name="bit_perfect_mode_usb_direct">USB DAC (מנהל התקן ישיר)</string>
-    <string name="bit_perfect_mode_usb_direct_subtitle">Dial מפעיל את ה-DAC בעצמו, בכל גרסת Android, וקובע את עוצמת הקול ב-DAC. מבקש הרשאת USB. עשוי להישמע חזק בהרבה מהפלט הרגיל.</string>
+    <string name="bit_perfect_mode_usb_direct_subtitle">Osmo מפעיל את ה-DAC בעצמו, בכל גרסת Android, וקובע את עוצמת הקול ב-DAC. מבקש הרשאת USB. עשוי להישמע חזק בהרבה מהפלט הרגיל.</string>
     <string name="dac_volume">עוצמת קול של ה-DAC</string>
     <string name="dac_volume_subtitle">נקבעת ב-DAC עצמו; המוזיקה אינה משתנה</string>
     <string name="usb_allow_fixed_volume">אפשר רכיבי DAC ללא בקרת עוצמה</string>
     <string name="usb_allow_fixed_volume_subtitle">אחרת, DAC כזה ינגן דרך הפלט הרגיל</string>
     <string name="usb_allow_fixed_volume_confirm_title">לנגן בעוצמה מלאה?</string>
-    <string name="usb_allow_fixed_volume_confirm_message">Dial לא יכול לקבוע את עוצמת הקול של DAC מסוג זה, ולכן הוא מנגן בעוצמה מלאה ורק הכפתור שלו עצמו, אם יש כזה, שולט בעוצמה. הצליל עלול להיות חזק באופן מסוכן עם אוזניות רגישות.</string>
+    <string name="usb_allow_fixed_volume_confirm_message">Osmo לא יכול לקבוע את עוצמת הקול של DAC מסוג זה, ולכן הוא מנגן בעוצמה מלאה ורק הכפתור שלו עצמו, אם יש כזה, שולט בעוצמה. הצליל עלול להיות חזק באופן מסוכן עם אוזניות רגישות.</string>
     <string name="convert_for_limited_dac">המרה לרכיבי DAC מוגבלים</string>
     <string name="convert_for_limited_dac_subtitle">ממיר רצועות שמעל למגבלת ה-DAC שלך לפורמט הגבוה ביותר שלו. ייתכן שהרצועות יתחילו לאט יותר, והן לא יהיו Bit-perfect ביחס למקור.</string>
     <string name="bit_perfect_confirm_title">להפעיל פלט Bit-perfect?</string>
@@ -1468,4 +1497,19 @@
     <string name="old_app_notice_body">ההגדרות, הספרייה, היסטוריית ההאזנה וההתחברויות מהאפליקציה הישנה לא עוברים מעצמם. באפליקציה הישנה פתחו הגדרות, ואז הנתונים שלך, והקישו על ייצוא נתונים. אחר כך הקישו כאן על ייבוא נתונים ובחרו את הקובץ. תצטרכו להתחבר מחדש.</string>
     <string name="old_app_notice_take_me_there">קח אותי לשם</string>
     <string name="old_app_notice_got_it">הבנתי</string>
+    <string name="episode_info">מידע</string>
+    <string name="episode_play_video">הפעלת וידאו</string>
+    <string name="search_podcasts_hint">חיפוש פודקאסטים</string>
+    <string name="podcast_search_hint">חפשו תוכניות ופרקים.</string>
+    <string name="podcast_search_library_hint">חפשו בתוכניות שאתם עוקבים אחריהן, בתוכניות בחוגה ובפרקים לשמיעה מאוחרת.</string>
+    <string name="podcast_search_failed">לא ניתן לחפש. נסו שוב.</string>
+    <string name="podcast_search_none">אין תוכניות או פרקים עבור “%1$s”.</string>
+    <string name="podcast_search_shows">תוכניות</string>
+    <string name="podcast_search_episodes">פרקים</string>
+    <string name="episode_filter">סינון פרקים</string>
+    <string name="episode_filter_all">הכול</string>
+    <string name="episode_filter_unplayed">לא הושמעו</string>
+    <string name="episode_filter_in_progress">בהשמעה</string>
+    <string name="episode_filter_played">הושמעו</string>
+    <string name="episode_filter_none">אין פרקים במסנן הזה.</string>
 </resources>

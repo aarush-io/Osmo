@@ -23,7 +23,7 @@ class TapRun(private val needed: Int, private val gapMs: Long = 1_500L) {
 }
 
 /**
- * Developer options: switched on by tapping the Dial logo at the foot of
+ * Developer options: switched on by tapping the Osmo mark at the foot of
  * Settings [TAPS_TO_ENABLE] times in a row, which adds a few rows to
  * Advanced & experimental options for looking at the app as someone new to
  * it would.

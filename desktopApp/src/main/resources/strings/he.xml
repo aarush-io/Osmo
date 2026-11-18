@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">BitChord</string>
+    <string name="app_name">Osmo</string>
     <string name="playback_channel_name">מתנגן כעת</string>
     <string name="download_channel_name">הורדות</string>
     <string name="download_channel_description">שירים שנשמרים בתיקיית המוזיקה שלך</string>
@@ -330,7 +330,7 @@
     <string name="downloads_finished">הורדות · הסתיימו</string>
     <string name="downloading_progress">מוריד · %1$d%%</string>
     <string name="starting">מתחיל</string>
-    <string name="saved_to_bitchord_folder">נשמר ב-Music/Dial</string>
+    <string name="saved_to_bitchord_folder">נשמר ב-Music</string>
     <string name="nothing_downloading">שום דבר לא יורד</string>
     <string name="nothing_to_explore">אין מה לחקור כרגע</string>
     <string name="no_youtube_music_results">אין תוצאות מ-YouTube Music</string>
@@ -455,7 +455,7 @@
     <string name="biggest_day_note">היום הגדול ביותר שלך היה %1$s עם %2$s של האזנה.</string>
     <string name="close_replay">סגור Replay</string>
     <string name="couldnt_draw_picture">לא ניתן ליצור תמונה</string>
-    <string name="default_replay_holder">מאזין Dial</string>
+    <string name="default_replay_holder">מאזין Osmo</string>
     <string name="different_albums">אלבומים שונים</string>
     <string name="genres_pending">ז\'אנרים יופיעו ככל שהיסטוריית ההאזנה שלך תגדל</string>
     <string name="hour_am">%1$d AM</string>
@@ -481,7 +481,7 @@
     <string name="replay_artist_end"> המשיך לחזור.</string>
     <string name="replay_artist_focus">אמן אחד</string>
     <string name="replay_artist_start">כל החודש, </string>
-    <string name="replay_empty_description">האזן קצת יותר ו-Dial יהפוך את ההיסטוריה שלך ל-Replay.</string>
+    <string name="replay_empty_description">האזן קצת יותר ו-Osmo יהפוך את ההיסטוריה שלך ל-Replay.</string>
     <string name="replay_genre_end"> עיצבו את הצליל שלך.</string>
     <string name="replay_genre_focus">הז\'אנרים שלך</string>
     <string name="replay_genre_start">ביחד, </string>

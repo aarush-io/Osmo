@@ -74,7 +74,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 /*
- * "Let Dial Generate Playlist Image": every playlist page gets a moving
+ * "Let Osmo generate playlist images": every playlist page gets a moving
  * collage behind it, one cover in front and others floating round it, made of
  * songs picked at random from the first batch of the list to load. A playlist
  * with a picture of its own (one its owner chose, a mix's artwork, a cover

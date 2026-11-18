@@ -18,7 +18,7 @@ import java.util.Locale
 /**
  * Where a downloaded track goes, and how it gets there.
  *
- * The destination is the device's own Music folder, in a `Dial`
+ * The destination is the device's own Music folder, in an `Osmo`
  * subfolder — somewhere the file manager lists, other players can open, and a
  * user can back up or delete without going through this app. That choice is
  * what makes this class necessary at all: an app-private directory would be
@@ -55,8 +55,11 @@ object DownloadStore {
 
     private const val TAG = "BitChord"
 
-    /** The subfolder of Music that everything lands in. */
-    const val FOLDER = "Dial"
+    /** The subfolder of Music where new downloads land. */
+    const val FOLDER = "Osmo"
+
+    /** Older downloads remain readable from their original folder. */
+    const val LEGACY_FOLDER = "Dial"
 
     private val relativePath = "${Environment.DIRECTORY_MUSIC}/$FOLDER"
 
@@ -155,6 +158,7 @@ object DownloadStore {
             mediaStoreEntry(context, name)
         } else {
             legacyFile(name).takeIf { it.exists() }?.let(Uri::fromFile)
+                ?: legacyFile(name, LEGACY_FOLDER).takeIf { it.exists() }?.let(Uri::fromFile)
         }
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -162,9 +166,10 @@ object DownloadStore {
         context.contentResolver.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             arrayOf(MediaStore.MediaColumns._ID),
-            "${MediaStore.MediaColumns.DISPLAY_NAME} = ? AND " +
-                "${MediaStore.MediaColumns.RELATIVE_PATH} LIKE ?",
-            arrayOf(name, "%$FOLDER%"),
+            "${MediaStore.MediaColumns.DISPLAY_NAME} = ? AND (" +
+                "${MediaStore.MediaColumns.RELATIVE_PATH} LIKE ? OR " +
+                "${MediaStore.MediaColumns.RELATIVE_PATH} LIKE ?)",
+            arrayOf(name, "%$FOLDER%", "%$LEGACY_FOLDER%"),
             null,
         )?.use { cursor ->
             if (!cursor.moveToFirst()) return@use null
@@ -304,8 +309,8 @@ object DownloadStore {
     }
 
     @Suppress("DEPRECATION")
-    private fun legacyFile(name: String) = File(
-        File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), FOLDER),
+    private fun legacyFile(name: String, folder: String = FOLDER) = File(
+        File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), folder),
         name,
     )
 

@@ -18,7 +18,7 @@ import com.music.bitchord.data.spotify.SpotifyPlayedSync
 import com.music.bitchord.ui.components.GlassAlert
 
 /**
- * What the "Played in Dial" playlist is, in full (the settings row has room
+ * What the "Played in Osmo" playlist is, in full (the settings row has room
  * for a line of it), and how many songs it holds before the oldest make way.
  */
 @Composable

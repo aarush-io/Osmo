@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BitChord</string>
+    <string name="app_name">Osmo</string>
     <string name="playback_channel_name">Now playing</string>
     <string name="download_channel_name">Downloads</string>
     <string name="download_channel_description">Songs being saved to your Music folder</string>
@@ -466,7 +466,7 @@
     <string name="played_by">Played by %1$s</string>
     <string name="shared_link">Shared link</string>
     <string name="radio_started">%1$s radio started</string>
-    <string name="saved_to_bitchord_folder">Saved to Music/Dial</string>
+    <string name="saved_to_bitchord_folder">Saved to Music</string>
     <string name="nothing_downloading">Nothing downloading</string>
     <string name="nothing_to_explore">Nothing to explore right now</string>
     <string name="no_youtube_music_results">No results from YouTube Music</string>
@@ -631,7 +631,7 @@
     <string name="biggest_day_note">Your biggest day was %1$s with %2$s of listening.</string>
     <string name="close_replay">Close Replay</string>
     <string name="couldnt_draw_picture">Could not create the picture</string>
-    <string name="default_replay_holder">Dial listener</string>
+    <string name="default_replay_holder">Osmo listener</string>
     <string name="different_albums">Different albums</string>
     <string name="genres_pending">Genres will appear as your listening history grows</string>
     <string name="hour_am">%1$d AM</string>
@@ -657,7 +657,7 @@
     <string name="replay_artist_end"> kept coming back.</string>
     <string name="replay_artist_focus">One artist</string>
     <string name="replay_artist_start">All month, </string>
-    <string name="replay_empty_description">Listen a little more and Dial will turn your history into a Replay.</string>
+    <string name="replay_empty_description">Listen a little more and Osmo will turn your history into a Replay.</string>
     <string name="replay_genre_end"> shaped your sound.</string>
     <string name="replay_genre_focus">Your genres</string>
     <string name="replay_genre_start">Together, </string>

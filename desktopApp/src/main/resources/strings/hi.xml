@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BitChord</string>
+    <string name="app_name">Osmo</string>
     <string name="playback_channel_name">अभी चल रहा है</string>
     <string name="download_channel_name">डाउनलोड</string>
     <string name="download_channel_description">आपके संगीत फ़ोल्डर में सेव हो रहे गाने</string>
@@ -330,7 +330,7 @@
     <string name="downloads_finished">डाउनलोड · पूरे हुए</string>
     <string name="downloading_progress">डाउनलोड हो रहा है · %1$d%%</string>
     <string name="starting">शुरू हो रहा है</string>
-    <string name="saved_to_bitchord_folder">Music/Dial में सेव किया गया</string>
+    <string name="saved_to_bitchord_folder">Music में सेव किया गया</string>
     <string name="nothing_downloading">कुछ भी डाउनलोड नहीं हो रहा</string>
     <string name="nothing_to_explore">अभी एक्सप्लोर करने के लिए कुछ नहीं है</string>
     <string name="no_youtube_music_results">YouTube Music से कोई नतीजे नहीं मिले</string>
@@ -492,7 +492,7 @@
     <string name="biggest_day_note">आपका सबसे बड़ा दिन %1$s था, जिसमें %2$s सुना गया।</string>
     <string name="close_replay">Replay बंद करें</string>
     <string name="couldnt_draw_picture">तस्वीर नहीं बन सकी</string>
-    <string name="default_replay_holder">Dial श्रोता</string>
+    <string name="default_replay_holder">Osmo श्रोता</string>
     <string name="different_albums">अलग-अलग एल्बम</string>
     <string name="genres_pending">आपके सुनने का इतिहास बढ़ने पर शैलियां दिखेंगी</string>
     <string name="hour_am">%1$d AM</string>
@@ -518,7 +518,7 @@
     <string name="replay_artist_end"> बार-बार सुना गया।</string>
     <string name="replay_artist_focus">एक कलाकार</string>
     <string name="replay_artist_start">पूरे महीने, </string>
-    <string name="replay_empty_description">थोड़ा और सुनें और Dial आपके इतिहास को एक Replay में बदल देगा।</string>
+    <string name="replay_empty_description">थोड़ा और सुनें और Osmo आपके इतिहास को एक Replay में बदल देगा।</string>
     <string name="replay_genre_end"> ने आपकी पसंद को आकार दिया।</string>
     <string name="replay_genre_focus">आपकी शैलियां</string>
     <string name="replay_genre_start">मिलकर, </string>

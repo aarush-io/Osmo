@@ -67,8 +67,8 @@
     <string name="spotify_algorithm">Use Spotify algorithm</string>
     <string name="spotify_algorithm_subtitle">Radio and AutoPlay follow Spotify\'s recommendations, played from YouTube Music. Off uses YT Music\'s.</string>
     <string name="spotify_like_sync_summary">Liking or un-liking a song here also saves or removes it from your Spotify Liked Songs</string>
-    <string name="spotify_played_playlist">Played in Dial playlist</string>
-    <string name="spotify_played_playlist_subtitle">Creates a private \"Played in Dial\" playlist on your Spotify account and adds the songs you play here, to help steer Spotify\'s recommendations. It stays hidden in this app.</string>
+    <string name="spotify_played_playlist">Played in Osmo playlist</string>
+    <string name="spotify_played_playlist_subtitle">Creates a private \"Played in Osmo\" playlist on your Spotify account and adds the songs you play here, to help steer Spotify\'s recommendations. It stays hidden in this app.</string>
     <string name="spotify_played_playlist_summary">Tap for details and how many songs to keep</string>
     <string name="spotify_played_keep">Songs to keep</string>
     <string name="spotify_played_keep_note">Once the playlist is full, the oldest songs are removed as new ones are added.</string>
@@ -89,7 +89,7 @@
     <string name="crop_thumbnails">Crop thumbnails</string>
     <string name="artist_local_files_only">Show only local files</string>
     <string name="artist_show_all_files">Show everything, not just local files</string>
-    <string name="generate_playlist_image">Let Dial Generate Playlist Image</string>
+    <string name="generate_playlist_image">Let Osmo generate playlist images</string>
     <string name="generate_playlist_image_subtitle">Playlist pages get a moving collage of their most recently added songs. Turn it off for one playlist from its ⋯ menu</string>
     <string name="crop_thumbnails_subtitle">Fill artwork that isn\'t square instead of showing bars</string>
     <string name="dial_page_artists">Artists</string>
@@ -98,7 +98,7 @@
     <string name="speed_dials_setting_subtitle">Open Home on the speed dial pages. Off, Home is just the list of sections</string>
     <string name="artist_dial">Give artists their own dial</string>
     <string name="artist_dial_subtitle">A page under the speed dial of the artists you pin, then the ones you play most</string>
-    <string name="mixes_dial">Mixes Dial</string>
+    <string name="mixes_dial">Mixes</string>
     <string name="mixes_dial_subtitle">Swipe right from the speed dial\'s first page for a page of random mixes from YouTube Music, and Spotify when you\'re signed in</string>
     <string name="mixes_dial_empty">No mixes to show yet. Pull down to try again</string>
     <string name="favorite_artist">Favorite artist</string>
@@ -112,13 +112,13 @@
     <string name="hide_dial_title">Hide title on dial</string>
     <string name="show_dial_title">Show title on dial</string>
     <string name="dial_pin_icon">Pin icon on pinned tiles</string>
-    <string name="dial_settings">Dial</string>
+    <string name="dial_settings">Home grid</string>
     <string name="dial_labels_default">Show tile names</string>
     <string name="dial_tile_style">Tile style</string>
     <string name="dial_tile_style_none">None</string>
     <string name="dial_tile_style_edge">Edge</string>
     <string name="dial_tile_style_glass">Glass</string>
-    <string name="home_dial_menu">Dial options</string>
+    <string name="home_dial_menu">Home grid options</string>
     <string name="check_for_updates">Check for updates</string>
     <string name="checking_for_updates">Checking…</string>
     <string name="update_ready">Version %1$s is ready. Tap to install</string>
@@ -213,9 +213,14 @@
     <string name="speed_dial_source_history">History</string>
     <string name="speed_dial_source_youtube">YT Music</string>
     <string name="dial_new_release">New release</string>
+    <string name="performance_mode">Performance mode</string>
+    <string name="performance_mode_subtitle">Turns off the effects that use the most power: glass and blur, animations, the moving background, Canvas video and haptics. Turn it off to get your settings back.</string>
+    <string name="performance_mode_on">On. Each setting that it changed stays in its own row, and you can change it there.</string>
+    <string name="keep_home">Keep Home loaded</string>
+    <string name="keep_home_subtitle">Home stays ready while you look at other pages, and comes back with no delay. It uses more memory.</string>
     <string name="enable_logging">Enable logging</string>
-    <string name="enable_logging_subtitle">Records everything the app logs until you turn it off or close the app, then lets you share or save the log</string>
-    <string name="enable_logging_running">Logging now. Turn it off to share or save the log.</string>
+    <string name="enable_logging_subtitle">Records everything the app logs until you turn it off, then lets you share or save the log. It stays on when you close the app, so the log can include a launch.</string>
+    <string name="enable_logging_running">Logging now, also after the app is closed and opened again. Turn it off to share or save the log.</string>
     <string name="log_ready_title">Log recorded</string>
     <string name="log_ready_message">The log is %1$s. Share it, or save it to your phone\'s storage.</string>
     <string name="share_log">Share</string>
@@ -241,9 +246,9 @@
     <string name="song_fix_restore_details_detail">Back to “%1$s”</string>
     <string name="song_fix_details_restored">Original details restored</string>
     <string name="song_fix_details_saved">Details updated and saved to the file</string>
-    <string name="song_fix_details_unsupported">Details updated in Dial. This type of file can\'t be changed.</string>
-    <string name="song_fix_details_denied">Details updated in Dial. It wasn\'t allowed to change the file.</string>
-    <string name="song_fix_details_failed">Details updated in Dial, but the file couldn\'t be changed.</string>
+    <string name="song_fix_details_unsupported">Details updated in Osmo. This type of file can\'t be changed.</string>
+    <string name="song_fix_details_denied">Details updated in Osmo. It wasn\'t allowed to change the file.</string>
+    <string name="song_fix_details_failed">Details updated in Osmo, but the file couldn\'t be changed.</string>
     <string name="song_fix_compare_title">Choose song details</string>
     <string name="song_fix_compare_hint">Tap the one to keep. Tap it again to edit it.</string>
     <string name="song_fix_compare_file">Your file</string>
@@ -290,7 +295,7 @@
     <string name="progress_bar_wave">Wave</string>
     <string name="progress_bar_plain">Plain</string>
     <!-- First-launch tour -->
-    <string name="onboarding_welcome_title">Welcome to Dial</string>
+    <string name="onboarding_welcome_title">Welcome to Osmo</string>
     <string name="onboarding_welcome_body">Your music, a tap away. A short tour shows how the dial works and where things are.</string>
     <string name="onboarding_look_note">You can change these any time in Settings.</string>
     <string name="onboarding_take_tour">Take a tour</string>
@@ -304,14 +309,14 @@
     <string name="onboarding_pins_body">Hold a song, album, playlist or artist anywhere in the app and choose Add to speed dial to pin it. Pins come first on the dial: hold one, then drag it to move it.</string>
     <string name="onboarding_settings_title">Settings</string>
     <string name="onboarding_settings_body">The profile button at the top right leads to Settings. Hold it to go straight there.</string>
-    <string name="onboarding_mixes_title">Mixes Dial</string>
+    <string name="onboarding_mixes_title">Mixes</string>
     <string name="onboarding_mixes_body">Swipe right from the dial\'s first page for a page of mixes, from YouTube Music and from Spotify once it\'s connected. Pull down on Home for a new set.</string>
-    <string name="onboarding_dial_menu_title">Dial options</string>
+    <string name="onboarding_dial_menu_title">Home grid options</string>
     <string name="onboarding_dial_menu_body">The ⋯ button on Home holds the dial\'s own settings: where its picks come from, tile names, the grid and more.</string>
     <string name="onboarding_library_title">Your library</string>
     <string name="onboarding_library_body">On the Library tab, the ⋯ button filters what you see: YouTube Music, this device, or both. Your song history is there too.</string>
     <string name="onboarding_finish_title">That\'s the tour</string>
-    <string name="onboarding_finish_body">There is much more to make Dial your own in Settings: the look, the player, lyrics, sound quality and the services you connect.</string>
+    <string name="onboarding_finish_body">There is much more to make Osmo your own in Settings: the look, the player, lyrics, sound quality and the services you connect.</string>
     <!-- Developer options -->
     <string name="developer_options">Developer options</string>
     <string name="developer_options_subtitle">Turn off to hide these rows and undo what they changed</string>

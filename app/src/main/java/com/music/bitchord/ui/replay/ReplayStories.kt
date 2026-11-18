@@ -413,16 +413,16 @@ private fun StoryChrome(
                 color = Color.White,
                 modifier = Modifier.weight(1f),
             )
-            // Dial's mark and "dial." in the pixel face, as the share cards carry them.
+            // Osmo's mark and "osmo." in the pixel face, as the share cards carry them.
             Icon(
-                painter = painterResource(R.drawable.ic_dial_logo),
+                painter = painterResource(R.drawable.ic_osmo_mark),
                 contentDescription = null,
                 tint = Color.White.copy(alpha = 0.9f),
                 modifier = Modifier.size(width = 13.dp, height = 18.dp),
             )
             Spacer(Modifier.width(7.dp))
             Text(
-                text = "dial.",
+                text = "osmo.",
                 style = MaterialTheme.typography.titleMedium,
                 fontFamily = Tiny5Lcd,
                 fontWeight = FontWeight.W400,
