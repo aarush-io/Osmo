@@ -196,6 +196,7 @@ import com.music.bitchord.data.NerdStats
 import com.music.bitchord.data.scrobbling.LastFM
 import com.music.bitchord.data.listentogether.ListenTogether
 import com.music.bitchord.data.settings.AppSettings
+import com.music.bitchord.data.settings.PlayerTheme
 import com.music.bitchord.data.settings.CustomizationSettings
 import com.music.bitchord.data.settings.SpeedDialSource
 import com.music.bitchord.ui.components.frostedSurfaceColor
@@ -322,7 +323,7 @@ fun SettingsScreen(
     val videoQualityWifi by AppSettings.videoQualityWifi.collectAsStateWithLifecycle()
     val videoQualityMobile by AppSettings.videoQualityMobile.collectAsStateWithLifecycle()
     val fullBleedArtwork by AppSettings.fullBleedArtwork.collectAsStateWithLifecycle()
-    val legacyMeshGradient by AppSettings.legacyMeshGradient.collectAsStateWithLifecycle()
+    val playerTheme by AppSettings.playerTheme.collectAsStateWithLifecycle()
     val syncedLyrics by AppSettings.syncedLyrics.collectAsStateWithLifecycle()
     val lyricsInNotification by AppSettings.lyricsInNotification.collectAsStateWithLifecycle()
     val lyricsSources by AppSettings.lyricsSources.collectAsStateWithLifecycle()
@@ -1247,19 +1248,32 @@ fun SettingsScreen(
                     )
                 }
             }
-            val legacyMeshGradientTitle = stringResource(R.string.legacy_mesh_gradient)
-            row(legacyMeshGradientTitle, "background", "player") {
+            val playerThemeTitle = stringResource(R.string.player_theme)
+            row(playerThemeTitle, "background", "player", "mesh", "gradient", "legacy", "simple", "blur") {
                 SettingsRow(
                     icon = Icons.Rounded.Gradient,
-                    title = legacyMeshGradientTitle,
-                    subtitle = stringResource(R.string.legacy_mesh_gradient_subtitle),
-                    trailing = {
-                        IosSwitch(
-                            checked = legacyMeshGradient,
-                            onCheckedChange = AppSettings::setLegacyMeshGradient,
+                    title = playerThemeTitle,
+                    subtitle = stringResource(
+                        when (playerTheme) {
+                            PlayerTheme.DEFAULT -> R.string.player_theme_default_subtitle
+                            PlayerTheme.LEGACY -> R.string.player_theme_legacy_subtitle
+                            PlayerTheme.SIMPLE -> R.string.player_theme_simple_subtitle
+                        },
+                    ),
+                )
+                SegmentedControl(
+                    options = PlayerTheme.entries.map {
+                        stringResource(
+                            when (it) {
+                                PlayerTheme.DEFAULT -> R.string.player_theme_default
+                                PlayerTheme.LEGACY -> R.string.player_theme_legacy
+                                PlayerTheme.SIMPLE -> R.string.player_theme_simple
+                            },
                         )
                     },
-                    onClick = { AppSettings.setLegacyMeshGradient(!legacyMeshGradient) },
+                    selectedIndex = PlayerTheme.entries.indexOf(playerTheme),
+                    onSelect = { AppSettings.setPlayerTheme(PlayerTheme.entries[it]) },
+                    modifier = Modifier.padding(start = ROW_INSET, end = ROW_INSET, bottom = 14.dp),
                 )
             }
             val progressBarTitle = stringResource(R.string.progress_bar_style)

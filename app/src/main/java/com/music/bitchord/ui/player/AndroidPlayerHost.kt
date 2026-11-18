@@ -72,7 +72,7 @@ class AndroidPlayerHost(context: Context) : PlayerHost {
         override val lastPlayerScreen get() = AppSettings.lastPlayerScreen
         override val outputIcons
             get() = com.music.bitchord.data.settings.CustomizationSettings.outputIcons
-        override val legacyMeshGradient get() = AppSettings.legacyMeshGradient
+        override val playerTheme get() = AppSettings.playerTheme
         override val lyricsBlur get() = AppSettings.lyricsBlur
         override val lyricsOffsetMs get() = AppSettings.lyricsOffsetMs
         override val lyricsSourceOrder get() = AppSettings.lyricsSourceOrder
