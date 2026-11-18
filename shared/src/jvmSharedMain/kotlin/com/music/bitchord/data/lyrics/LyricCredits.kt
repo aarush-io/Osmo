@@ -29,11 +29,10 @@ fun List<LyricLine>.withoutLeadingCredits(): List<LyricLine> {
     }
     if (credits == 0 || head >= size) return this
     val first = this[head]
-    if (first.timeMs < MIN_GAP_MS) return subList(head, size).toList()
-    return buildList(size - head + 1) {
-        add(LyricLine(0L, ""))
-        addAll(this@withoutLeadingCredits.subList(head, size))
-    }
+    val kept = subList(head, size)
+    if (first.timeMs < MIN_GAP_MS) return kept.toList()
+    // Not buildList: in its block, `size` is the size of the list being built.
+    return listOf(LyricLine(0L, "")) + kept
 }
 
 /**
