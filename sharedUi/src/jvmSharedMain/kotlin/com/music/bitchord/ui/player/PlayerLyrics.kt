@@ -18,7 +18,6 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -109,7 +108,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import org.jetbrains.compose.resources.Font
-import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -122,6 +120,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -382,6 +381,13 @@ private const val LYRIC_SETTLE_MS = 400
 
 /** How long the strip's break bar and a sung line take to change places. */
 private const val BREAK_MORPH_MS = 420
+
+/**
+ * How far, as a part of the strip's height, the break bar and a sung line
+ * travel as they change places: the one goes up by this much as the other
+ * comes up from this far below.
+ */
+private const val BREAK_SLIDE = 0.6f
 
 /**
  * How the rows fan out as the panel moves between lines.
@@ -2626,24 +2632,13 @@ private fun CurrentLyricLine(
     // Everything ahead of the first sung line is the intro — LRC files open on a
     // bare [00:00.00] gap, so that stretch is gap lines rather than nothing.
     val firstSung = remember(lines) { lines.indexOfFirst { !it.isGap } }
-    val intro = instrumental && firstSung >= 0 && index < firstSung
-    // The intro gets one of the slang lines; mid-song breaks stay plain.
-    val introLines = stringArrayResource(Res.array.lyrics_intro_lines)
-    // `stringArrayResource` may return a new array on every recomposition.
-    // Keying this selection to that array made the intro copy change whenever
-    // the playback clock recomposed the strip. Pick it once for this track.
-    val introLine = remember(trackKey) { introLines.random() }
     // The strip is one line and switches the moment the next one is due, so
     // the answering vocal — where there is one — has nowhere to go: showing
     // it would mean either cutting it short when the next line arrives or
     // holding the strip back and leaving a gap before the next line's own
     // words appear. [LyricsPanel] has the room to draw it properly; here it
     // is simply left off, same as before this line had a bracket in it.
-    val text = when {
-        intro -> introLine
-        instrumental -> stringResource(Res.string.instrumental)
-        else -> current.text
-    }
+    val text = if (instrumental) stringResource(Res.string.instrumental) else current.text
 
     val reduceAnimation by PlayerSettings.reduceAnimation.collectAsStateWithLifecycle()
 
@@ -2654,15 +2649,6 @@ private fun CurrentLyricLine(
             .clickable(onClick = onClick)
             .padding(vertical = 4.dp),
     ) {
-        if (instrumental) {
-            Icon(
-                imageVector = BitChordIcons.Instrumental,
-                contentDescription = null,
-                tint = PlayerInk,
-                modifier = Modifier.size(16.dp),
-            )
-            Spacer(Modifier.width(6.dp))
-        }
         // Where the break a gap line belongs to began: a break can be more
         // than one bare stamp in a row, and the bar counts the whole of it.
         val breakStart: (Int) -> Int = { at ->
@@ -2670,15 +2656,22 @@ private fun CurrentLyricLine(
             while (start - 1 >= firstSung.coerceAtLeast(0) && lines[start - 1].isGap) start--
             start
         }
+        // The intro is everything before the first sung line, whether a gap
+        // line stands for it or not: its bar runs from the start of the song.
+        val isIntro: (Int) -> Boolean = { at -> firstSung >= 0 && at < firstSung }
         val isBreakBar: (Int, LyricLine?) -> Boolean = { at, item ->
-            item != null && item.isGap && firstSung >= 0 && at >= firstSung
+            isIntro(at) || (item != null && item.isGap && firstSung >= 0)
         }
         AnimatedContent(
             targetState = Triple(index, current, text),
             // One bar for the whole of a break, however many stamps it is
             // made of: keyed on each, it slid out and back in mid-count.
             contentKey = { state ->
-                if (isBreakBar(state.first, state.second)) "break@${breakStart(state.first)}" else state
+                when {
+                    isIntro(state.first) -> "intro"
+                    isBreakBar(state.first, state.second) -> "break@${breakStart(state.first)}"
+                    else -> state
+                }
             },
             transitionSpec = {
                 val duration = if (reduceAnimation) 0 else 340
@@ -2689,16 +2682,19 @@ private fun CurrentLyricLine(
                         SizeTransform(clip = false, sizeAnimationSpec = { _, _ -> snap() })
                     )
                 } else if (barInvolved) {
-                    // The break's bar and a sung line change places where they
-                    // stand: the one dissolves as the other comes up out of
-                    // it from the same left edge, and the strip's width eases
-                    // between the two on one curve. The slide the lines use
-                    // between themselves threw a full bar upward at the very
-                    // moment it finished, while the width caught up behind it.
-                    val grow = tween<Float>(BREAK_MORPH_MS, easing = LYRIC_EASING)
-                    (fadeIn(tween(BREAK_MORPH_MS - 80, delayMillis = 60, easing = LinearOutSlowInEasing)) +
-                        scaleIn(grow, initialScale = 0.94f, transformOrigin = TransformOrigin(0f, 0.5f)))
-                        .togetherWith(fadeOut(tween(220, easing = FastOutLinearInEasing)))
+                    // The bar and a sung line hand over in one upward
+                    // movement: the full bar slides up and fades as the next
+                    // line fades in and rises into its place from below it.
+                    // Both travel on the lyric curve, and the strip's width
+                    // eases between the two on that same curve, so the width
+                    // does not trail behind the slide.
+                    val move = tween<IntOffset>(BREAK_MORPH_MS, easing = LYRIC_EASING)
+                    (fadeIn(tween(BREAK_MORPH_MS - 80, delayMillis = 80, easing = LinearOutSlowInEasing)) +
+                        slideInVertically(move) { height -> (height * BREAK_SLIDE).toInt() })
+                        .togetherWith(
+                            fadeOut(tween(BREAK_MORPH_MS - 160, easing = FastOutLinearInEasing)) +
+                                slideOutVertically(move) { height -> -(height * BREAK_SLIDE).toInt() }
+                        )
                         .using(
                             SizeTransform(clip = false, sizeAnimationSpec = { _, _ ->
                                 tween(BREAK_MORPH_MS, easing = LYRIC_EASING)
@@ -2720,17 +2716,32 @@ private fun CurrentLyricLine(
         ) { (lineIndex, lineItem, lineText) ->
             val itemInstrumental = lineItem == null || lineItem.isGap
             val swept = lineItem?.takeIf { !itemInstrumental && it.isWordSynced }
-            // A break inside the song counts itself down rather than naming
-            // itself: a thin bar from the break's own stamp to the next sung
-            // line. The intro keeps its line of copy.
-            val breakSpan = if (isBreakBar(lineIndex, lineItem) && lineItem != null) {
-                val began = lines[breakStart(lineIndex)].timeMs
-                val until = lines.subList(lineIndex + 1, lines.size).firstOrNull { !it.isGap }?.timeMs
-                until?.takeIf { it > began }?.let { began to it }
-            } else {
-                null
+            // The note goes with the bar or the word "Instrumental", inside
+            // the transition, so it slides with them instead of popping.
+            val noteMark: @Composable () -> Unit = {
+                Icon(
+                    imageVector = BitChordIcons.Instrumental,
+                    contentDescription = null,
+                    tint = PlayerInk,
+                    modifier = Modifier.size(16.dp),
+                )
+                Spacer(Modifier.width(6.dp))
             }
-            if (breakSpan != null) {
+            // A break counts itself down rather than naming itself: a thin
+            // bar from the break's own stamp to the next sung line. The intro
+            // is counted the same way, from the start of the song to the
+            // first line.
+            val breakSpan = when {
+                isIntro(lineIndex) -> 0L to lines[firstSung].timeMs
+                isBreakBar(lineIndex, lineItem) && lineItem != null -> {
+                    val began = lines[breakStart(lineIndex)].timeMs
+                    val until = lines.subList(lineIndex + 1, lines.size).firstOrNull { !it.isGap }?.timeMs
+                    until?.let { began to it }
+                }
+                else -> null
+            }?.takeIf { (from, until) -> until > from }
+            if (breakSpan != null) Row(verticalAlignment = Alignment.CenterVertically) {
+                noteMark()
                 val (from, until) = breakSpan
                 // Sized by an invisible line of the strip's own type, so the
                 // break is exactly as tall as a sung line and nothing under the
@@ -2814,6 +2825,16 @@ private fun CurrentLyricLine(
                             )
                         }
                     },
+                )
+            } else if (itemInstrumental) Row(verticalAlignment = Alignment.CenterVertically) {
+                // A break with no sung line after it: nothing to count down to.
+                noteMark()
+                Text(
+                    text = lineText,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = PlayerInk.copy(alpha = 0.5f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             } else {
                 // No word timing: the line crosses its overflow over its own
