@@ -3,13 +3,11 @@ package com.music.bitchord.data.settings
 import android.content.SharedPreferences
 import com.music.bitchord.data.model.HomeShelf
 import com.music.bitchord.data.model.ShelfItem
-import com.music.bitchord.data.model.isPodcastShow
 import com.music.bitchord.data.podcasts.isPodcastTile
 import com.music.bitchord.data.podcasts.PodcastSource
 import com.music.bitchord.ui.components.DialTileStyle
 import com.music.bitchord.ui.components.GlassTint
 import kotlinx.coroutines.flow.MutableStateFlow
-import org.json.JSONArray
 import org.json.JSONObject
 
 /** A page the bottom bar can lead to. [id] is the tab index MainActivity keys its pages by. */
@@ -80,52 +78,22 @@ object CustomizationSettings {
     /** Playlists (keyed without their `VL`) whose page keeps its own artwork. */
     val playlistBackdropsOff = MutableStateFlow<Set<String>>(emptySet())
 
-    /**
-     * Whether Home has its dials at all. Off, Home is the plain list of
-     * sections, with no dial pages to snap between and nothing to pin to.
-     */
-    val speedDials = MutableStateFlow(true)
-
-    /**
-     * A second dial under the speed dial, of artists: the ones pinned to it,
-     * then the most played. Off, artists are pinned to the speed dial itself.
-     */
-    val artistDial = MutableStateFlow(false)
-
-    /** A die on the speed dial that starts a radio off a random personal pick. */
-    val feelingLucky = MutableStateFlow(true)
-
-    /**
-     * A page to the left of the speed dial's first page, of mixes dealt at
-     * random from YouTube Music and, while signed in, Spotify.
-     */
-    val mixesDial = MutableStateFlow(true)
-
-    /** Artists pinned to [artistDial]'s page, in their order there. */
-    val artistDialPins = MutableStateFlow<List<ShelfItem>>(emptyList())
-
-    /** Ids taken off the dials with "Remove from dial", kept off until pinned again. */
-    val hiddenFromDial = MutableStateFlow<Set<String>>(emptySet())
-
-    /** Whether dial tiles show their titles, unless a tile says otherwise. */
-    val dialLabels = MutableStateFlow(true)
-
-    /** Dial tiles that go against [dialLabels]: hidden while it is on, shown while it is off. */
-    val dialHiddenLabels = MutableStateFlow<Set<String>>(emptySet())
-
-    /** Whether pinned tiles on the dials carry the little pin badge. */
-    val dialPinIcon = MutableStateFlow(true)
-
-    /** How the dials' tiles are edged: the plain hairline, a contoured rim, or a glass rim. */
-    val dialTileStyle = MutableStateFlow(DialTileStyle.GLASS)
+    // The dial layout lives in the shared module's DialSettings, kept in these
+    // same preferences under the same keys; these names stay for the app's callers.
+    val speedDials get() = DialSettings.speedDials
+    val artistDial get() = DialSettings.artistDial
+    val feelingLucky get() = DialSettings.feelingLucky
+    val mixesDial get() = DialSettings.mixesDial
+    val artistDialPins get() = DialSettings.artistDialPins
+    val hiddenFromDial get() = DialSettings.hiddenFromDial
+    val dialLabels get() = DialSettings.dialLabels
+    val dialHiddenLabels get() = DialSettings.dialHiddenLabels
+    val dialPinIcon get() = DialSettings.dialPinIcon
+    val dialTileStyle get() = DialSettings.dialTileStyle
+    val speedDialSource get() = DialSettings.speedDialSource
+    val speedDialRows get() = DialSettings.speedDialRows
 
     val miniPlayerShape = MutableStateFlow(MiniPlayerShape.SQUARED)
-
-    /** Where the speed dial's unpinned tiles come from; see [SpeedDialSource]. */
-    val speedDialSource = MutableStateFlow(SpeedDialSource.YOUTUBE)
-
-    /** How many rows of three tiles the speed dial shows per page: 3 or 4. */
-    val speedDialRows = MutableStateFlow(DEFAULT_SPEED_DIAL_ROWS)
 
     /**
      * Over a Spotify Canvas, shrink the controls to the foot of the screen
@@ -263,7 +231,7 @@ object CustomizationSettings {
     val librarySource = MutableStateFlow(LibrarySource.ALL)
 
     /** Items pinned to the speed dial, in the order they were pinned. */
-    val speedDialPins = MutableStateFlow<List<ShelfItem>>(emptyList())
+    val speedDialPins get() = DialSettings.speedDialPins
 
     /**
      * The speed dial as Home last showed it, saved so the next launch opens on
@@ -276,7 +244,7 @@ object CustomizationSettings {
     val lastDialNewReleases = MutableStateFlow<Set<String>>(emptySet())
 
     /** Shows pinned to the Podcasts page's dial, in the order they were pinned. */
-    val podcastDialPins = MutableStateFlow<List<ShelfItem>>(emptyList())
+    val podcastDialPins get() = DialSettings.podcastDialPins
 
     /** The Podcasts page's dial as it last showed, for the page to open on at once; see [lastSpeedDial]. */
     val lastPodcastDial = MutableStateFlow<List<ShelfItem>>(emptyList())
@@ -302,6 +270,8 @@ object CustomizationSettings {
 
     fun init(prefs: SharedPreferences) {
         this.prefs = prefs
+        DialSettings.isPodcastTile = { it.isPodcastTile }
+        DialSettings.init(SharedPreferencesDialStore(prefs))
         readAll()
     }
 
@@ -321,14 +291,6 @@ object CustomizationSettings {
         cropThumbnails.value = p.getBoolean(KEY_CROP_THUMBNAILS, true)
         generatePlaylistImages.value = p.getBoolean(KEY_GENERATE_PLAYLIST_IMAGES, true)
         playlistBackdropsOff.value = p.getStringSet(KEY_PLAYLIST_BACKDROPS_OFF, null)?.toSet().orEmpty()
-        speedDials.value = p.getBoolean(KEY_SPEED_DIALS, true)
-        artistDial.value = p.getBoolean(KEY_ARTIST_DIAL, false)
-        feelingLucky.value = p.getBoolean(KEY_FEELING_LUCKY, true)
-        mixesDial.value = p.getBoolean(KEY_MIXES_DIAL, true)
-        speedDialSource.value = SpeedDialSource.entries
-            .firstOrNull { it.name == p.getString(KEY_SPEED_DIAL_SOURCE, null) } ?: SpeedDialSource.YOUTUBE
-        speedDialRows.value = p.getInt(KEY_SPEED_DIAL_ROWS, DEFAULT_SPEED_DIAL_ROWS).takeIf { it in 3..4 }
-            ?: DEFAULT_SPEED_DIAL_ROWS
         miniPlayerShape.value = MiniPlayerShape.entries
             .firstOrNull { it.name == p.getString(KEY_MINI_PLAYER_SHAPE, null) } ?: MiniPlayerShape.SQUARED
         compactCanvasControls.value = p.getBoolean(KEY_COMPACT_CANVAS_CONTROLS, true)
@@ -416,11 +378,8 @@ object CustomizationSettings {
         }
         librarySource.value = LibrarySource.entries
             .firstOrNull { it.name == p.getString(KEY_LIBRARY_SOURCE, null) } ?: LibrarySource.ALL
-        speedDialPins.value = readPins(p.getString(KEY_SPEED_DIAL_PINS, null))
         lastSpeedDial.value = readPins(p.getString(KEY_LAST_SPEED_DIAL, null))
         lastDialNewReleases.value = p.getStringSet(KEY_LAST_DIAL_NEW_RELEASES, emptySet())?.toSet().orEmpty()
-        artistDialPins.value = readPins(p.getString(KEY_ARTIST_DIAL_PINS, null))
-        podcastDialPins.value = readPins(p.getString(KEY_PODCAST_DIAL_PINS, null))
         lastPodcastDial.value = readPins(p.getString(KEY_LAST_PODCAST_DIAL, null))
         podcastEpisodesForLater.value = p.getBoolean(KEY_PODCAST_EPISODES_FOR_LATER, false)
         podcastSource.value = PodcastSource.entries
@@ -429,183 +388,52 @@ object CustomizationSettings {
         podcastShowsForYou.value = readPins(p.getString(KEY_PODCAST_SHOWS_FOR_YOU, null))
             .takeIf { it.isNotEmpty() }
             ?.let { HomeShelf(p.getString(KEY_PODCAST_SHOWS_TITLE, null).orEmpty(), it) }
-        // The artist dial used to be on unless switched off. Someone who never
-        // touched the switch but pinned artists to that dial keeps it, rather
-        // than having those pins left on a page that is no longer shown.
-        if (!p.contains(KEY_ARTIST_DIAL) && artistDialPins.value.isNotEmpty()) artistDial.value = true
-        hiddenFromDial.value = p.getStringSet(KEY_HIDDEN_FROM_DIAL, emptySet())?.toSet().orEmpty()
-        dialHiddenLabels.value = p.getStringSet(KEY_DIAL_HIDDEN_LABELS, emptySet())?.toSet().orEmpty()
-        dialPinIcon.value = p.getBoolean(KEY_DIAL_PIN_ICON, true)
-        dialLabels.value = p.getBoolean(KEY_DIAL_LABELS, true)
         // Retired settings: tilt parallax and the ambient style picker are gone.
         if (p.contains(KEY_RETIRED_DIAL_PARALLAX) || p.contains(KEY_RETIRED_AMBIENT_STYLE)) {
             p.edit().remove(KEY_RETIRED_DIAL_PARALLAX).remove(KEY_RETIRED_AMBIENT_STYLE).apply()
         }
-        dialTileStyle.value = p.getString(KEY_DIAL_TILE_STYLE, null)
-            ?.let { name -> DialTileStyle.entries.firstOrNull { it.name == name } }
-            // The style's first form was one switch, for the contoured rim.
-            // Glass is the default when nothing was chosen.
-            ?: if (p.getBoolean(KEY_DIAL_CONTOURED_EDGE, false)) DialTileStyle.EDGE else DialTileStyle.GLASS
     }
 
-    // ── Speed dial ──────────────────────────────────────────────────────
+    // ── Speed dial (shared DialSettings) ────────────────────────────────
 
-    fun isPinnedToSpeedDial(id: String?): Boolean =
-        id != null && (
-            speedDialPins.value.any { it.speedDialId == id } ||
-                artistDialPins.value.any { it.speedDialId == id } ||
-                podcastDialPins.value.any { it.speedDialId == id }
-            )
+    fun isPinnedToSpeedDial(id: String?): Boolean = DialSettings.isPinnedToSpeedDial(id)
 
     /** Whether [item] is an artist (a YouTube channel), which may have a dial of its own. */
-    fun isArtist(item: ShelfItem): Boolean = item.videoId == null && item.browseId?.startsWith("UC") == true
+    fun isArtist(item: ShelfItem): Boolean = DialSettings.isArtist(item)
 
-    /**
-     * Pins [item], or unpins it if it is already pinned. Returns whether it is
-     * pinned now. An artist goes to the artists' own dial while that is on.
-     */
-    fun toggleSpeedDial(item: ShelfItem): Boolean {
-        val id = item.speedDialId ?: return false
-        // Pinning something taken off the dial brings it back.
-        if (id in hiddenFromDial.value) setHiddenFromDial(hiddenFromDial.value - id)
-        // A podcast show goes to the Podcasts page's dial. One pinned to the
-        // speed dial before that page was there comes off the speed dial as before.
-        if (item.isPodcastShow && speedDialPins.value.none { it.speedDialId == id }) {
-            val current = podcastDialPins.value
-            val pinned = current.none { it.speedDialId == id }
-            setPodcastDialPins(if (pinned) (current + item).takeLast(SPEED_DIAL_SIZE) else current.filterNot { it.speedDialId == id })
-            return pinned
-        }
-        if (isArtist(item) && (artistDial.value || artistDialPins.value.any { it.speedDialId == id })) {
-            val current = artistDialPins.value
-            val pinned = current.none { it.speedDialId == id }
-            setArtistDialPins(if (pinned) (current + item).takeLast(SPEED_DIAL_SIZE) else current.filterNot { it.speedDialId == id })
-            // Not on both dials at once.
-            if (pinned) setSpeedDialPins(speedDialPins.value.filterNot { it.speedDialId == id })
-            return pinned
-        }
-        val current = speedDialPins.value
-        val pinned = current.none { it.speedDialId == id }
-        val updated = if (pinned) {
-            (current + item).takeLast(SPEED_DIAL_SIZE)
-        } else {
-            current.filterNot { it.speedDialId == id }
-        }
-        setSpeedDialPins(updated)
-        return pinned
-    }
+    /** Pins [item], or unpins it; see [DialSettings.toggleSpeedDial]. */
+    fun toggleSpeedDial(item: ShelfItem): Boolean = DialSettings.toggleSpeedDial(item)
 
     /** Whether this launch has refreshed the pins' art yet: once per fresh start. */
-    var pinArtRefreshed = false
+    var pinArtRefreshed: Boolean
+        get() = DialSettings.pinArtRefreshed
+        set(value) { DialSettings.pinArtRefreshed = value }
 
-    /**
-     * Gives pinned tiles the art [items] carry for them now. A pin is saved
-     * with the art it had when it was pinned, but YouTube redraws the cover of
-     * a mix it rebuilds (Discover Mix, Supermix, New Release Mix) with each
-     * rebuild, so the pinned tile would otherwise keep last week's.
-     */
-    fun refreshPinArt(items: List<ShelfItem>) {
-        val art = HashMap<String, String>()
-        items.forEach { item ->
-            val id = item.speedDialId ?: return@forEach
-            item.thumbnailUrl?.let { art.putIfAbsent(id, it) }
-        }
-        refreshPinArt(art)
-    }
+    fun refreshPinArt(items: List<ShelfItem>) = DialSettings.refreshPinArt(items)
 
-    /** [refreshPinArt] from art already keyed by the pin's id. */
-    fun refreshPinArt(art: Map<String, String>) {
-        if (art.isEmpty()) return
-        fun fresh(pins: List<ShelfItem>) = pins.map { pin ->
-            val url = art[pin.speedDialId]
-            if (url == null || url == pin.thumbnailUrl) pin else pin.copy(thumbnailUrl = url)
-        }
-        val speed = fresh(speedDialPins.value)
-        if (speed != speedDialPins.value) setSpeedDialPins(speed)
-        val artists = fresh(artistDialPins.value)
-        if (artists != artistDialPins.value) setArtistDialPins(artists)
-    }
+    fun refreshPinArt(art: Map<String, String>) = DialSettings.refreshPinArt(art)
 
-    /**
-     * The pinned mixes YouTube builds for the listener and rebuilds over time,
-     * whose `RDTMAK` ids are the same from one rebuild to the next.
-     */
-    fun pinnedDynamicMixes(): List<String> =
-        speedDialPins.value.mapNotNull { pin -> pin.browseId?.takeIf { pin.videoId == null && isDynamicMix(it) } }
+    fun pinnedDynamicMixes(): List<String> = DialSettings.pinnedDynamicMixes()
 
-    fun isDynamicMix(browseId: String): Boolean = browseId.removePrefix("VL").startsWith("RDTMAK")
+    fun isDynamicMix(browseId: String): Boolean = DialSettings.isDynamicMix(browseId)
 
-    /** Replaces the pins, in the order given. */
-    fun setSpeedDialPins(value: List<ShelfItem>) {
-        val updated = value.distinctBy { it.speedDialId }.take(SPEED_DIAL_SIZE)
-        speedDialPins.value = updated
-        prefs?.edit()?.putString(KEY_SPEED_DIAL_PINS, writeItems(updated))?.apply()
-    }
+    fun setSpeedDialPins(value: List<ShelfItem>) = DialSettings.setSpeedDialPins(value)
 
-    /**
-     * Takes [item] off whichever dial it is on: unpinned, and kept off even
-     * where YouTube's own speed dial, Recently played or the play counts would
-     * put it back — until it is pinned again.
-     */
-    fun removeFromDial(item: ShelfItem) {
-        val id = item.speedDialId ?: return
-        setSpeedDialPins(speedDialPins.value.filterNot { it.speedDialId == id })
-        setArtistDialPins(artistDialPins.value.filterNot { it.speedDialId == id })
-        setPodcastDialPins(podcastDialPins.value.filterNot { it.speedDialId == id })
-        setHiddenFromDial(hiddenFromDial.value + id)
-    }
+    fun removeFromDial(item: ShelfItem) = DialSettings.removeFromDial(item)
 
-    /** Whether a dial tile's title shows: the default, unless the tile overrides it. */
-    fun dialLabelShown(id: String?): Boolean = dialLabels.value != (id != null && id in dialHiddenLabels.value)
+    fun dialLabelShown(id: String?): Boolean = DialSettings.dialLabelShown(id)
 
-    /** Shows or hides one dial tile's title, against the default. */
-    fun toggleDialLabel(item: ShelfItem) {
-        val id = item.speedDialId ?: return
-        val value = if (id in dialHiddenLabels.value) dialHiddenLabels.value - id else dialHiddenLabels.value + id
-        setDialLabelOverrides(value)
-    }
+    fun toggleDialLabel(item: ShelfItem) = DialSettings.toggleDialLabel(item)
 
-    /** Shows or hides every tile's title; the tiles' own choices start over from it. */
-    fun setDialLabels(value: Boolean) {
-        dialLabels.value = value
-        prefs?.edit()?.putBoolean(KEY_DIAL_LABELS, value)?.apply()
-        setDialLabelOverrides(emptySet())
-    }
+    fun setDialLabels(value: Boolean) = DialSettings.setDialLabels(value)
 
-    private fun setDialLabelOverrides(value: Set<String>) {
-        dialHiddenLabels.value = value
-        prefs?.edit()?.putStringSet(KEY_DIAL_HIDDEN_LABELS, value)?.apply()
-    }
+    fun setDialPinIcon(value: Boolean) = DialSettings.setDialPinIcon(value)
 
-    fun setDialPinIcon(value: Boolean) {
-        dialPinIcon.value = value
-        prefs?.edit()?.putBoolean(KEY_DIAL_PIN_ICON, value)?.apply()
-    }
+    fun setDialTileStyle(value: DialTileStyle) = DialSettings.setDialTileStyle(value)
 
-    fun setDialTileStyle(value: DialTileStyle) {
-        dialTileStyle.value = value
-        prefs?.edit()?.putString(KEY_DIAL_TILE_STYLE, value.name)?.remove(KEY_DIAL_CONTOURED_EDGE)?.apply()
-    }
+    fun setArtistDialPins(value: List<ShelfItem>) = DialSettings.setArtistDialPins(value)
 
-    private fun setHiddenFromDial(value: Set<String>) {
-        hiddenFromDial.value = value
-        prefs?.edit()?.putStringSet(KEY_HIDDEN_FROM_DIAL, value)?.apply()
-    }
-
-    /** Replaces the artists' dial's pins, in the order given. */
-    fun setArtistDialPins(value: List<ShelfItem>) {
-        val updated = value.distinctBy { it.speedDialId }.take(SPEED_DIAL_SIZE)
-        artistDialPins.value = updated
-        prefs?.edit()?.putString(KEY_ARTIST_DIAL_PINS, writeItems(updated))?.apply()
-    }
-
-    /** Replaces the Podcasts dial's pins, in the order given. */
-    fun setPodcastDialPins(value: List<ShelfItem>) {
-        val updated = value.distinctBy { it.speedDialId }.take(SPEED_DIAL_SIZE)
-        if (updated == podcastDialPins.value) return
-        podcastDialPins.value = updated
-        prefs?.edit()?.putString(KEY_PODCAST_DIAL_PINS, writeItems(updated))?.apply()
-    }
+    fun setPodcastDialPins(value: List<ShelfItem>) = DialSettings.setPodcastDialPins(value)
 
     /** Saves the dial the Podcasts page is showing, for the page to open on next time. */
     fun setLastPodcastDial(value: List<ShelfItem>) {
@@ -640,37 +468,13 @@ object CustomizationSettings {
         prefs?.edit()?.putBoolean(KEY_PODCAST_EPISODES_FOR_LATER, value)?.apply()
     }
 
-    fun setFeelingLucky(value: Boolean) {
-        feelingLucky.value = value
-        prefs?.edit()?.putBoolean(KEY_FEELING_LUCKY, value)?.apply()
-    }
+    fun setFeelingLucky(value: Boolean) = DialSettings.setFeelingLucky(value)
 
-    /** Pins are kept while the dials are off, so turning them back on restores them. */
-    fun setSpeedDials(value: Boolean) {
-        speedDials.value = value
-        prefs?.edit()?.putBoolean(KEY_SPEED_DIALS, value)?.apply()
-    }
+    fun setSpeedDials(value: Boolean) = DialSettings.setSpeedDials(value)
 
-    fun setMixesDial(value: Boolean) {
-        mixesDial.value = value
-        prefs?.edit()?.putBoolean(KEY_MIXES_DIAL, value)?.apply()
-    }
+    fun setMixesDial(value: Boolean) = DialSettings.setMixesDial(value)
 
-    /** Turning it on moves pinned artists onto their dial; off, back onto the speed dial. */
-    fun setArtistDial(value: Boolean) {
-        artistDial.value = value
-        prefs?.edit()?.putBoolean(KEY_ARTIST_DIAL, value)?.apply()
-        if (value) {
-            val artists = speedDialPins.value.filter { isArtist(it) }
-            if (artists.isNotEmpty()) {
-                setArtistDialPins(artistDialPins.value + artists)
-                setSpeedDialPins(speedDialPins.value.filterNot { isArtist(it) })
-            }
-        } else if (artistDialPins.value.isNotEmpty()) {
-            setSpeedDialPins(speedDialPins.value + artistDialPins.value)
-            setArtistDialPins(emptyList())
-        }
-    }
+    fun setArtistDial(value: Boolean) = DialSettings.setArtistDial(value)
 
     /** Saves the dial Home is showing, for the next launch to open on. */
     fun setLastSpeedDial(value: List<ShelfItem>, newReleases: Set<String> = emptySet()) {
@@ -683,22 +487,7 @@ object CustomizationSettings {
             ?.apply()
     }
 
-    private fun writeItems(items: List<ShelfItem>): String {
-        val json = JSONArray()
-        items.forEach { pin ->
-            json.put(
-                JSONObject()
-                    .put("title", pin.title)
-                    .put("subtitle", pin.subtitle)
-                    .put("thumb", pin.thumbnailUrl ?: JSONObject.NULL)
-                    .put("video", pin.videoId ?: JSONObject.NULL)
-                    .put("browse", pin.browseId ?: JSONObject.NULL)
-                    // So that a saved dial still knows an episode from a track.
-                    .put("podcast", pin.isPodcastEpisode || pin.durationText != null),
-            )
-        }
-        return json.toString()
-    }
+    private fun writeItems(items: List<ShelfItem>): String = DialPins.encode(items)
 
     /**
      * Up to [SPEED_DIAL_SIZE] items: pins first, then recently played, then
@@ -749,39 +538,15 @@ object CustomizationSettings {
      * [picks] are left to the Podcasts page's dial. A pin stays, as the
      * listener put it there.
      */
-    fun assembleDial(pins: List<ShelfItem>, picks: List<ShelfItem>): List<ShelfItem> {
-        val hidden = hiddenFromDial.value
-        return (pins + picks.filterNot { it.isPodcastTile })
-            .filter { it.speedDialId != null && it.speedDialId !in hidden }
-            .distinctBy { it.speedDialId }
-            .take(SPEED_DIAL_SIZE)
-    }
+    fun assembleDial(pins: List<ShelfItem>, picks: List<ShelfItem>): List<ShelfItem> =
+        DialSettings.assembleDial(pins, picks)
 
     private fun shelfItems(shelves: List<HomeShelf>, title: String) =
         shelves.firstOrNull { it.title.equals(title, ignoreCase = true) }?.items.orEmpty()
 
     private fun asPlayed(items: List<ShelfItem>) = items.map { PlayedCollections.collectionFor(it.videoId) ?: it }
 
-    private fun readPins(stored: String?): List<ShelfItem> {
-        if (stored.isNullOrBlank()) return emptyList()
-        return runCatching {
-            val json = JSONArray(stored)
-            (0 until json.length()).map { i ->
-                val o = json.getJSONObject(i)
-                ShelfItem(
-                    title = o.optString("title"),
-                    subtitle = o.optString("subtitle"),
-                    thumbnailUrl = o.optStringOrNull("thumb"),
-                    videoId = o.optStringOrNull("video"),
-                    browseId = o.optStringOrNull("browse"),
-                    isPodcastEpisode = o.optBoolean("podcast", false),
-                )
-            }
-        }.getOrDefault(emptyList())
-    }
-
-    private fun JSONObject.optStringOrNull(key: String): String? =
-        if (isNull(key)) null else optString(key).takeIf { it.isNotBlank() }
+    private fun readPins(stored: String?): List<ShelfItem> = DialPins.decode(stored)
 
     /** The pages the bar shows, Search last. */
     fun visibleNavPages(tabs: List<OrderedToggle<NavPage>> = navTabs.value): List<NavPage> =
@@ -992,16 +757,9 @@ object CustomizationSettings {
         prefs?.edit()?.putString(KEY_MINI_PLAYER_SHAPE, value.name)?.apply()
     }
 
-    fun setSpeedDialSource(value: SpeedDialSource) {
-        speedDialSource.value = value
-        prefs?.edit()?.putString(KEY_SPEED_DIAL_SOURCE, value.name)?.apply()
-    }
+    fun setSpeedDialSource(value: SpeedDialSource) = DialSettings.setSpeedDialSource(value)
 
-    fun setSpeedDialRows(value: Int) {
-        val rows = value.coerceIn(3, 4)
-        speedDialRows.value = rows
-        prefs?.edit()?.putInt(KEY_SPEED_DIAL_ROWS, rows)?.apply()
-    }
+    fun setSpeedDialRows(value: Int) = DialSettings.setSpeedDialRows(value)
 
     private fun ensureOneTab(tabs: List<OrderedToggle<NavPage>>): List<OrderedToggle<NavPage>> =
         if (tabs.any { it.enabled }) {
@@ -1047,9 +805,9 @@ object CustomizationSettings {
     /** The title the speed dial goes by, both YouTube's and the one built here. */
     const val SPEED_DIAL_TITLE = "Speed dial"
     private const val RECENTS_TITLE = "Recents"
-    const val SPEED_DIAL_SIZE = 36
+    const val SPEED_DIAL_SIZE = DialSettings.SPEED_DIAL_SIZE
     private const val SPEED_DIAL_COLUMNS = 3
-    const val DEFAULT_SPEED_DIAL_ROWS = 4
+    const val DEFAULT_SPEED_DIAL_ROWS = DialSettings.DEFAULT_SPEED_DIAL_ROWS
 
     /**
      * The glass as it ships, in both styles: 90% see-through, a 10dp frost,
@@ -1126,42 +884,24 @@ object CustomizationSettings {
         KEY_CLEAR_GLASS_TINT,
     )
     private const val KEY_LIBRARY_SOURCE = "custom_library_source"
-    private const val KEY_SPEED_DIAL_PINS = "custom_speed_dial_pins"
     private const val KEY_LAST_SPEED_DIAL = "custom_last_speed_dial"
     private const val KEY_MINI_PLAYER_NEXT = "custom_mini_player_next"
     private const val KEY_CROP_THUMBNAILS = "custom_crop_thumbnails"
     private const val KEY_GENERATE_PLAYLIST_IMAGES = "custom_generate_playlist_images"
     private const val KEY_PLAYLIST_BACKDROPS_OFF = "custom_playlist_backdrops_off"
-    private const val KEY_SPEED_DIALS = "custom_speed_dials"
-    private const val KEY_ARTIST_DIAL = "custom_artist_dial"
-    private const val KEY_FEELING_LUCKY = "custom_feeling_lucky"
-    private const val KEY_MIXES_DIAL = "custom_mixes_dial"
-    private const val KEY_ARTIST_DIAL_PINS = "custom_artist_dial_pins"
-    private const val KEY_PODCAST_DIAL_PINS = "custom_podcast_dial_pins"
     private const val KEY_LAST_PODCAST_DIAL = "custom_last_podcast_dial"
     private const val KEY_PODCAST_SHOWS_FOR_YOU = "custom_podcast_shows_for_you"
     private const val KEY_PODCAST_SHOWS_TITLE = "custom_podcast_shows_title"
     private const val KEY_PODCAST_SHOWS_LISTENER = "custom_podcast_shows_listener"
     private const val KEY_PODCAST_EPISODES_FOR_LATER = "custom_podcast_episodes_for_later"
     private const val KEY_PODCAST_SOURCE = "custom_podcast_source"
-    private const val KEY_HIDDEN_FROM_DIAL = "custom_hidden_from_dial"
-    private const val KEY_DIAL_HIDDEN_LABELS = "custom_dial_hidden_labels"
-    private const val KEY_DIAL_PIN_ICON = "custom_dial_pin_icon"
-    private const val KEY_DIAL_LABELS = "custom_dial_labels"
-    private const val KEY_DIAL_CONTOURED_EDGE = "custom_dial_contoured_edge"
-    private const val KEY_DIAL_TILE_STYLE = "custom_dial_tile_style"
     private const val KEY_RETIRED_DIAL_PARALLAX = "custom_dial_parallax"
     private const val KEY_RETIRED_AMBIENT_STYLE = "custom_ambient_style"
     private const val KEY_START_PAGE = "custom_start_page"
     private const val KEY_KEEP_NAV_EXPANDED = "custom_keep_nav_expanded"
     private const val KEY_MINI_PLAYER_SHAPE = "custom_mini_player_shape"
-    private const val KEY_SPEED_DIAL_ROWS = "custom_speed_dial_rows"
-    private const val KEY_SPEED_DIAL_SOURCE = "custom_speed_dial_source"
     private const val KEY_LAST_DIAL_NEW_RELEASES = "custom_last_dial_new_releases"
 }
-
-/** What identifies an item on the speed dial: its track, or the page it opens. */
-val ShelfItem.speedDialId: String? get() = videoId ?: browseId
 
 /**
  * When each track was last started, by video id, for the folders' "Last played"
