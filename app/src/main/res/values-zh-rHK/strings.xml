@@ -864,9 +864,15 @@
 
     <string name="export_compatible_downloads">匯出相容的下載</string>
 
-    <string name="legacy_mesh_gradient">經典網格漸變</string>
+    <string name="player_blur_style">播放器模糊樣式</string>
 
-    <string name="legacy_mesh_gradient_subtitle">恢復 v1.5 中播放器背後的流動色塊效果</string>
+    <string name="player_theme_default">預設</string>
+
+    <string name="player_theme_legacy">舊版</string>
+
+    <string name="player_theme_simple">簡潔</string>
+
+    <string name="player_blur_style_subtitle">專輯封面下方模糊效果的樣式</string>
 
     <string name="liquid_glass">液態玻璃 (Liquid Glass)</string>
 

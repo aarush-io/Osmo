@@ -194,6 +194,7 @@ import com.music.bitchord.data.VideoCanvases
 import com.music.bitchord.data.lyrics.LyricLine
 import com.music.bitchord.data.lyrics.LyricsSource
 import com.music.bitchord.data.settings.LastPlayerScreen
+import com.music.bitchord.data.settings.PlayerTheme
 import com.music.bitchord.data.model.LikeStatus
 import com.music.bitchord.data.model.PlaybackSourceType
 import com.music.bitchord.data.model.CARD_ART_PX
@@ -1523,8 +1524,11 @@ fun NowPlayingScreen(
     val canvasCover = remember(canvas?.url) {
         mutableFloatStateOf(if (canvasSeed.rendered && incomingFade.value >= 1f) 1f else 0f)
     }
-    // v1.5's backdrop, kept behind a switch — see [PlayerSettings.legacyMeshGradient].
-    val legacyMesh by PlayerSettings.legacyMeshGradient.collectAsStateWithLifecycle()
+    // What the main player stands on — see [PlayerTheme]. Legacy is v1.5's
+    // drifting blobs; Simple is the blurred cover the lyrics and queue use.
+    val playerTheme by PlayerSettings.playerTheme.collectAsStateWithLifecycle()
+    val legacyMesh = playerTheme == PlayerTheme.LEGACY
+    val simpleBackdrop = playerTheme == PlayerTheme.SIMPLE
     // The backdrop's colours, taken off the artwork's own arrangement rather
     // than quantised out of it — see [ArtworkMesh].
     //
@@ -2329,8 +2333,9 @@ fun NowPlayingScreen(
         if (spotifyCanvasPresentation && mixing) spotifyCanvasControlsOpen = true
     }
     // Portrait clips always use the existing artwork mesh, even if the user
-    // selected the legacy backdrop for ordinary artwork.
-    val artMesh = if (legacyMesh && !canvasFirstPortrait) null else
+    // selected the legacy backdrop for ordinary artwork. The simple backdrop
+    // has no mesh at all: a portrait clip feathers into the blurred cover.
+    val artMesh = if (simpleBackdrop || (legacyMesh && !canvasFirstPortrait)) null else
         key(song.videoId) { rememberArtworkMesh(remoteArt, canvasFrame, CARD_ART_PX) }
     // Whether the banner is the presentation at all: full-bleed is on, and there
     // is something to blow out. The collapse is deliberately *not* part of this:
@@ -2681,7 +2686,9 @@ fun NowPlayingScreen(
     val fullArtworkBlurImage = rememberFullArtworkBlurImage(
         imageUrl = remoteArt,
         artPx = CARD_ART_PX,
-        prepare = landscape || tabletArtworkBackdrop || lyricsOpen || queueOpen ||
+        // Straight away when it is the main player's backdrop too: the decode
+        // and blur run off the main thread.
+        prepare = simpleBackdrop || landscape || tabletArtworkBackdrop || lyricsOpen || queueOpen ||
             playerPrewarmStage >= 1,
     )
     // One movable Image node, not two backdrop call sites. Compose carries it
@@ -3397,10 +3404,15 @@ fun NowPlayingScreen(
         }
         val legacyMeshBackdrop = !tabletArtworkBackdrop && !backdropCovered &&
             legacyMesh && !canvasFirstPortrait
+        // The simple theme puts the blurred cover under the main player too,
+        // in place of the mesh, and lets it go under a full-screen Canvas as
+        // the mesh is let go of.
+        val simpleMainBackdrop = simpleBackdrop && !lyricsOpen && !queueOpen
         val fullArtworkBackdropAlpha by animateFloatAsState(
             targetValue = if (
                 !legacyMeshBackdrop &&
-                (tabletArtworkBackdrop || lyricsOpen || queueOpen || !heroMode) &&
+                (tabletArtworkBackdrop || lyricsOpen || queueOpen || !heroMode ||
+                    (simpleBackdrop && !backdropCovered)) &&
                 (tabletArtworkBackdrop || fullArtworkBlurImage != null)
             ) 1f else 0f,
             animationSpec = tween(durationMillis = 360, easing = FastOutSlowInEasing),
@@ -3425,7 +3437,7 @@ fun NowPlayingScreen(
                     alpha = (1f - fullArtworkBackdropAlpha) * backdropClipAlpha()
                 }.then(sweepOut),
             )
-        } else if (!tabletArtworkBackdrop && !backdropCovered) {
+        } else if (!tabletArtworkBackdrop && !backdropCovered && !simpleBackdrop) {
             ArtworkMeshBackdrop(
                 mesh = artMesh,
                 seam = if (canvasFirstPortrait) renderedCanvasBottom else if (heroMode) heroHeight else 0.dp,
@@ -3435,7 +3447,14 @@ fun NowPlayingScreen(
             )
         }
         fullArtworkBlurContent(
-            Modifier.graphicsLayer { alpha = fullArtworkBackdropAlpha },
+            if (simpleMainBackdrop && !tabletArtworkBackdrop) {
+                // Faded and swept out under a clip coming in, as the mesh is.
+                Modifier.graphicsLayer {
+                    alpha = fullArtworkBackdropAlpha * backdropClipAlpha()
+                }.then(sweepOut)
+            } else {
+                Modifier.graphicsLayer { alpha = fullArtworkBackdropAlpha }
+            },
         )
 
         // Mount once, behind the controls. A known portrait aspect changes the

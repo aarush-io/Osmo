@@ -884,9 +884,15 @@
 
     <string name="export_compatible_downloads">Kompatible Downloads exportieren</string>
 
-    <string name="legacy_mesh_gradient">Klassischer Netzverlauf</string>
+    <string name="player_blur_style">Unschärfestil des Players</string>
 
-    <string name="legacy_mesh_gradient_subtitle">Bringt die sanft fließenden Farbflecken aus v1.5 zurück</string>
+    <string name="player_theme_default">Standard</string>
+
+    <string name="player_theme_legacy">Klassisch</string>
+
+    <string name="player_theme_simple">Einfach</string>
+
+    <string name="player_blur_style_subtitle">Der Stil der Unschärfe unter dem Albumcover</string>
 
     <string name="liquid_glass">Flüssiges Glas</string>
 
