@@ -55,20 +55,6 @@
     <string name="lyrics_already_in_language">ये लिरिक्स पहले से %1$s में हैं</string>
     <string name="lyrics_already_romanized">ये लिरिक्स पहले से लैटिन अक्षरों में हैं</string>
     <string name="lyrics_by">%1$s द्वारा लिरिक्स</string>
-    <string-array name="lyrics_intro_lines">
-        <item>बीट उतर रही है</item>
-        <item>गाना शुरू हो रहा है</item>
-        <item>वॉर्मअप हो रहा है</item>
-        <item>माहौल बन रहा है</item>
-        <item>पहले बेस, फिर शब्द</item>
-        <item>थोड़ा रुकिए</item>
-        <item>बिल्ड-अप महसूस कीजिए</item>
-        <item>अभी तो बस ग्रूव</item>
-        <item>हुक आने ही वाला है</item>
-        <item>इसे थोड़ी सांस लेने दीजिए</item>
-        <item>वोकल्स की बारी</item>
-        <item>पहले सुर आ गए</item>
-    </string-array>
     <string-array name="lyrics_loading_lines">
         <item>लिरिक्स लाए जा रहे हैं</item>
         <item>शब्द ढूंढे जा रहे हैं</item>
