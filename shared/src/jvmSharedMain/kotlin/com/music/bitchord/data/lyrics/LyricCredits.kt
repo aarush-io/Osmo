@@ -10,12 +10,18 @@ package com.music.bitchord.data.lyrics
  * that is not a credit, so a line in the middle of the song that happens to say
  * "written by" stays.
  *
+ * Some sources also open with a header line that names the song: "Flower In
+ * A Hurricane (feat. …) - Justice/Tame Impala". When [title] is known, a line
+ * in that run that starts with the title and also names one of the [artist]s
+ * or has a " - " goes with the credits too.
+ *
  * Blank lines in that run go with the credits. When the first line that stays
  * starts late enough, it gets one intro break at 0, as
  * [withInstrumentalGaps] would give it. If nothing would be left, the lines are
  * returned as they were.
  */
-fun List<LyricLine>.withoutLeadingCredits(): List<LyricLine> {
+fun List<LyricLine>.withoutLeadingCredits(title: String? = null, artist: String? = null): List<LyricLine> {
+    val header = SongHeader.of(title, artist)
     var head = 0
     var credits = 0
     while (head < size && head < MAX_HEAD_LINES) {
@@ -23,6 +29,7 @@ fun List<LyricLine>.withoutLeadingCredits(): List<LyricLine> {
         when {
             line.text.isBlank() -> Unit
             isCreditLine(line.text) -> credits++
+            header?.matches(line.text) == true -> credits++
             else -> break
         }
         head++
@@ -54,11 +61,50 @@ fun isCreditLine(text: String): Boolean {
         CJK_CREDIT.containsMatchIn(line)
 }
 
+/**
+ * The song's own name and artists, to know a header line such as "Title (feat.
+ * X) - Artist/Other" when a source puts one before the lyrics.
+ */
+private class SongHeader(private val title: String, private val artists: List<String>) {
+
+    fun matches(text: String): Boolean {
+        val line = text.matchKey()
+        if (!line.startsWith(title)) return false
+        // The first sung line can be the title itself: "Flower in a hurricane,
+        // I ..." is a lyric. A header also names who made it, or has a dash.
+        return text.contains(" - ") || text.contains(" – ") || artists.any { line.contains(it) }
+    }
+
+    companion object {
+        fun of(title: String?, artist: String?): SongHeader? {
+            // Only the name before any bracket or dash: the header and the
+            // player can write "(feat. …)" and "[from …]" differently.
+            val name = title?.forLyricsSearch()
+                ?.substringBefore('(')?.substringBefore('[')?.substringBefore(" - ")
+                ?.matchKey()?.takeIf { it.length >= 2 }
+                ?: return null
+            val artists = artist.orEmpty().artistForLyricsSearch()
+                .split(ARTIST_SPLIT)
+                .map { it.matchKey() }
+                .filter { it.length >= 2 }
+            return SongHeader(name, artists)
+        }
+
+        private val ARTIST_SPLIT = Regex("""\s*(?:,|&|/|\bfeat\.?|\bft\.?|\band\b|\bx\b|、)\s*""", RegexOption.IGNORE_CASE)
+    }
+}
+
+/** Letters and digits only, in lower case: how a header line and a title are compared. */
+private fun String.matchKey(): String = lowercase().filter { it.isLetterOrDigit() }
+
 /** Credits are a few lines at the start; past this many lines it is the song. */
 private const val MAX_HEAD_LINES = 12
 
-/** A credit with many names can be long, but not as long as a verse. */
-private const val MAX_CREDIT_LENGTH = 140
+/**
+ * A credit with many names can be long: "Composed by: …" with eleven writers
+ * is about 200 characters. A verse written as one line is longer than this.
+ */
+private const val MAX_CREDIT_LENGTH = 400
 
 /** Brackets and bullets that some sources put around a credit line. */
 private val EDGE_MARKS = charArrayOf('(', ')', '[', ']', '{', '}', '（', '）', '【', '】', '*', '•', '·', '-', '–', '—', '~', '"', '“', '”')

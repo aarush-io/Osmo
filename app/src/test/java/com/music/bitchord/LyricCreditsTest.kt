@@ -120,6 +120,34 @@ class LyricCreditsTest {
     }
 
     @Test
+    fun `a header line and long credits at the start are removed`() {
+        val writers = "Stu Mackenzie/Joey Walker/Ambrose Kenny-Smith/Nicholas Craig/Michael Cavanagh/" +
+            "Lucas Harwood/Gaspard Auge/Xavier de Rosnay/Kevin Parker/Sarah Aarons/Solana Rowe"
+        val result = lines(
+            0L to "Flower In A Hurricane (feat. Tame Impala, SZA, King Gizzard & the Lizard Wizard) " +
+                "[from GTAVI] - Justice/Tame Impala/SZA/Grand Theft Auto VI",
+            1_000L to "Lyrics by :\u3000$writers",
+            2_000L to "Composed by :\u3000$writers",
+            3_000L to "",
+            20_000L to "Only love never hesitates",
+            24_000L to "Only trust has a price",
+        ).withoutLeadingCredits(
+            title = "Flower In A Hurricane (feat. Tame Impala, SZA, King Gizzard & the Lizard Wizard) [from GTA VI]",
+            artist = "Justice, Tame Impala",
+        )
+        assertEquals(listOf("", "Only love never hesitates", "Only trust has a price"), result.map { it.text })
+    }
+
+    @Test
+    fun `a first line that is the title stays`() {
+        val original = lines(
+            12_000L to "Flower in a hurricane, I hold on",
+            15_000L to "Second line",
+        )
+        assertSame(original, original.withoutLeadingCredits(title = "Flower In A Hurricane", artist = "Justice"))
+    }
+
+    @Test
     fun `lyrics without credits are unchanged`() {
         val original = lines(0L to "", 12_000L to "First line", 15_000L to "Second line")
         assertSame(original, original.withoutLeadingCredits())
