@@ -55,20 +55,6 @@
     <string name="lyrics_already_in_language">이 가사는 이미 %1$s입니다</string>
     <string name="lyrics_already_romanized">이 가사는 이미 로마자를 사용하고 있습니다</string>
     <string name="lyrics_by">가사: %1$s</string>
-    <string-array name="lyrics_intro_lines">
-        <item>비트가 깔리는 중</item>
-        <item>노래가 시작하는 중</item>
-        <item>준비 중</item>
-        <item>분위기 잡는 중</item>
-        <item>베이스 먼저, 가사는 나중에</item>
-        <item>잠시만 기다려주세요</item>
-        <item>빌드업을 느껴보세요</item>
-        <item>지금은 그루브만 타 보세요</item>
-        <item>훅이 다가오고 있어요</item>
-        <item>한숨 돌려요</item>
-        <item>보컬 큐</item>
-        <item>첫 음 시작</item>
-    </string-array>
     <string-array name="lyrics_loading_lines">
         <item>가사를 가져오는 중</item>
         <item>가사를 찾는 중</item>

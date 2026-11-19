@@ -74,6 +74,7 @@ object EmbeddedLyrics {
             // The same last pass the network sources get, so a downloaded track
             // and a streamed one draw their backing vocals the same way.
             LrcLib.parseLrc(raw).takeIf { lines -> lines.any { it.text.isNotBlank() } }
+                ?.withoutLeadingCredits()
                 ?.withBackgroundVocals()
         }
 

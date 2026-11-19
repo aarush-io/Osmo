@@ -32,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
@@ -108,6 +110,14 @@ internal object HomeCategory {
         private set
 
     val active: Boolean get() = selected != null
+
+    /**
+     * The chip row's height in px, as last measured, or 0 with no chips. The
+     * held row ([HomeCategoryPinnedRow]) takes this much room under the top
+     * bar, so Home's feed comes to rest below it, not under it. Read only
+     * when a fling settles, so it is not state.
+     */
+    var rowHeightPx: Int = 0
 
     private val scope by lazy { CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate) }
     private var job: Job? = null
@@ -310,6 +320,9 @@ internal fun rememberCategoryHome(account: Any?, speedDialsOn: Boolean, hidden: 
 /** Home's category chips, beside the mark: for [com.music.bitchord.ui.screens.HomeScreen]'s mark row. */
 internal val HomeCategoryRow: @Composable () -> Unit = { HomeCategoryChips(floating = false) }
 
+/** The room the held chip row takes under the top bar, in px: for HomeScreen's feedHeldRoomPx. */
+internal val HomeCategoryHeldRoom: () -> Int = { HomeCategory.rowHeightPx }
+
 /**
  * The category chips again, held under the top bar while Home is scrolled
  * down into its feed (the "For You" part, or the category's): drawn over the
@@ -344,7 +357,10 @@ private fun HomeCategoryChips(floating: Boolean) {
     val live by YtMusicRepository.homeChips.collectAsStateWithLifecycle()
     LaunchedEffect(live) { HomeCategory.save(live) }
     val chips = HomeCategory.chips(live)
-    if (chips.isEmpty()) return
+    if (chips.isEmpty()) {
+        SideEffect { HomeCategory.rowHeightPx = 0 }
+        return
+    }
     val selected = HomeCategory.selected
     val haptics = rememberHaptics()
     val rowState = rememberLazyListState()
@@ -365,7 +381,10 @@ private fun HomeCategoryChips(floating: Boolean) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         contentPadding = PaddingValues(start = if (floating) PAGE_GUTTER else 0.dp, end = PAGE_GUTTER),
-        modifier = Modifier.fillMaxWidth().chipRowEdgeFade(rowState),
+        modifier = Modifier
+            .fillMaxWidth()
+            .onSizeChanged { HomeCategory.rowHeightPx = it.height }
+            .chipRowEdgeFade(rowState),
     ) {
         items(chips, key = { it.params }) { chip ->
             CategoryChip(
