@@ -156,7 +156,7 @@ object LyricsRepository {
                         recording,
                         hit,
                         documents::get,
-                    )?.takeIf { fitsTrack(it, durationMs) }?.let { result(source, it) }
+                    )?.takeIf { fitsTrack(it, durationMs) }?.let { result(source, it, title, artist) }
                     onSourceResult?.invoke(source, found)
                     found
                 } catch (cancelled: CancellationException) {
@@ -246,8 +246,8 @@ object LyricsRepository {
      * [TtmlLyrics] knows it structurally — [withBackgroundVocals] leaves that
      * one's own split alone.
      */
-    private fun result(source: LyricsSource, lines: List<LyricLine>) =
-        Result(source, lines.withoutLeadingCredits().withBackgroundVocals())
+    private fun result(source: LyricsSource, lines: List<LyricLine>, title: String, artist: String) =
+        Result(source, lines.withoutLeadingCredits(title, artist).withBackgroundVocals())
 
     /**
      * Longest the lookup will wait to find out which recording this is.
