@@ -4,16 +4,12 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- The grid in near-black for the light greyscale icon, dim cells a faint grey. -->
+    <!-- Osmo mark, centered within the icon mask. -->
     <group
         android:pivotX="54"
         android:pivotY="54"
         android:scaleX="0.8"
         android:scaleY="0.8">
-        <path
-            android:fillColor="#FF000000"
-            android:fillAlpha="0.12"
-            android:pathData="M54,18 A36,36 0 1,1 54,90 A36,36 0 1,1 54,18 Z M54,32 A22,22 0 1,0 54,76 A22,22 0 1,0 54,32 Z" / android:fillType="evenOdd">
         <path android:pathData="M54,18 A36,36 0 1,1 54,90 A36,36 0 1,1 54,18 Z M54,32 A22,22 0 1,0 54,76 A22,22 0 1,0 54,32 Z" android:fillType="evenOdd">
             <aapt:attr name="android:fillColor">
                 <gradient

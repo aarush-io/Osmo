@@ -3,7 +3,7 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- The grid at 80% of its first size, so it sits clear of the mask's edge. -->
+    <!-- Osmo mark, centered within the icon mask. -->
     <group
         android:pivotX="54"
         android:pivotY="54"
@@ -11,11 +11,8 @@
         android:scaleY="0.8">
         <path
             android:fillColor="#FFFFFFFF"
-            android:fillAlpha="0.25"
-            android:pathData="M54,18 A36,36 0 1,1 54,90 A36,36 0 1,1 54,18 Z M54,32 A22,22 0 1,0 54,76 A22,22 0 1,0 54,32 Z" / android:fillType="evenOdd">
-        <path
-            android:fillColor="#FFFFFFFF"
             android:fillAlpha="1.0"
-            android:pathData="M54,18 A36,36 0 1,1 54,90 A36,36 0 1,1 54,18 Z M54,32 A22,22 0 1,0 54,76 A22,22 0 1,0 54,32 Z" / android:fillType="evenOdd">
+            android:pathData="M54,18 A36,36 0 1,1 54,90 A36,36 0 1,1 54,18 Z M54,32 A22,22 0 1,0 54,76 A22,22 0 1,0 54,32 Z"
+            android:fillType="evenOdd" />
     </group>
 </vector>
