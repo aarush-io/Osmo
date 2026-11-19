@@ -83,7 +83,7 @@ jobs:
           LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
           LASTFM_SECRET: ${{ secrets.LASTFM_SECRET }}
         run: |
-          ./gradlew assembleDevBenchmark -x lintVitalDevBenchmark -PnoBenchmarkSuffix \
+          ./gradlew assembleProdBenchmark -x lintVitalProdBenchmark -PnoBenchmarkSuffix \
             -Pandroid.injected.signing.store.file="$SHARED_KEYSTORE" \
             -Pandroid.injected.signing.store.password=android \
             -Pandroid.injected.signing.key.alias=androiddebugkey \
@@ -101,7 +101,7 @@ jobs:
           # arm64-v8a goes up first and sorts first: the update check of 1.7.1
           # and older takes the first APK of a release, and those are all
           # arm64 installs.
-          OUT=app/build/outputs/apk/dev/benchmark
+          OUT=app/build/outputs/apk/prod/benchmark
           ASSETS=()
           for ABI in arm64-v8a armeabi-v7a x86_64 universal; do
             APK=$(ls "$OUT"/*"$ABI"*.apk 2>/dev/null | head -n1)

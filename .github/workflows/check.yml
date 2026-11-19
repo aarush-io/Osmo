@@ -53,7 +53,7 @@ jobs:
           fi
 
       # The benchmark build type: the release build's R8 and non-debuggable
-      # runtime, signed with the shared key under the app's own package, so it
+      # runtime, signed with the shared key under Osmo's production package, so it
       # installs over the last one. A debug build is interpreted and checked at
       # runtime and runs Compose several times slower than the app really does,
       # which made every scroll and launch feel laggier than it is. Release lint
@@ -61,7 +61,7 @@ jobs:
       # arm64 only (-Parm64Only): it is the one APK the test builds are tried on.
       # A pull request with the label "32-bit build" also gets the armeabi-v7a
       # APK, for a phone with a 32-bit system. The label counts from the next push.
-      - name: Build the dev APK
+      - name: Build the Osmo APK
         env:
           WITH_32_BIT: ${{ contains(github.event.pull_request.labels.*.name, '32-bit build') }}
         run: |
@@ -69,30 +69,30 @@ jobs:
           ABI_FLAG=-Parm64Only
           if [ "$WITH_32_BIT" = "true" ]; then ABI_FLAG=-Pabis=arm64-v8a,armeabi-v7a; fi
           if [ -n "$SHARED_KEYSTORE" ]; then
-            ./gradlew assembleDevBenchmark -x lintVitalDevBenchmark -PnoBenchmarkSuffix "$ABI_FLAG" \
+            ./gradlew assembleProdBenchmark -x lintVitalProdBenchmark -PnoBenchmarkSuffix "$ABI_FLAG" \
               -Pandroid.injected.signing.store.file="$SHARED_KEYSTORE" \
               -Pandroid.injected.signing.store.password=android \
               -Pandroid.injected.signing.key.alias=androiddebugkey \
               -Pandroid.injected.signing.key.password=android 2>&1 | tee -a "$RUNNER_TEMP/gradle.log"
           else
-            ./gradlew assembleDevBenchmark -x lintVitalDevBenchmark -PnoBenchmarkSuffix "$ABI_FLAG" 2>&1 | tee -a "$RUNNER_TEMP/gradle.log"
+            ./gradlew assembleProdBenchmark -x lintVitalProdBenchmark -PnoBenchmarkSuffix "$ABI_FLAG" 2>&1 | tee -a "$RUNNER_TEMP/gradle.log"
           fi
 
-      - name: Upload the dev APK
+      - name: Upload the Osmo APK
         uses: actions/upload-artifact@v4
         with:
           name: osmo-${{ github.sha }}
           path: |
-            app/build/outputs/apk/dev/benchmark/*.apk
-            !app/build/outputs/apk/dev/benchmark/*armeabi-v7a*.apk
+            app/build/outputs/apk/prod/benchmark/*.apk
+            !app/build/outputs/apk/prod/benchmark/*armeabi-v7a*.apk
           if-no-files-found: error
 
-      - name: Upload the 32-bit dev APK
+      - name: Upload the 32-bit Osmo APK
         if: contains(github.event.pull_request.labels.*.name, '32-bit build')
         uses: actions/upload-artifact@v4
         with:
           name: osmo-32-bit-${{ github.sha }}
-          path: app/build/outputs/apk/dev/benchmark/*armeabi-v7a*.apk
+          path: app/build/outputs/apk/prod/benchmark/*armeabi-v7a*.apk
           if-no-files-found: error
 
       # Compiler errors and failed tasks as annotations, so they read on the

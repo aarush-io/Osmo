@@ -72,7 +72,7 @@ class AppThreadWatchTest {
 
     @Test
     fun `compiled code is the app's own executable mappings`() {
-        val dir = "/data/app/~~a==/com.steeben.dial-b=="
+        val dir = "/data/app/~~a==/com.osmo.music-b=="
         val maps = sequenceOf(
             "7a00000000-7a00100000 r--p 00000000 fd:05 11 $dir/oat/arm64/base.odex",
             "7a00100000-7a00500000 r-xp 00100000 fd:05 11 $dir/oat/arm64/base.odex",
@@ -88,7 +88,7 @@ class AppThreadWatchTest {
 
     @Test
     fun `an install with no compiled code has none`() {
-        val dir = "/data/app/~~a==/com.steeben.dial-b=="
+        val dir = "/data/app/~~a==/com.osmo.music-b=="
         val maps = sequenceOf(
             "7a00000000-7a00100000 r--p 00000000 fd:05 11 $dir/oat/arm64/base.odex",
             "7a00500000-7a00600000 r--p 00000000 fd:05 12 $dir/oat/arm64/base.vdex",

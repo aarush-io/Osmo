@@ -75,7 +75,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.music.bitchord"
+        applicationId = "com.osmo.music"
         // 26 keeps reach wide; real-time blur (RenderEffect) kicks in on API 31+,
         // Haze falls back to a translucent scrim below that.
         minSdk = 26
@@ -138,11 +138,9 @@ android {
     productFlavors {
         create("dev") {
             dimension = "env"
-            // This fork's own app (com.steeben.dial since 1.5.0, com.steeben.bitchord
-            // before): a different package from upstream's, so it
-            // installs beside the official BitChord instead of replacing it.
-            applicationId = "com.steeben.dial"
-            resValue("string", "app_name", "Osmo")
+            // Development builds sit beside the stable Osmo app.
+            applicationId = "com.osmo.music.dev"
+            resValue("string", "app_name", "Osmo Dev")
         }
         create("prod") {
             dimension = "env"
@@ -461,10 +459,10 @@ val verifyDevInstall = tasks.register("verifyDevInstall") {
             .drop(1)
             .mapNotNull { line -> line.split('\t').takeIf { it.size == 2 && it[1] == "device" }?.get(0) }
         serials.forEach { serial ->
-            logger.lifecycle("verifyDevInstall: compiling com.steeben.dial on $serial")
+            logger.lifecycle("verifyDevInstall: compiling com.osmo.music.dev on $serial")
             ProcessBuilder(
                 adbPath, "-s", serial, "shell", "cmd", "package", "compile",
-                "-m", "verify", "-f", "com.steeben.dial",
+                "-m", "verify", "-f", "com.osmo.music.dev",
             ).inheritIO().start().waitFor()
         }
     }

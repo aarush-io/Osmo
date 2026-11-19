@@ -1,8 +1,8 @@
 name: Dev Debug APK
 
 # Builds an installable debug APK for testing changes from a fork or branch.
-# No signing secrets needed: debug builds are signed with the debug key, and the
-# `dev` flavor installs as "BitChord Dev" beside the normal app.
+# Uses the same Osmo production package as releases, so it can update an existing
+# install when signed with the shared key.
 #
 # Run it by hand from the Actions tab (pick the branch), or it runs on every push
 # to a fix/** or feat/** branch. The APK is attached to the run as an artifact.
@@ -68,20 +68,20 @@ jobs:
           LASTFM_SECRET: ${{ secrets.LASTFM_SECRET }}
         run: |
           if [ -n "$SHARED_KEYSTORE" ]; then
-            ./gradlew assembleDevBenchmark -x lintVitalDevBenchmark -PnoBenchmarkSuffix \
+            ./gradlew assembleProdBenchmark -x lintVitalProdBenchmark -PnoBenchmarkSuffix \
               -Pandroid.injected.signing.store.file="$SHARED_KEYSTORE" \
               -Pandroid.injected.signing.store.password=android \
               -Pandroid.injected.signing.key.alias=androiddebugkey \
               -Pandroid.injected.signing.key.password=android
           else
-            ./gradlew assembleDevBenchmark -x lintVitalDevBenchmark -PnoBenchmarkSuffix
+            ./gradlew assembleProdBenchmark -x lintVitalProdBenchmark -PnoBenchmarkSuffix
           fi
 
       # The certificate fingerprint must be identical on every run, or Android
       # will refuse to install over the previous build.
       - name: Show signing certificate
         run: |
-          APK=$(ls app/build/outputs/apk/dev/benchmark/*.apk | head -n1)
+          APK=$(ls app/build/outputs/apk/prod/benchmark/*.apk | head -n1)
           APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | tail -n1)
           FP=$("$APKSIGNER" verify --print-certs "$APK" | grep 'SHA-256' | head -n1)
           echo "$FP"
@@ -94,8 +94,8 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: bitchord-dev-benchmark-${{ github.sha }}
-          path: app/build/outputs/apk/dev/benchmark/*.apk
+          name: osmo-test-benchmark-${{ github.sha }}
+          path: app/build/outputs/apk/prod/benchmark/*.apk
           if-no-files-found: error
 
   tests:
