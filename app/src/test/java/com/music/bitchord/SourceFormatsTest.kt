@@ -155,7 +155,7 @@ class SourceFormatsTest {
         val reason = reason(SourceFormats.detect(body, "https://host/registry.json"))
 
         assertTrue(reason, reason.contains("extensions"))
-        assertTrue(reason, reason.contains("not a format Dial reads"))
+        assertTrue(reason, reason.contains("not a format Osmo reads"))
     }
 
     @Test
