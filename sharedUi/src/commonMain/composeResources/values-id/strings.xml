@@ -55,20 +55,6 @@
     <string name="lyrics_already_in_language">Lirik ini sudah dalam %1$s</string>
     <string name="lyrics_already_romanized">Lirik ini sudah memakai huruf Latin</string>
     <string name="lyrics_by">Lirik oleh %1$s</string>
-    <string-array name="lyrics_intro_lines">
-        <item>Ketukan mulai terasa</item>
-        <item>Lagu segera dimulai</item>
-        <item>Pemanasan dulu</item>
-        <item>Membangun suasana</item>
-        <item>Bass dulu, kata-kata menyusul</item>
-        <item>Tunggu saja</item>
-        <item>Rasakan build-nya</item>
-        <item>Groove-nya dulu ya</item>
-        <item>Reff-nya segera tiba</item>
-        <item>Biarkan mengalir</item>
-        <item>Vokal segera masuk</item>
-        <item>Nada pertama masuk</item>
-    </string-array>
     <string-array name="lyrics_loading_lines">
         <item>Mengambil lirik</item>
         <item>Mencari kata-katanya</item>

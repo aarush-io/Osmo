@@ -5,6 +5,7 @@ import com.music.bitchord.data.lyrics.LyricLine
 import com.music.bitchord.data.lyrics.LyricsRepository
 import com.music.bitchord.data.lyrics.LyricsSource
 import com.music.bitchord.data.lyrics.withBackgroundVocals
+import com.music.bitchord.data.lyrics.withoutLeadingCredits
 import com.music.bitchord.data.model.Song
 import com.music.bitchord.data.model.durationMillis
 import java.util.concurrent.ConcurrentHashMap
@@ -110,6 +111,8 @@ object DesktopLyricsClient {
             ?: return null
         val raw = DesktopEmbeddedLyrics.read(path) ?: return null
         // The same last pass the network sources get, as on the phone.
-        return LrcLib.parseLrc(raw).takeIf { lines -> lines.any { it.text.isNotBlank() } }?.withBackgroundVocals()
+        return LrcLib.parseLrc(raw).takeIf { lines -> lines.any { it.text.isNotBlank() } }
+            ?.withoutLeadingCredits()
+            ?.withBackgroundVocals()
     }
 }

@@ -14,6 +14,7 @@ import com.music.bitchord.data.settings.AudioQuality
 import com.music.bitchord.data.settings.LastPlayerScreen
 import com.music.bitchord.data.settings.PlayerTheme
 import com.music.bitchord.data.settings.MixBlend
+import com.music.bitchord.data.settings.MixTransitionView
 import com.music.bitchord.data.settings.SmartAnalysis
 import com.music.bitchord.data.settings.TransitionWindow
 import com.music.bitchord.ui.player.AudioOutputDevice
@@ -212,6 +213,9 @@ internal object DesktopPlayerSettings : PlayerSettingsSource {
     override val smartFadeEnabled = MutableStateFlow(false)
     override val smartMixInProgress = MutableStateFlow(false)
     override val smartMixBlend = MutableStateFlow<MixBlend?>(null)
+    override val smartMixView = MutableStateFlow<MixTransitionView?>(null)
+    override val smartMixProgress = MutableStateFlow(0f)
+    override val automixDetail = MutableStateFlow<String?>(null)
     override val smartTransitionWindow = MutableStateFlow<TransitionWindow?>(null)
     override val spotifyCanvasAutoHide = MutableStateFlow(true)
     override val syncedLyrics = MutableStateFlow(true)
@@ -255,8 +259,6 @@ private fun DesktopAudioPipeline.toOutputFormat(): OutputFormatUi {
         ?.let { "${"%.1f".format(Locale.ROOT, it / 1000f).removeSuffix(".0")} kHz" }
     return OutputFormatUi(
         summary = listOfNotNull(depth, rate).joinToString(" · "),
-        carriesHiRes = outputIsFloat == true || (outputBytesPerSample ?: 2) > 2 ||
-            (outputSampleRateHz ?: 0) > 48_000,
     )
 }
 

@@ -55,20 +55,6 @@
     <string name="lyrics_already_in_language">Bu sözler zaten %1$s dilinde</string>
     <string name="lyrics_already_romanized">Bu sözler zaten Latin harfleri kullanıyor</string>
     <string name="lyrics_by">Sözler: %1$s</string>
-    <string-array name="lyrics_intro_lines">
-        <item>Ritim geliyor</item>
-        <item>Şarkı başlıyor</item>
-        <item>Isınıyor</item>
-        <item>Atmosfer hazırlanıyor</item>
-        <item>Önce bas, sonra sözler</item>
-        <item>Biraz bekle</item>
-        <item>Yükselişi hisset</item>
-        <item>Şimdilik sadece ritim</item>
-        <item>Nakarat yolda</item>
-        <item>Nefes almasına izin ver</item>
-        <item>Vokale hazır ol</item>
-        <item>İlk notalar geldi</item>
-    </string-array>
     <string-array name="lyrics_loading_lines">
         <item>Sözler alınıyor</item>
         <item>Kelimeler bulunuyor</item>

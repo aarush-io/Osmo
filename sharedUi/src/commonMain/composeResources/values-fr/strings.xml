@@ -55,20 +55,6 @@
     <string name="lyrics_already_in_language">Ces paroles sont déjà en %1$s</string>
     <string name="lyrics_already_romanized">Ces paroles utilisent déjà l\'alphabet latin</string>
     <string name="lyrics_by">Paroles de %1$s</string>
-    <string-array name="lyrics_intro_lines">
-        <item>Le beat arrive</item>
-        <item>La chanson démarre</item>
-        <item>Échauffement</item>
-        <item>Ambiance en préparation</item>
-        <item>La basse d\'abord, les mots ensuite</item>
-        <item>Patience…</item>
-        <item>Sentez la montée</item>
-        <item>Pour l\'instant, juste le groove</item>
-        <item>Le refrain arrive</item>
-        <item>Laissez-la respirer</item>
-        <item>Voix en approche</item>
-        <item>Premières notes</item>
-    </string-array>
     <string-array name="lyrics_loading_lines">
         <item>Récupération des paroles</item>
         <item>Recherche des mots</item>

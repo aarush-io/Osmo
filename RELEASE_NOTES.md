@@ -1,9 +1,18 @@
-Dial 1.8.3
+Dial 1.8.4
+
+### Home
+- After you scroll past the dials, the category chips do not cover the first heading of the feed. The feed stops below the chips.
+
+### Podcasts
+- The Podcasts dial tiles do not change places when the feed loads. A show that is on the dial keeps its place. Only a new show goes into the place of a show that is not on the dial now.
+
+### Lyrics
+- Credit lines at the start of the lyrics ("Lyrics by", "Composed by", "Composer:" and similar) are removed. A header line with the song name and the artist is removed too. Lines after the first lyric line do not change.
+- During the intro of a song, the lyric strip shows a progress bar until the first line. The bar slides up into the first line.
+- When you open the lyrics or the queue, they fade in while the album art becomes smaller. Before, they came in only after the art stopped.
 
 ### Player
-- Settings, Appearance has a new option, "Player blur style". It sets the style of the blur below the album art. There are three styles:
-  - Default: the colours of the cover continue below it. This is the style from before.
-  - Legacy: the moving colour shapes from v1.5.
-  - Simple: a soft blur of the cover behind all of the player, the same as on the lyrics and queue pages.
-- "Player blur style" replaces the "Legacy mesh gradient" switch. If that switch was on, the app starts with Legacy.
-- The name and description of the option are in all 19 languages.
+- When you touch the audio quality line at the bottom of the player, the text becomes smaller and then springs back. The box that showed on the text before is removed.
+
+### Other
+- The dial layout moved into shared code, for the desktop app in the future. Your dials and pins do not change.

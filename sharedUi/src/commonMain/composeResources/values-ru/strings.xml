@@ -55,20 +55,6 @@
     <string name="lyrics_already_in_language">Текст уже на языке %1$s</string>
     <string name="lyrics_already_romanized">Этот текст уже написан латиницей</string>
     <string name="lyrics_by">Текст песни: %1$s</string>
-    <string-array name="lyrics_intro_lines">
-        <item>Бит набирает обороты</item>
-        <item>Песня начинается</item>
-        <item>Разогрев</item>
-        <item>Создаём настроение</item>
-        <item>Сначала бас, слова потом</item>
-        <item>Ещё чуть-чуть</item>
-        <item>Чувствуете нарастание?</item>
-        <item>Пока только грув</item>
-        <item>Припев уже близко</item>
-        <item>Дайте треку задышать</item>
-        <item>Включаем вокал</item>
-        <item>Первые ноты уже звучат</item>
-    </string-array>
     <string-array name="lyrics_loading_lines">
         <item>Загружаем текст</item>
         <item>Ищем слова</item>

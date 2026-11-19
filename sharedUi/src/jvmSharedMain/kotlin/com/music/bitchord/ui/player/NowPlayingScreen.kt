@@ -93,8 +93,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.snapshots.Snapshot
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.ui.Alignment
@@ -275,6 +273,16 @@ private val ART_TITLE_GAP = 20.dp
  * Only the toggle, which travels end to end, ever spends all of it.
  */
 private const val QUEUE_TRAVEL_MS = 420
+
+/**
+ * How far into the sleeve's collapse the lyrics or the queue start to fade up
+ * in its place. They reach full on the frame the collapse lands, so the art
+ * shrinking and the panel arriving are one movement, with no still beat
+ * between them. On the 420ms collapse curve this is about 150ms in.
+ *
+ * The same point a finger dragging the queue in has always faded it from.
+ */
+private const val PANEL_FADE_START = 0.45f
 
 /**
  * How much darker the lyrics and queue backdrop is than the main player's: the full-cover
@@ -1960,43 +1968,30 @@ fun NowPlayingScreen(
     val collapseDone by remember { derivedStateOf { p() >= 1f } }
     val queueShowing by remember { derivedStateOf { queueSlide.floatValue > 0.01f } }
 
-    // Whether the sleeve has finished getting out of the way, and how far the
-    // panel that replaces it has faded up since.
+    // Whether the sleeve is far enough out of the way for the panel that
+    // replaces it to start coming up, and how far up that panel is.
     //
-    // The lyric sheet and the queue list are the two most expensive things this
-    // screen can compose — measuring every line of a song, or building a lazy
-    // list with drag-reorder state per row — and both used to be composed on
-    // the frame the panel was asked for, which is the frame the 420ms collapse
-    // above starts on. That put the single heaviest composition of the whole
-    // screen directly on top of the one animation the eye is following, and it
-    // read as the open stuttering.
+    // The lyric sheet and the queue list used to wait for [collapseDone] and
+    // then run a 200ms fade of their own, so every open had a still beat with
+    // the art already in the header and nothing yet under it. They now come up
+    // over the second half of the collapse itself, tied to [p]: from
+    // [PANEL_FADE_START] to the end of the movement, so the panel is fully up
+    // on the frame the sleeve lands.
     //
-    // Held back until [p] has actually arrived, the expensive frame lands while
-    // nothing is moving, where a dropped frame costs nothing to look at, and
-    // the panel then fades up on its own short curve. The open is a little
-    // longer end to end and visibly smoother for it.
+    // The wait was there because composing either panel on top of the collapse
+    // made it stutter. Both are now composed offscreen ahead of time (see
+    // [playerPrewarmStage]), so in the ordinary case arriving here is only a
+    // move from offscreen and an alpha, which costs the collapse nothing.
     //
-    // Declared out here rather than beside either panel on purpose: an
-    // [animateFloatAsState] created at the moment its target becomes true is
-    // created *at* that target and has nothing left to animate. Living above
-    // both panels, this one is already at 0 when they mount.
-    //
-    // Followed off the snapshot rather than handed a target in composition:
-    // read here, [collapseDone] recomposed this whole screen on the first frame
-    // of every close — a sleeve already moving, and the heaviest pass this
-    // player has, landing on its second frame.
-    val panelFade = remember {
-        // Already up for a player opened onto a panel, as the animated value
-        // this replaces started at its first target.
-        Animatable(if (Snapshot.withoutReadObservation { collapseDone }) 1f else 0f)
-    }
-    LaunchedEffect(Unit) {
-        snapshotFlow { collapseDone }.collectLatest { settled ->
-            panelFade.animateTo(
-                if (settled) 1f else 0f,
-                tween(durationMillis = 200, easing = FastOutSlowInEasing),
-            )
-        }
+    // A function read in draw, as [p] is: as a value it would recompose the
+    // whole player on every frame of the collapse. [collapsePastFadeStart] is
+    // the one composition-time question, and it changes once per collapse.
+    // Tied to [p] rather than to a clock of its own, a reopen in the middle of
+    // a close picks up from where the sleeve is, and a drag of the queue
+    // carries straight on into the settle it lets go to.
+    val collapsePastFadeStart by remember { derivedStateOf { p() >= PANEL_FADE_START } }
+    val panelFade: () -> Float = {
+        ((p() - PANEL_FADE_START) / (1f - PANEL_FADE_START)).coerceIn(0f, 1f)
     }
     val fullBleedArt by PlayerSettings.fullBleedArtwork.collectAsStateWithLifecycle()
     // Full-bleed is a phone idiom. What the width has to rule out is a player
@@ -5176,7 +5171,7 @@ fun NowPlayingScreen(
                 // [lyricsOpen] asked first: a close has already hidden the
                 // panel, and doesn't then listen for the sleeve leaving the
                 // header — which is its first frame of moving.
-                val lyricsPanelVisible = lyricsOpen && collapseDone
+                val lyricsPanelVisible = lyricsOpen && collapsePastFadeStart
                 // Only with lines to run under it: the "no lyrics" notice and
                 // the skeleton are centred in the room above the deck.
                 val lyricsUnderDeck = underDeckStyle.takeIf { !lyrics.isNullOrEmpty() }
@@ -5196,13 +5191,9 @@ fun NowPlayingScreen(
                                 .offset {
                                     if (lyricsPanelVisible) IntOffset.Zero else IntOffset(100_000, 0)
                                 }
-                                // Arrives after the sleeve has finished collapsing
-                                // into the header rather than during — see
-                                // [collapseDone]. Fading lyrics in over a sleeve
-                                // still mid-collapse doubled the same movement in
-                                // two places on screen at once, and composing them
-                                // there was what made the collapse stutter.
-                                .graphicsLayer { alpha = if (lyricsPanelVisible) panelFade.value else 0f }
+                                // Comes up over the second half of the sleeve's
+                                // collapse into the header — see [panelFade].
+                                .graphicsLayer { alpha = if (lyricsPanelVisible) panelFade() else 0f }
                                 .panelBackSwipe(panelBack.progress)
                                 .softUnderDeck(lyricsUnderDeck, { deckHeightPx }, PLAYER_GUTTER),
                         ) { particleProgress ->
@@ -5291,20 +5282,17 @@ fun NowPlayingScreen(
                     }
                 }
 
-                // Toggles and the queue arrive after the sleeve has finished
-                // travelling, and leave before it starts coming back.
-                // Held back until the sleeve has settled, exactly as the lyric
-                // sheet above is — except while a finger is actually dragging
-                // the queue in. A drag is direct manipulation: the queue has to
-                // be under the finger the whole way for the gesture to mean
-                // anything, and the person doing it is setting the pace, so
-                // there is no animation of ours for the composition to trip up.
+                // Toggles and the queue come up over the second half of the
+                // sleeve's travel, and leave before it starts coming back.
+                // The same [panelFade] as the lyric sheet above — and the same
+                // fade a finger dragging the queue in has always had, so a drag
+                // let go part way carries on into the settle without a dip.
                 //
                 // Gone with [queueOpen], as the lyrics are with theirs, rather
                 // than a frame later when the sleeve first moves: listening
                 // for that frame was a recomposition on it.
                 val queuePanelVisible = !lyricsOpen &&
-                    (queueDragging || (queueOpen && queueShowing && collapseDone))
+                    (queueDragging || (queueOpen && queueShowing && collapsePastFadeStart))
                 if (queuePanelVisible || playerPrewarmStage >= 3) {
                     Column(
                         modifier = Modifier
@@ -5318,13 +5306,7 @@ fun NowPlayingScreen(
                                 if (queuePanelVisible) IntOffset.Zero else IntOffset(100_000, 0)
                             }
                             .graphicsLayer {
-                                alpha = if (!queuePanelVisible) {
-                                    0f
-                                } else if (queueDragging) {
-                                    ((queueSlide.floatValue - 0.45f) / 0.55f).coerceIn(0f, 1f)
-                                } else {
-                                    panelFade.value
-                                }
+                                alpha = if (queuePanelVisible) panelFade() else 0f
                                 translationY = if (queuePanelVisible) {
                                     (1f - queueSlide.floatValue) * 26.dp.toPx()
                                 } else {
@@ -5369,9 +5351,9 @@ fun NowPlayingScreen(
             val underDeckWashAlpha: () -> Float = {
                 when {
                     underDeckStyle == null -> 0f
-                    lyricsOpen -> if (collapseDone && !lyrics.isNullOrEmpty()) panelFade.value else 0f
-                    queueDragging -> ((queueSlide.floatValue - 0.45f) / 0.55f).coerceIn(0f, 1f)
-                    queueOpen && queueShowing && collapseDone -> panelFade.value
+                    lyricsOpen -> if (!lyrics.isNullOrEmpty()) panelFade() else 0f
+                    queueDragging -> panelFade()
+                    queueOpen && queueShowing -> panelFade()
                     else -> 0f
                 }
             }

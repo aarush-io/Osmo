@@ -55,20 +55,6 @@
     <string name="lyrics_already_in_language">เนื้อเพลงนี้เป็นภาษา %1$s อยู่แล้ว</string>
     <string name="lyrics_already_romanized">เนื้อเพลงนี้ใช้อักษรละตินอยู่แล้ว</string>
     <string name="lyrics_by">เนื้อเพลงโดย %1$s</string>
-    <string-array name="lyrics_intro_lines">
-        <item>จังหวะกำลังจะมา</item>
-        <item>เพลงกำลังเริ่ม</item>
-        <item>กำลังวอร์มอัพ</item>
-        <item>กำลังปรับอารมณ์</item>
-        <item>เบสมาก่อน คำร้องตามหลัง</item>
-        <item>รอสักครู่</item>
-        <item>สัมผัสจังหวะที่กำลังไต่ระดับ</item>
-        <item>ตอนนี้มีแค่ทำนอง</item>
-        <item>ท่อนฮุกกำลังจะมา</item>
-        <item>ปล่อยให้มันไหลลื่น</item>
-        <item>เตรียมพร้อมสำหรับเสียงร้อง</item>
-        <item>โน้ตแรกมาแล้ว</item>
-    </string-array>
     <string-array name="lyrics_loading_lines">
         <item>กำลังดึงเนื้อเพลง</item>
         <item>กำลังหาคำร้อง</item>

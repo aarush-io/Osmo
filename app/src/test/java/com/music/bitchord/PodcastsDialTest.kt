@@ -212,6 +212,62 @@ class PodcastsDialTest {
     }
 
     @Test
+    fun tiles_keepTheirPlaces_whenTheFeedGivesTheSameShowsInAnotherOrder() {
+        val shown = listOf(show("a"), show("b"), show("c"), show("d"))
+        val picks = listOf(show("b"), show("a"), show("d"), show("c"))
+
+        val tiles = PodcastsDial.tiles(emptyList(), picks, hidden = emptySet(), shown = shown)
+
+        assertEquals(listOf("a", "b", "c", "d"), ids(tiles))
+    }
+
+    @Test
+    fun tiles_putANewShowInThePlaceOfOneThatWentOff_andMoveNoOther() {
+        val shown = listOf(show("a"), show("b"), show("c"), show("d"))
+        val picks = listOf(show("x"), show("d"), show("a"), show("c"), show("y"))
+        val small = PodcastsDial.tiles(emptyList(), picks.take(4), hidden = emptySet(), shown = shown)
+
+        assertEquals(listOf("a", "x", "c", "d"), ids(small))
+
+        val more = PodcastsDial.tiles(emptyList(), picks, hidden = emptySet(), shown = shown)
+
+        assertEquals(listOf("a", "x", "c", "d", "y"), ids(more))
+    }
+
+    @Test
+    fun tiles_keepThePinsFirst_andTheOtherShowsWhereTheyWere() {
+        val shown = listOf(show("p1"), show("a"), show("b"), show("c"))
+        val pins = listOf(show("p1"), show("b"))
+        val picks = listOf(show("c"), show("a"))
+
+        val tiles = PodcastsDial.tiles(pins, picks, hidden = emptySet(), shown = shown)
+
+        // b took the second pin's place; a, whose place that was, takes the one b left.
+        assertEquals(listOf("p1", "b", "a", "c"), ids(tiles))
+    }
+
+    @Test
+    fun tiles_keepAShowWithANewEpisodeWhereItWas() {
+        val shown = listOf(show("a"), show("b"), show("n1"))
+        val picks = listOf(show("a"), show("b"), show("n1"))
+
+        val tiles = PodcastsDial.tiles(emptyList(), picks, hidden = emptySet(), fresh = listOf(show("n1")), shown = shown)
+
+        assertEquals(listOf("a", "b", "n1"), ids(tiles))
+    }
+
+    @Test
+    fun tiles_areTheSame_whenTheyAreMadeAgainFromWhatTheyMade() {
+        val shown = listOf(show("a"), show("b"), show("c"))
+        val picks = listOf(show("c"), show("x"), show("a"))
+        val once = PodcastsDial.tiles(listOf(show("p1")), picks, hidden = emptySet(), shown = shown)
+
+        val twice = PodcastsDial.tiles(listOf(show("p1")), picks, hidden = emptySet(), shown = once)
+
+        assertEquals(ids(once), ids(twice))
+    }
+
+    @Test
     fun page_leadsWithTheDial_underTheTitleTheSpeedDialGoesBy() {
         val shelves = listOf(shows("Popular shows", "a"))
 
