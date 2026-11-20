@@ -4202,6 +4202,9 @@ private fun BitChordApp(
                             },
                             // The category chips, beside the mark.
                             logoRowContent = HomeCategoryRow,
+                            // ... and held under the top bar in the feed: the
+                            // feed rests below them.
+                            feedHeldRoomPx = HomeCategoryHeldRoom,
                             artworkMotion = artworkMotion && shown,
                             onTopPickLongPress = { pick ->
                                 pick.browseId?.let { browseId ->

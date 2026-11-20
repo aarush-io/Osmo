@@ -4,31 +4,8 @@ import com.music.bitchord.data.model.HomeShelf
 import com.music.bitchord.data.model.ShelfItem
 import com.music.bitchord.data.podcasts.isPodcastTile
 
-/**
- * Where the speed dial's tiles after the pins come from: what was played
- * lately, YouTube Music's own speed dial (the default), or what Spotify
- * recommends after the songs played lately. The pickers show them in this
- * order; Spotify is only offered while a Spotify account is signed in.
- */
-enum class SpeedDialSource {
-    HISTORY, YOUTUBE, SPOTIFY;
-
-    /** This choice as it applies now: Spotify without a Spotify account is YouTube Music. */
-    fun effective(spotifyConnected: Boolean): SpeedDialSource =
-        if (this == SPOTIFY && !spotifyConnected) YOUTUBE else this
-
-    companion object {
-        /** The sources a picker offers. */
-        fun choices(spotifyConnected: Boolean): List<SpeedDialSource> =
-            if (spotifyConnected) entries else entries - SPOTIFY
-    }
-}
-
-/** The dial's tiles past the pins, and which of them are new releases (for their tag). */
-data class DialPicks(
-    val items: List<ShelfItem>,
-    val newReleaseIds: Set<String>,
-)
+// SpeedDialSource and DialPicks live with the rest of the dial layout in the
+// shared module (DialTypes.kt), in this same package.
 
 /**
  * Picking the speed dial's tiles for each [SpeedDialSource]. Pure, so it can

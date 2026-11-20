@@ -257,6 +257,8 @@
     <string name="video_quality_subtitle">ミュージックビデオと、曲の Canvas として表示されるミュージックビデオに適用されます。最高画質は最大 4K を使います。データとバッテリーを大幅に多く使い、性能の低い端末では動作が遅くなることがあります。</string>
     <string name="video_quality_mobile">モバイルデータ</string>
     <string name="video_quality_mobile_off_note">モバイルデータでは Canvas と動画を再生しません。プレーヤーにはカバーアートが表示され、音楽は通常どおり再生されます。ダウンロードした曲と一緒に保存した Canvas は再生されます。</string>
+    <string name="bluetooth_video_delay">Bluetooth の動画遅延</string>
+    <string name="bluetooth_video_delay_subtitle">音声が Bluetooth に出力されるとき、動画をこの時間だけ遅らせます。Bluetooth の音声は遅れて届くためです。映像が音より先に進む場合は、値を大きくしてください。</string>
     <string name="video_quality_max">最高画質</string>
     <string name="high_performance_mode">高パフォーマンスモード</string>
     <string name="high_performance_subtitle">より高いディスプレイリフレッシュレートをリクエストします</string>
@@ -979,9 +981,15 @@
 
     <string name="dolby_atmos_unavailable">このデバイスは Atmos を再生できないため、通常バージョンで再生されます</string>
 
-    <string name="legacy_mesh_gradient">従来のメッシュ グラデーション</string>
+    <string name="player_blur_style">プレーヤーのぼかしスタイル</string>
 
-    <string name="legacy_mesh_gradient_subtitle">v1.5 のプレーヤー背面の流れるカラー アニメーションを復元します</string>
+    <string name="player_theme_default">デフォルト</string>
+
+    <string name="player_theme_legacy">従来</string>
+
+    <string name="player_theme_simple">シンプル</string>
+
+    <string name="player_blur_style_subtitle">アルバムアートの下に表示するぼかしのスタイル</string>
 
     <string name="liquid_glass">リキッド グラス</string>
 

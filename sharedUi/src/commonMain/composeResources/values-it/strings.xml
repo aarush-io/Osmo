@@ -55,20 +55,6 @@
     <string name="lyrics_already_in_language">Questo testo è già in %1$s</string>
     <string name="lyrics_already_romanized">Questo testo usa già caratteri latini</string>
     <string name="lyrics_by">Testi di %1$s</string>
-    <string-array name="lyrics_intro_lines">
-        <item>Il ritmo sta arrivando</item>
-        <item>Il brano sta iniziando</item>
-        <item>Riscaldamento</item>
-        <item>Si crea l\'atmosfera</item>
-        <item>Prima il basso, poi le parole</item>
-        <item>Aspetta</item>
-        <item>Senti la crescita</item>
-        <item>Per ora solo il groove</item>
-        <item>Il ritornello sta arrivando</item>
-        <item>Lascialo respirare</item>
-        <item>Via alla voce</item>
-        <item>Prime note in arrivo</item>
-    </string-array>
     <string-array name="lyrics_loading_lines">
         <item>Recupero dei testi</item>
         <item>Ricerca delle parole</item>

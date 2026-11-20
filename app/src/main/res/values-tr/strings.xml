@@ -302,6 +302,8 @@
     <string name="video_quality_subtitle">Müzik videoları ve bir şarkının Canvas\'ı olarak gösterilen müzik videosu için. En yüksek kalite 4K\'ya kadar kullanır. Çok daha fazla veri ve pil kullanır, zayıf telefonlarda yavaş olabilir.</string>
     <string name="video_quality_mobile">Mobil veri</string>
     <string name="video_quality_mobile_off_note">Mobil veride Canvas veya video oynatılmaz. Oynatıcı kapak görselini gösterir ve müzik her zamanki gibi çalar. İndirilen bir şarkıyla kaydedilen Canvas yine de oynatılır.</string>
+    <string name="bluetooth_video_delay">Bluetooth video gecikmesi</string>
+    <string name="bluetooth_video_delay_subtitle">Ses Bluetooth\'a gittiğinde videoyu bu süre kadar geciktirir, çünkü Bluetooth sesi geç gelir. Görüntü sesten önce gidiyorsa daha yüksek bir değer seçin.</string>
     <string name="video_quality_max">En yüksek kalite</string>
     <string name="high_performance_mode">Yüksek performans modu</string>
     <string name="high_performance_subtitle">Daha yüksek bir ekran yenileme hızı ister</string>
@@ -895,9 +897,15 @@
 
     <string name="export_compatible_downloads">Uyumlu indirmeleri dışa aktar</string>
 
-    <string name="legacy_mesh_gradient">Klasik ağ gradyanı</string>
+    <string name="player_blur_style">Oynatıcı bulanıklık stili</string>
 
-    <string name="legacy_mesh_gradient_subtitle">v1.5\'teki oynatıcı arkasındaki akıcı renk geçişlerini geri getirir</string>
+    <string name="player_theme_default">Varsayılan</string>
+
+    <string name="player_theme_legacy">Eski</string>
+
+    <string name="player_theme_simple">Sade</string>
+
+    <string name="player_blur_style_subtitle">Albüm kapağının altındaki bulanıklığın stili</string>
 
     <string name="lyrics_debug_logs">Şarkı sözü hata ayıklama günlükleri</string>
 

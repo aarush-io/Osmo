@@ -320,6 +320,8 @@
     <string name="video_quality_subtitle">Per i video musicali e per un video musicale mostrato come Canvas di un brano. Qualità massima usa fino a 4K. Usa molti più dati e batteria e può essere lenta sui telefoni poco potenti.</string>
     <string name="video_quality_mobile">Dati mobili</string>
     <string name="video_quality_mobile_off_note">Con i dati mobili non viene riprodotto nessun Canvas o video. Il lettore mostra la copertina e la musica suona come sempre. Un Canvas salvato con un brano scaricato viene ancora riprodotto.</string>
+    <string name="bluetooth_video_delay">Ritardo video Bluetooth</string>
+    <string name="bluetooth_video_delay_subtitle">Ritarda il video di questo tempo quando l’audio va al Bluetooth, perché l’audio Bluetooth arriva in ritardo. Se l’immagine anticipa l’audio, imposta un valore più alto.</string>
     <string name="video_quality_max">Qualità massima</string>
     <string name="high_performance_mode">Modalità alte prestazioni</string>
     <string name="high_performance_subtitle">Richiede una frequenza di aggiornamento più alta</string>
@@ -913,9 +915,15 @@
 
     <string name="export_compatible_downloads">Esporta download compatibili</string>
 
-    <string name="legacy_mesh_gradient">Gradiente fluido classico</string>
+    <string name="player_blur_style">Stile sfocatura del lettore</string>
 
-    <string name="legacy_mesh_gradient_subtitle">Ripristina le sfumature di colore animate dietro il lettore della v1.5</string>
+    <string name="player_theme_default">Predefinito</string>
+
+    <string name="player_theme_legacy">Classico</string>
+
+    <string name="player_theme_simple">Semplice</string>
+
+    <string name="player_blur_style_subtitle">Lo stile della sfocatura sotto la copertina dell\'album</string>
 
     <string name="lyrics_debug_logs">Log di debug dei testi</string>
 

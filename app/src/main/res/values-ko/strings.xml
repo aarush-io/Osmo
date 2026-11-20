@@ -331,8 +331,11 @@
     <string name="liquid_glass_subtitle">플로팅 탐색 막대에 사실적인 유리 질감을 적용합니다. Android 12 이상, GPU 사용량 증가.</string>
     <string name="liquid_glass_unavailable">Android 12 이상 필요</string>
     <string name="full_screen_cover_art">전체화면 커버 아트</string>
-    <string name="legacy_mesh_gradient">구형 메시 그라데이션</string>
-    <string name="legacy_mesh_gradient_subtitle">v1.5 버전의 플레이어 뒤에서 떠다니던 색상 거품을 다시 표시합니다</string>
+    <string name="player_blur_style">플레이어 블러 스타일</string>
+    <string name="player_theme_default">기본</string>
+    <string name="player_theme_legacy">이전</string>
+    <string name="player_theme_simple">심플</string>
+    <string name="player_blur_style_subtitle">앨범 아트 아래 블러의 스타일</string>
     <string name="animated_cover_art">움직이는 커버 아트</string>
     <string name="artist_signatures">아티스트 서명</string>
     <string name="artist_signatures_subtitle">Apple Music에 타이틀 로고가 없으면 자필 서명을 표시합니다</string>
@@ -379,6 +382,8 @@
     <string name="video_quality_subtitle">뮤직비디오와 노래의 Canvas로 표시되는 뮤직비디오에 적용됩니다. 최고 화질은 최대 4K를 사용합니다. 데이터와 배터리를 훨씬 많이 쓰며 성능이 낮은 휴대전화에서는 느릴 수 있습니다.</string>
     <string name="video_quality_mobile">모바일 데이터</string>
     <string name="video_quality_mobile_off_note">모바일 데이터에서는 Canvas나 동영상을 재생하지 않습니다. 플레이어에 커버 아트가 표시되고 음악은 평소처럼 재생됩니다. 다운로드한 곡과 함께 저장된 Canvas는 계속 재생됩니다.</string>
+    <string name="bluetooth_video_delay">블루투스 동영상 지연</string>
+    <string name="bluetooth_video_delay_subtitle">소리가 블루투스로 나갈 때 동영상을 이 시간만큼 늦춥니다. 블루투스 소리는 늦게 들리기 때문입니다. 영상이 소리보다 앞서면 값을 높이세요.</string>
     <string name="video_quality_max">최고 화질</string>
     <string name="high_performance_mode">고성능 모드</string>
     <string name="high_performance_subtitle">더 높은 화면 주사율을 요청합니다</string>

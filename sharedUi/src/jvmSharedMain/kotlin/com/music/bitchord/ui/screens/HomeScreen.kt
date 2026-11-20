@@ -109,6 +109,9 @@ import com.music.bitchord.ui.player.MeshPalette
 /** How far the Listen now heading and feed sit above the shared top inset. */
 private val HOME_TITLE_LIFT = 28.dp
 
+/** Between a row held under the top bar and the feed that rests below it. */
+private val HELD_ROW_GAP = 8.dp
+
 private const val RECENTS_TITLE = "Recents"
 private const val RECENT_TRACKS_PER_COLUMN = 4
 
@@ -235,6 +238,13 @@ fun HomeScreen(
      * It scrolls away with the list, as the dials do.
      */
     logoRowContent: (@Composable () -> Unit)? = null,
+    /**
+     * Room in px that something held under the top bar takes over the feed
+     * (Home's category chips, once the list is scrolled past the dials), or 0.
+     * The feed comes to rest below it after the dials. Read when a fling
+     * settles.
+     */
+    feedHeldRoomPx: () -> Int = { 0 },
 ) {
     val recentsViewType by AppUi.host.homeRecentsViewType.collectAsStateWithLifecycle()
     var showAllMoods by remember { mutableStateOf(false) }
@@ -338,12 +348,20 @@ fun HomeScreen(
         val decay = rememberSplineBasedDecay<Float>()
         val evenFling = remember(decay) { EvenFling(decay) }
         FrameBeatWhileScrolling(listState)
+        val heldRoom by rememberUpdatedState(feedHeldRoomPx)
         val dialFling = remember(listState, decay, density) {
             DialPageFling(
                 listState = listState,
                 decay = decay,
                 restOffsetPx = { with(density) { HOME_LOGO_RESERVE.roundToPx() } },
-                nextOffsetPx = { with(density) { HOME_TITLE_LIFT.roundToPx() } },
+                // Below the held chip row when there is one, with a small gap,
+                // so the chips never sit on the feed's first heading.
+                nextOffsetPx = {
+                    val held = heldRoom()
+                    with(density) {
+                        HOME_TITLE_LIFT.roundToPx() + if (held > 0) held + HELD_ROW_GAP.roundToPx() else 0
+                    }
+                },
                 artistPageFollows = { artistPageShown },
             )
         }

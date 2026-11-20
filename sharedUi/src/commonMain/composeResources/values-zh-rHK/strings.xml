@@ -55,20 +55,6 @@
     <string name="lyrics_already_in_language">歌詞已經是%1$s</string>
     <string name="lyrics_already_romanized">這些歌詞已經是拉丁字母</string>
     <string name="lyrics_by">歌詞來自 %1$s</string>
-    <string-array name="lyrics_intro_lines">
-        <item>節奏落地啦</item>
-        <item>歌曲開始啦</item>
-        <item>熱場中</item>
-        <item>氛圍調節中</item>
-        <item>先來低音，歌詞隨後</item>
-        <item>稍等一下</item>
-        <item>感受這段鋪墊</item>
-        <item>先感受節奏</item>
-        <item>高潮部分馬上到</item>
-        <item>讓旋律先喘口氣</item>
-        <item>人聲準備登場</item>
-        <item>第一個音符響起</item>
-    </string-array>
     <string-array name="lyrics_loading_lines">
         <item>正在獲取歌詞</item>
         <item>正在尋找歌詞</item>

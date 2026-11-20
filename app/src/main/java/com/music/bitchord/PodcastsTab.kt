@@ -151,7 +151,7 @@ internal fun PodcastsTabPage(
 
     val state: UiState<List<HomeShelf>> = remember(feed, pins, hidden, lastDial, fresh, effectiveSource, spotifyShows) {
         // Nothing from the network (yet): the dial as it last was, when there is one.
-        val saved = PodcastsDial.tiles(pins, lastDial, hidden)
+        val saved = PodcastsDial.tiles(pins, lastDial, hidden, shown = lastDial)
             .takeIf { it.isNotEmpty() }
             ?.let { UiState.Success(PodcastsDial.page(it, emptyList())) }
         when (val current = feed) {
@@ -167,6 +167,8 @@ internal fun PodcastsTabPage(
                         },
                         hidden = hidden,
                         fresh = fresh,
+                        // The shows already on the dial stay where they are.
+                        shown = lastDial,
                     ),
                     PodcastsDial.shelvesUnder(current.data),
                 ),
@@ -180,7 +182,8 @@ internal fun PodcastsTabPage(
         val latest = (feed as? UiState.Success)?.data ?: return@LaunchedEffect
         if (spotifyPending) return@LaunchedEffect
         val picks = PodcastSources.picks(latest.picks, spotifyShows.orEmpty(), effectiveSource)
-        CustomizationSettings.setLastPodcastDial(PodcastsDial.tiles(pins, picks, hidden, fresh))
+        // In the places the dial shows them, so that the next opening starts with the same dial.
+        CustomizationSettings.setLastPodcastDial(PodcastsDial.tiles(pins, picks, hidden, fresh, shown = lastDial))
     }
 
     // "Episodes for later", in the die's place: YouTube Music's own list, which only an account has.

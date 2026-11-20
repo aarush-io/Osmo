@@ -263,6 +263,8 @@
     <string name="video_quality_subtitle">לקליפים ולקליפ שמוצג כ-Canvas של שיר. איכות מרבית משתמשת בעד 4K. היא צורכת הרבה יותר נתונים וסוללה, ועלולה להיות איטית בטלפונים חלשים.</string>
     <string name="video_quality_mobile">נתונים סלולריים</string>
     <string name="video_quality_mobile_off_note">בנתונים סלולריים לא מתנגן Canvas או וידאו. הנגן מציג את תמונת העטיפה והמוזיקה מתנגנת כרגיל. Canvas שנשמר עם שיר שהורד עדיין מתנגן.</string>
+    <string name="bluetooth_video_delay">השהיית וידאו ב-Bluetooth</string>
+    <string name="bluetooth_video_delay_subtitle">משהה את הווידאו בזמן הזה כשהצליל עובר ל-Bluetooth, כי צליל Bluetooth מגיע באיחור. אם התמונה מקדימה את הצליל, הגדירו ערך גבוה יותר.</string>
     <string name="video_quality_max">איכות מרבית</string>
     <string name="high_performance_mode">מצב ביצועים גבוהים</string>
     <string name="high_performance_subtitle">מבקש קצב רענון מסך גבוה יותר</string>
@@ -889,9 +891,15 @@
 
     <string name="export_compatible_downloads">ייצא הורדות תואמות</string>
 
-    <string name="legacy_mesh_gradient">גרדיאנט רשת קלאסי</string>
+    <string name="player_blur_style">סגנון טשטוש בנגן</string>
 
-    <string name="legacy_mesh_gradient_subtitle">מחזיר את כתמי הצבע הנעים מגרסה v1.5</string>
+    <string name="player_theme_default">ברירת מחדל</string>
+
+    <string name="player_theme_legacy">קלאסי</string>
+
+    <string name="player_theme_simple">פשוט</string>
+
+    <string name="player_blur_style_subtitle">סגנון הטשטוש מתחת לעטיפת האלבום</string>
 
     <string name="liquid_glass">זכוכית נוזלית</string>
 

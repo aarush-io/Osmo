@@ -298,7 +298,10 @@ import com.music.bitchord.sharedui.resources.Res as SharedRes
 import com.music.bitchord.sharedui.resources.spotify_logo
 import com.music.bitchord.data.model.withoutRepeatsOf
 import com.music.bitchord.data.settings.AutomixPerformanceMode
+import com.music.bitchord.data.settings.DialSettings
+import com.music.bitchord.data.settings.speedDialId
 import com.music.bitchord.data.settings.LastPlayerScreen
+import com.music.bitchord.data.settings.PlayerTheme
 import com.music.bitchord.data.settings.SmartAnalysis
 import com.music.bitchord.data.settings.TrackAnalysisState
 import com.music.bitchord.data.settings.TransitionWindow
@@ -2883,7 +2886,9 @@ fun BitChordDesktopApp() {
     SideEffect {
         DesktopPlayerSettings.animatedCanvas.value = animatedCanvas
         DesktopPlayerSettings.fullBleedArtwork.value = fullBleedArtwork
-        DesktopPlayerSettings.legacyMeshGradient.value = legacyMeshGradient
+        // The desktop keeps its legacy switch until it has a picker of its own.
+        DesktopPlayerSettings.playerTheme.value =
+            if (legacyMeshGradient) PlayerTheme.LEGACY else PlayerTheme.DEFAULT
         DesktopPlayerSettings.lyricsBlur.value = lyricsBlur
         DesktopPlayerSettings.syncedLyrics.value = syncedLyrics
         DesktopPlayerSettings.showNerdStats.value = showNerdStats
@@ -3881,24 +3886,44 @@ fun BitChordDesktopApp() {
                             downloadInProgress = downloadInProgress,
                             contentPadding = contentPadding,
                         )
-                        destination == DesktopDestination.LISTEN_NOW -> HomeScreen(
-                            state = homeState,
-                            listState = homeListState,
-                            onItemClick = { item, shelfTitle -> openShelfItem(item, shelfTitle) },
-                            onRetry = ::loadHome,
-                            refreshing = false,
-                            onRefresh = ::loadHome,
-                            pullState = rememberPullToRefreshState(),
-                            contentPadding = sharedPagePadding,
-                            title = null,
-                            signedIn = youtubeSignedIn,
-                            onSignIn = { overlays.accounts = true },
-                            onItemLongPress = { item -> if (item.videoId != null) openMenu(item.toSong()) },
-                            onLoadMore = ::loadMoreHome,
-                            loadingMore = homeLoadingMore,
-                            recentlyPlayedLoading = homeRecentsLoading,
-                            leadHero = false,
-                        )
+                        destination == DesktopDestination.LISTEN_NOW -> {
+                            val speedDialsOn by DialSettings.speedDials.collectAsState()
+                            val dialPins by DialSettings.speedDialPins.collectAsState()
+                            val dialHidden by DialSettings.hiddenFromDial.collectAsState()
+                            val dialRows by DialSettings.speedDialRows.collectAsState()
+                            val dialLabelsOn by DialSettings.dialLabels.collectAsState()
+                            val dialLabelOverrides by DialSettings.dialHiddenLabels.collectAsState()
+                            val dialPinIconOn by DialSettings.dialPinIcon.collectAsState()
+                            // The speed dial heads Home as on the phone: the pins, then YouTube's own
+                            // speed dial and the rest of the feed, minus what was taken off it.
+                            val homeWithDial = remember(homeState, speedDialsOn, dialPins, dialHidden) {
+                                withSpeedDial(homeState, speedDialsOn, dialPins)
+                            }
+                            HomeScreen(
+                                state = homeWithDial,
+                                listState = homeListState,
+                                speedDialPinned = dialPins.mapNotNull { it.speedDialId }.toSet(),
+                                speedDialRows = dialRows,
+                                onSpeedDialReorder = DialSettings::setSpeedDialPins,
+                                dialLabels = dialLabelsOn,
+                                dialLabelOverrides = dialLabelOverrides,
+                                dialPinIcon = dialPinIconOn,
+                                onItemClick = { item, shelfTitle -> openShelfItem(item, shelfTitle) },
+                                onRetry = ::loadHome,
+                                refreshing = false,
+                                onRefresh = ::loadHome,
+                                pullState = rememberPullToRefreshState(),
+                                contentPadding = sharedPagePadding,
+                                title = null,
+                                signedIn = youtubeSignedIn,
+                                onSignIn = { overlays.accounts = true },
+                                onItemLongPress = { item -> if (item.videoId != null) openMenu(item.toSong()) },
+                                onLoadMore = ::loadMoreHome,
+                                loadingMore = homeLoadingMore,
+                                recentlyPlayedLoading = homeRecentsLoading,
+                                leadHero = false,
+                            )
+                        }
                         destination == DesktopDestination.EXPLORE && selectedMoodGenre != null -> Column(Modifier.fillMaxSize()) {
                             MoodGenrePlaylistsScreen(
                                 title = selectedMoodGenre!!.title,

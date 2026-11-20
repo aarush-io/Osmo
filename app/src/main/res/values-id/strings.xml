@@ -257,6 +257,8 @@
     <string name="video_quality_subtitle">Untuk video musik dan untuk video musik yang ditampilkan sebagai Canvas sebuah lagu. Kualitas maksimum memakai hingga 4K. Pilihan ini memakai jauh lebih banyak data dan baterai, dan bisa lambat pada ponsel yang lemah.</string>
     <string name="video_quality_mobile">Data seluler</string>
     <string name="video_quality_mobile_off_note">Dengan data seluler, tidak ada Canvas atau video yang diputar. Pemutar menampilkan sampul dan musik diputar seperti biasa. Canvas yang disimpan bersama lagu yang diunduh tetap diputar.</string>
+    <string name="bluetooth_video_delay">Jeda video Bluetooth</string>
+    <string name="bluetooth_video_delay_subtitle">Menahan video selama waktu ini saat suara keluar lewat Bluetooth, karena suara Bluetooth datang terlambat. Jika gambar mendahului suara, atur nilai yang lebih tinggi.</string>
     <string name="video_quality_max">Kualitas maksimum</string>
     <string name="high_performance_mode">Mode performa tinggi</string>
     <string name="high_performance_subtitle">Meminta refresh rate layar yang lebih tinggi</string>
@@ -863,9 +865,15 @@
 
     <string name="export_compatible_downloads">Ekspor unduhan yang kompatibel</string>
 
-    <string name="legacy_mesh_gradient">Gradien mesh klasik</string>
+    <string name="player_blur_style">Gaya buram pemutar</string>
 
-    <string name="legacy_mesh_gradient_subtitle">Kembalikan efek warna mengalir di belakang pemutar dari v1.5</string>
+    <string name="player_theme_default">Default</string>
+
+    <string name="player_theme_legacy">Lama</string>
+
+    <string name="player_theme_simple">Sederhana</string>
+
+    <string name="player_blur_style_subtitle">Gaya efek buram di bawah sampul album</string>
 
     <string name="liquid_glass">Kaca Cair</string>
 

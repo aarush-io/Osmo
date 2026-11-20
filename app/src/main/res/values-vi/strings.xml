@@ -267,8 +267,11 @@
     <string name="glass_tint_green">Xanh lá</string>
     <string name="glass_tint_black">Đen</string>
     <string name="full_screen_cover_art">Ảnh bìa toàn màn hình</string>
-    <string name="legacy_mesh_gradient">Dải màu lưới kiểu cũ</string>
-    <string name="legacy_mesh_gradient_subtitle">Mang lại các đốm màu chuyển động phía sau trình phát từ phiên bản 1.5</string>
+    <string name="player_blur_style">Kiểu làm mờ trình phát</string>
+    <string name="player_theme_default">Mặc định</string>
+    <string name="player_theme_legacy">Cổ điển</string>
+    <string name="player_theme_simple">Đơn giản</string>
+    <string name="player_blur_style_subtitle">Kiểu làm mờ bên dưới ảnh bìa album</string>
     <string name="animated_cover_art">Ảnh bìa động</string>
     <string name="synced_lyrics">Lời bài hát đồng bộ</string>
     <string name="synced_lyrics_subtitle">Làm sáng các từ trên trình phát khi đang được hát</string>
@@ -309,6 +312,8 @@
     <string name="video_quality_subtitle">Dành cho video âm nhạc và video âm nhạc hiển thị làm Canvas của bài hát. Chất lượng tối đa dùng đến 4K. Lựa chọn này dùng nhiều dữ liệu và pin hơn nhiều, và có thể chậm trên điện thoại yếu.</string>
     <string name="video_quality_mobile">Dữ liệu di động</string>
     <string name="video_quality_mobile_off_note">Khi dùng dữ liệu di động, không phát Canvas hay video. Trình phát hiển thị ảnh bìa và nhạc vẫn phát như bình thường. Canvas được lưu cùng bài hát đã tải xuống vẫn phát.</string>
+    <string name="bluetooth_video_delay">Độ trễ video Bluetooth</string>
+    <string name="bluetooth_video_delay_subtitle">Giữ video chậm lại khoảng thời gian này khi âm thanh phát qua Bluetooth, vì âm thanh Bluetooth đến muộn. Nếu hình đi trước tiếng, hãy đặt giá trị cao hơn.</string>
     <string name="video_quality_max">Chất lượng tối đa</string>
     <string name="high_performance_mode">Chế độ hiệu năng cao</string>
     <string name="high_performance_subtitle">Yêu cầu tần số quét màn hình cao hơn</string>

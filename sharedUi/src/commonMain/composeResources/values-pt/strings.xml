@@ -55,20 +55,6 @@
     <string name="lyrics_already_in_language">Esta letra já está em %1$s</string>
     <string name="lyrics_already_romanized">Esta letra já usa caracteres latinos</string>
     <string name="lyrics_by">Letras de %1$s</string>
-    <string-array name="lyrics_intro_lines">
-        <item>A batida está chegando</item>
-        <item>A música está começando</item>
-        <item>Aquecendo</item>
-        <item>Preparando o clima</item>
-        <item>Baixo primeiro, palavras depois</item>
-        <item>Espere por isso</item>
-        <item>Sinta a construção</item>
-        <item>Apenas o groove por enquanto</item>
-        <item>O refrão está a caminho</item>
-        <item>Deixe respirar</item>
-        <item>Prepare os vocais</item>
-        <item>Primeiras notas</item>
-    </string-array>
     <string-array name="lyrics_loading_lines">
         <item>Obtendo as letras</item>
         <item>Encontrando as palavras</item>

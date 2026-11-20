@@ -156,7 +156,7 @@ object LyricsRepository {
                         recording,
                         hit,
                         documents::get,
-                    )?.takeIf { fitsTrack(it, durationMs) }?.let { result(source, it) }
+                    )?.takeIf { fitsTrack(it, durationMs) }?.let { result(source, it, title, artist) }
                     onSourceResult?.invoke(source, found)
                     found
                 } catch (cancelled: CancellationException) {
@@ -239,14 +239,15 @@ object LyricsRepository {
     }
 
     /**
-     * Whichever source won, its lines get the same last pass: the answering
-     * vocal split off the lead so it can be drawn under it. Done here rather
-     * than in each parser because most of them write it as a bracket and only
+     * Whichever source won, its lines get the same last pass: the credits at
+     * the start taken out ([withoutLeadingCredits]), and the answering vocal
+     * split off the lead so it can be drawn under it. Done here rather than in
+     * each parser because most of them write it as a bracket and only
      * [TtmlLyrics] knows it structurally — [withBackgroundVocals] leaves that
      * one's own split alone.
      */
-    private fun result(source: LyricsSource, lines: List<LyricLine>) =
-        Result(source, lines.withBackgroundVocals())
+    private fun result(source: LyricsSource, lines: List<LyricLine>, title: String, artist: String) =
+        Result(source, lines.withoutLeadingCredits(title, artist).withBackgroundVocals())
 
     /**
      * Longest the lookup will wait to find out which recording this is.

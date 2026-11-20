@@ -632,6 +632,14 @@ object AppSettings {
     /** The video quality on mobile data, which is a metered connection. */
     val videoQualityMobile = MutableStateFlow(VideoQuality.MOBILE_DEFAULT)
 
+    /**
+     * How far the music video picture is held back while the sound goes to a
+     * Bluetooth output, from Settings, Performance. Bluetooth sound comes out
+     * late, and on many headsets the phone does not know by how much, so the
+     * audio position runs ahead of what is heard. Zero is off.
+     */
+    val bluetoothVideoDelayMs = MutableStateFlow(DEFAULT_BLUETOOTH_VIDEO_DELAY_MS)
+
     /** The video quality for the connection the phone has now. */
     val videoQualityNow: VideoQuality
         get() = VideoQuality.forConnection(videoQualityWifi.value, videoQualityMobile.value, meteredConnection.value)
@@ -706,21 +714,22 @@ object AppSettings {
     val fullBleedArtwork = MutableStateFlow(true)
 
     /**
-     * Puts v1.5's backdrop back on the player: four quantised blobs drifting
-     * behind the whole screen, rather than the artwork's own colours hung off
-     * the sleeve's bottom edge.
+     * What the main player stands on below the artwork — see [PlayerTheme].
      *
-     * Off by default, because the current backdrop replaced it for two reasons
-     * that have not gone away — see [ArtworkMesh][com.music.bitchord.ui.player.ArtworkMesh]
+     * [PlayerTheme.DEFAULT] by default, because the other two each give
+     * something up. [PlayerTheme.LEGACY] (v1.5's four quantised blobs) lost
+     * its place for two reasons that have not gone away — see [ArtworkMesh][com.music.bitchord.ui.player.ArtworkMesh]
      * for the colour one (a cover that is nine-tenths black with a red stripe
      * comes back from the quantiser as a red screen) and
      * [ArtworkMeshBackdrop][com.music.bitchord.ui.player.ArtworkMeshBackdrop]
      * for the cost one (blobs that drift are a full-screen blur redrawn while
      * they move, where a mesh is drawn once per track and then composited).
-     * Kept as a switch because people asked for the old look back, and neither
-     * reason is one a listener has to agree with.
+     * [PlayerTheme.SIMPLE] gives up the sleeve's colours running on below it,
+     * for the plain blurred cover the lyrics and queue already use.
+     * Kept as a choice because people asked for the older looks back, and
+     * neither reason is one a listener has to agree with.
      */
-    val legacyMeshGradient = MutableStateFlow(false)
+    val playerTheme = MutableStateFlow(PlayerTheme.DEFAULT)
 
     /** Restores the expanded player to the surface the listener left open. */
     val lastPlayerScreen = MutableStateFlow(LastPlayerScreen.MAIN)
@@ -1192,6 +1201,8 @@ object AppSettings {
                 allowed = VideoQuality.MOBILE_CHOICES,
             )
         spotifyCanvasAutoHide.value = prefs.getBoolean(KEY_SPOTIFY_CANVAS_AUTO_HIDE, true)
+        bluetoothVideoDelayMs.value = prefs.getInt(KEY_BLUETOOTH_VIDEO_DELAY_MS, DEFAULT_BLUETOOTH_VIDEO_DELAY_MS)
+            .coerceIn(0, MAX_BLUETOOTH_VIDEO_DELAY_MS)
         prioritizeSpotifyCanvas.value = prefs.getBoolean(KEY_PRIORITIZE_SPOTIFY_CANVAS, false)
         animatedArt.value = com.music.bitchord.data.canvas.AnimatedArtPrefs(
             // Before the order existed, the Spotify screen's switch was the
@@ -1226,7 +1237,12 @@ object AppSettings {
             prefs.getString(KEY_SIGNATURE_API_URL, DEFAULT_SIGNATURE_API_URL).orEmpty(),
         )
         fullBleedArtwork.value = prefs.getBoolean(KEY_FULL_BLEED_ARTWORK, true)
-        legacyMeshGradient.value = prefs.getBoolean(KEY_LEGACY_MESH_GRADIENT, false)
+        // The old legacy mesh switch answers until a theme has been picked.
+        playerTheme.value = runCatching {
+            PlayerTheme.valueOf(prefs.getString(KEY_PLAYER_THEME, null).orEmpty())
+        }.getOrElse {
+            if (prefs.getBoolean(KEY_LEGACY_MESH_GRADIENT, false)) PlayerTheme.LEGACY else PlayerTheme.DEFAULT
+        }
         lastPlayerScreen.value = runCatching {
             LastPlayerScreen.valueOf(
                 prefs.getString(KEY_LAST_PLAYER_SCREEN, null) ?: LastPlayerScreen.MAIN.name,
@@ -1883,6 +1899,13 @@ object AppSettings {
         prefs.edit().putString(KEY_VIDEO_QUALITY_MOBILE, value.name).apply()
     }
 
+    fun setBluetoothVideoDelayMs(value: Int) {
+        val normalized = value.coerceIn(0, MAX_BLUETOOTH_VIDEO_DELAY_MS)
+        if (bluetoothVideoDelayMs.value == normalized) return
+        bluetoothVideoDelayMs.value = normalized
+        prefs.edit().putInt(KEY_BLUETOOTH_VIDEO_DELAY_MS, normalized).apply()
+    }
+
     fun setSpotifyCanvasAutoHide(value: Boolean) {
         spotifyCanvasAutoHide.value = value
         prefs.edit().putBoolean(KEY_SPOTIFY_CANVAS_AUTO_HIDE, value).apply()
@@ -1966,9 +1989,9 @@ object AppSettings {
         prefs.edit().putBoolean(KEY_FULL_BLEED_ARTWORK, value).apply()
     }
 
-    fun setLegacyMeshGradient(value: Boolean) {
-        legacyMeshGradient.value = value
-        prefs.edit().putBoolean(KEY_LEGACY_MESH_GRADIENT, value).apply()
+    fun setPlayerTheme(value: PlayerTheme) {
+        playerTheme.value = value
+        prefs.edit().putString(KEY_PLAYER_THEME, value.name).apply()
     }
 
     fun setLastPlayerScreen(value: LastPlayerScreen) {
@@ -2521,6 +2544,8 @@ object AppSettings {
 
     const val MIN_LYRICS_OFFSET_MS = -5_000
     const val MAX_LYRICS_OFFSET_MS = 5_000
+    const val DEFAULT_BLUETOOTH_VIDEO_DELAY_MS = 150
+    const val MAX_BLUETOOTH_VIDEO_DELAY_MS = 500
 
     const val DEFAULT_UPGRADE_LENGTH_SLACK_SECONDS = 3
     const val MIN_UPGRADE_LENGTH_SLACK_SECONDS = 0
@@ -2598,6 +2623,7 @@ object AppSettings {
     private const val KEY_CANVAS_OVER_CELLULAR = "canvas_over_cellular"
     private const val KEY_VIDEO_QUALITY_WIFI = "video_quality_wifi"
     private const val KEY_VIDEO_QUALITY_MOBILE = "video_quality_mobile"
+    private const val KEY_BLUETOOTH_VIDEO_DELAY_MS = "bluetooth_video_delay_ms"
     private const val KEY_SPOTIFY_CANVAS_AUTO_HIDE = "spotify_canvas_auto_hide"
     private const val KEY_PRIORITIZE_SPOTIFY_CANVAS = "prioritize_spotify_canvas"
     private const val KEY_ANIMATED_ART_ORDER = "animated_art_order"
@@ -2607,6 +2633,7 @@ object AppSettings {
     private const val KEY_SPOTIFY_PLAYED_PLAYLIST = "spotify_played_playlist"
     private const val KEY_SPOTIFY_PLAYED_KEEP = "spotify_played_keep"
     private const val KEY_FULL_BLEED_ARTWORK = "full_bleed_artwork"
+    private const val KEY_PLAYER_THEME = "player_theme"
     private const val KEY_LEGACY_MESH_GRADIENT = "legacy_mesh_gradient"
     private const val KEY_LAST_PLAYER_SCREEN = "last_player_screen"
     private const val KEY_SYNCED_LYRICS = "synced_lyrics"

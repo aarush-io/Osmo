@@ -55,20 +55,6 @@
     <string name="lyrics_already_in_language">המילים כבר ב%1$s</string>
     <string name="lyrics_already_romanized">המילים האלה כבר כתובות באותיות לטיניות</string>
     <string name="lyrics_by">מילים מאת %1$s</string>
-    <string-array name="lyrics_intro_lines">
-        <item>הקצב מתקרב</item>
-        <item>השיר מתחיל</item>
-        <item>מתחממים</item>
-        <item>קובעים את האווירה</item>
-        <item>קודם בס, אחר כך מילים</item>
-        <item>חכה לזה</item>
-        <item>תרגיש את ההתגברות</item>
-        <item>רק הגרוב בינתיים</item>
-        <item>הפזמון בדרך</item>
-        <item>תן לזה לנשום</item>
-        <item>הכן את השירה</item>
-        <item>תווים ראשונים</item>
-    </string-array>
     <string-array name="lyrics_loading_lines">
         <item>משיג את המילים</item>
         <item>מוצא את המילים</item>

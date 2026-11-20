@@ -152,17 +152,55 @@ object PodcastsDial {
      * episode ([fresh]), then [picks], without what was taken off the dial
      * ([hidden]), up to the size of a dial. A pinned show stays where its pin
      * is.
+     *
+     * [shown] is the dial as it was last drawn. A show that is not pinned and
+     * was on it keeps its place there: YouTube Music gives its shows in a
+     * different order from one answer to the next, and the tiles must not
+     * change places when the feed comes in. Only the shows that are new to
+     * the dial take the places that the shows which went off it left, in
+     * their order.
      */
     fun tiles(
         pins: List<ShelfItem>,
         picks: List<ShelfItem>,
         hidden: Set<String>,
         fresh: List<ShelfItem> = emptyList(),
-    ): List<ShelfItem> =
-        (pins + fresh + picks)
+        shown: List<ShelfItem> = emptyList(),
+    ): List<ShelfItem> {
+        val wanted = (pins + fresh + picks)
             .filter { it.isPodcastShow && it.speedDialId !in hidden }
             .distinctBy { it.speedDialId }
             .take(CustomizationSettings.SPEED_DIAL_SIZE)
+        return if (shown.isEmpty()) wanted else inPlaces(wanted, pins, shown)
+    }
+
+    /**
+     * [wanted] with each tile that is not one of [pins] put back in the place
+     * it had in [shown], when that place is still free. The pins stay first,
+     * in their order. The other tiles fill the free places in their order.
+     */
+    private fun inPlaces(wanted: List<ShelfItem>, pins: List<ShelfItem>, shown: List<ShelfItem>): List<ShelfItem> {
+        val pinned = pins.mapNotNullTo(HashSet()) { it.speedDialId }
+        val lead = wanted.takeWhile { it.speedDialId in pinned }.size
+        val was = HashMap<String, Int>()
+        shown.forEachIndexed { i, item -> item.speedDialId?.let { was.putIfAbsent(it, i) } }
+        val places = arrayOfNulls<ShelfItem>(wanted.size)
+        val left = ArrayList<ShelfItem>()
+        wanted.forEachIndexed { i, item ->
+            if (i < lead) {
+                places[i] = item
+                return@forEachIndexed
+            }
+            val place = was[item.speedDialId]
+            if (place != null && place >= lead && place < places.size && places[place] == null) {
+                places[place] = item
+            } else {
+                left += item
+            }
+        }
+        val next = left.iterator()
+        return places.map { it ?: next.next() }
+    }
 
     /**
      * The shelves under the dial and the row of large cards: Home's, then the

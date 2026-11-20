@@ -17,17 +17,8 @@ import androidx.compose.ui.unit.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
 
-/** How the dials' tiles are edged. */
-enum class DialTileStyle {
-    /** The plain hairline every thumbnail has. */
-    NONE,
-
-    /** A bevelled rim that catches the light along the top. */
-    EDGE,
-
-    /** Clear glass over the art, which fills the tile: frosted only along the edge. */
-    GLASS,
-}
+/** How the dials' tiles are edged; kept with the rest of the dial layout in shared code. */
+typealias DialTileStyle = com.music.bitchord.data.settings.DialTileStyle
 
 val LocalDialTileStyle = staticCompositionLocalOf { DialTileStyle.GLASS }
 

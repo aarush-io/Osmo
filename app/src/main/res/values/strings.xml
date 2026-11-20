@@ -401,8 +401,11 @@
     <string name="glass_tint_green">Green</string>
     <string name="glass_tint_black">Black</string>
     <string name="full_screen_cover_art">Full-screen cover art</string>
-    <string name="legacy_mesh_gradient">Legacy mesh gradient</string>
-    <string name="legacy_mesh_gradient_subtitle">Brings back the drifting colour blobs behind the player from v1.5</string>
+    <string name="player_blur_style">Player blur style</string>
+    <string name="player_theme_default">Default</string>
+    <string name="player_theme_legacy">Legacy</string>
+    <string name="player_theme_simple">Simple</string>
+    <string name="player_blur_style_subtitle">The style of the blur below the album art</string>
     <string name="animated_cover_art">Animated cover art</string>
     <string name="synced_lyrics">Synced lyrics</string>
     <string name="synced_lyrics_subtitle">Lights up the words on the player as they’re sung</string>
@@ -445,6 +448,8 @@
     <string name="video_quality_wifi" translatable="false">Wi-Fi</string>
     <string name="video_quality_mobile">Mobile data</string>
     <string name="video_quality_mobile_off_note">On mobile data, no Canvas or video plays. The player shows the cover art and the music plays as usual. A Canvas saved with a downloaded song still plays.</string>
+    <string name="bluetooth_video_delay">Bluetooth video delay</string>
+    <string name="bluetooth_video_delay_subtitle">Holds the video back by this time when the sound goes to Bluetooth, because Bluetooth sound comes late. If the video moves before the sound, set a higher value.</string>
     <string name="video_quality_480" translatable="false">480p</string>
     <string name="video_quality_1080" translatable="false">1080p</string>
     <string name="video_quality_max">Max quality</string>

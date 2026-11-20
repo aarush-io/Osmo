@@ -262,6 +262,8 @@
     <string name="video_quality_subtitle">Für Musikvideos und für ein Musikvideo, das als Canvas eines Titels gezeigt wird. Maximale Qualität verwendet bis zu 4K. Sie braucht viel mehr Daten und Akku und kann auf schwachen Geräten langsam sein.</string>
     <string name="video_quality_mobile">Mobile Daten</string>
     <string name="video_quality_mobile_off_note">Mit mobilen Daten wird kein Canvas und kein Video abgespielt. Der Player zeigt das Cover, und die Musik läuft wie gewohnt. Ein mit einem heruntergeladenen Song gespeichertes Canvas wird weiterhin abgespielt.</string>
+    <string name="bluetooth_video_delay">Video-Verzögerung bei Bluetooth</string>
+    <string name="bluetooth_video_delay_subtitle">Hält das Video um diese Zeit zurück, wenn der Ton über Bluetooth läuft, weil Bluetooth-Ton später kommt. Wenn das Bild vor dem Ton läuft, stelle einen höheren Wert ein.</string>
     <string name="video_quality_max">Maximale Qualität</string>
     <string name="high_performance_mode">Hochleistungsmodus</string>
     <string name="high_performance_subtitle">Fordert eine höhere Bildwiederholrate an</string>
@@ -884,9 +886,15 @@
 
     <string name="export_compatible_downloads">Kompatible Downloads exportieren</string>
 
-    <string name="legacy_mesh_gradient">Klassischer Netzverlauf</string>
+    <string name="player_blur_style">Unschärfestil des Players</string>
 
-    <string name="legacy_mesh_gradient_subtitle">Bringt die sanft fließenden Farbflecken aus v1.5 zurück</string>
+    <string name="player_theme_default">Standard</string>
+
+    <string name="player_theme_legacy">Klassisch</string>
+
+    <string name="player_theme_simple">Einfach</string>
+
+    <string name="player_blur_style_subtitle">Der Stil der Unschärfe unter dem Albumcover</string>
 
     <string name="liquid_glass">Flüssiges Glas</string>
 

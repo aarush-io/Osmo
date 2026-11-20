@@ -55,20 +55,6 @@
     <string name="lyrics_already_in_language">Dieser Songtext ist bereits auf %1$s</string>
     <string name="lyrics_already_romanized">Dieser Songtext verwendet bereits lateinische Schrift</string>
     <string name="lyrics_by">Songtexte von %1$s</string>
-    <string-array name="lyrics_intro_lines">
-        <item>Der Beat setzt ein</item>
-        <item>Der Song startet</item>
-        <item>Aufwärmen</item>
-        <item>Stimmung wird gesetzt</item>
-        <item>Erst der Bass, dann die Worte</item>
-        <item>Warte ab</item>
-        <item>Spür den Aufbau</item>
-        <item>Erstmal nur der Groove</item>
-        <item>Der Hook ist unterwegs</item>
-        <item>Lass es wirken</item>
-        <item>Gesang, dein Einsatz</item>
-        <item>Die ersten Töne sind da</item>
-    </string-array>
     <string-array name="lyrics_loading_lines">
         <item>Songtexte werden geholt</item>
         <item>Die Worte werden gesucht</item>

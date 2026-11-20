@@ -69,20 +69,6 @@
     <string name="lyrics_already_in_language">These lyrics are already in %1$s</string>
     <string name="lyrics_already_romanized">These lyrics already use Latin characters</string>
     <string name="lyrics_by">Lyrics by %1$s</string>
-    <string-array name="lyrics_intro_lines">
-        <item>The beat is landing</item>
-        <item>The song is starting</item>
-        <item>Warming up</item>
-        <item>Setting the mood</item>
-        <item>Bass first, words later</item>
-        <item>Wait for it</item>
-        <item>Feel that build</item>
-        <item>Just the groove for now</item>
-        <item>The hook is on the way</item>
-        <item>Let it breathe</item>
-        <item>Cue the vocals</item>
-        <item>First notes in</item>
-    </string-array>
     <string-array name="lyrics_loading_lines">
         <item>Getting the lyrics</item>
         <item>Finding the words</item>

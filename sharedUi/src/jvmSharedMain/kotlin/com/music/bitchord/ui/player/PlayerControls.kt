@@ -40,6 +40,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -1307,18 +1310,47 @@ internal fun OutputCaption(
     val jamName = badge.hostFirstName
         ?.let { stringResource(Res.string.listen_together_jam, it) }
         ?: stringResource(Res.string.listen_together_jam_unnamed)
+    // The line is text, not a button with a surface, so a tap shows as the
+    // text itself pressing in and springing back — no ripple box around it.
+    val interaction = remember { MutableInteractionSource() }
+    val press = remember { Animatable(1f) }
+    LaunchedEffect(interaction) {
+        var pressIn: Job? = null
+        interaction.interactions.collect { event ->
+            when (event) {
+                is PressInteraction.Press -> pressIn = launch {
+                    press.animateTo(CAPTION_PRESSED_SCALE, tween(durationMillis = 90, easing = FastOutSlowInEasing))
+                }
+                is PressInteraction.Release, is PressInteraction.Cancel -> {
+                    // A quick tap lets go before the press-in is done: finish
+                    // it first, or the push would not show at all.
+                    val pushing = pressIn
+                    launch {
+                        pushing?.join()
+                        press.animateTo(1f, spring(dampingRatio = 0.4f, stiffness = Spring.StiffnessMedium))
+                    }
+                }
+            }
+        }
+    }
     val captionModifier = Modifier
         // The stats run longer than a device's name: codec, depth, rate,
         // bitrate and channels have to fit on the one line.
         .fillMaxWidth(if (statsLine != null) 0.92f else 0.65f)
         .onGloballyPositioned { captionCenter = it.boundsInWindow().center }
-        .clickable {
+        // Outside the scale, so the touch area stays the full line.
+        .clickable(interactionSource = interaction, indication = null) {
             haptics.play(Haptic.Tap)
             when {
                 badge.inParty -> onOpenMembers()
                 statsLine != null -> onOpenPipeline(captionCenter)
                 else -> onOpenOutput()
             }
+        }
+        .graphicsLayer {
+            // Read here so the spring redraws without recomposing.
+            scaleX = press.value
+            scaleY = press.value
         }
     if (statsLine != null) {
         Text(
@@ -1352,6 +1384,9 @@ internal fun OutputCaption(
         )
     }
 }
+
+/** How far [OutputCaption] pushes in while held. */
+private const val CAPTION_PRESSED_SCALE = 0.9f
 
 /** The three fields of a party the player draws — see [OutputPartySegments]. */
 private data class PartyBadge(

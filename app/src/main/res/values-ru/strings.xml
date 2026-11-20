@@ -272,6 +272,8 @@
     <string name="video_quality_subtitle">Для музыкальных клипов и для клипа, который показывается как Canvas песни. «Максимальное качество» использует до 4K. Оно расходует намного больше трафика и заряда и может работать медленно на слабых телефонах.</string>
     <string name="video_quality_mobile">Мобильный интернет</string>
     <string name="video_quality_mobile_off_note">В мобильной сети Canvas и видео не воспроизводятся. Плеер показывает обложку, музыка играет как обычно. Canvas, сохранённый вместе со скачанной песней, по-прежнему воспроизводится.</string>
+    <string name="bluetooth_video_delay">Задержка видео при Bluetooth</string>
+    <string name="bluetooth_video_delay_subtitle">Задерживает видео на это время, когда звук идёт через Bluetooth, потому что звук Bluetooth приходит позже. Если картинка опережает звук, задайте большее значение.</string>
     <string name="video_quality_max">Максимальное качество</string>
     <string name="high_performance_mode">Режим высокой производительности</string>
     <string name="high_performance_subtitle">Запрашивает более высокую частоту обновления экрана</string>
@@ -912,9 +914,15 @@
 
     <string name="export_compatible_downloads">Экспорт совместимых загрузок</string>
 
-    <string name="legacy_mesh_gradient">Классический сетчатый градиент</string>
+    <string name="player_blur_style">Стиль размытия плеера</string>
 
-    <string name="legacy_mesh_gradient_subtitle">Возвращает мягкие анимированные цветные пятна из v1.5</string>
+    <string name="player_theme_default">По умолчанию</string>
+
+    <string name="player_theme_legacy">Прежняя</string>
+
+    <string name="player_theme_simple">Простая</string>
+
+    <string name="player_blur_style_subtitle">Стиль размытия под обложкой альбома</string>
 
     <string name="liquid_glass">Жидкое стекло</string>
 

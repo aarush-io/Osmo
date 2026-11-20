@@ -12,6 +12,7 @@ import com.music.bitchord.data.model.Song
 import com.music.bitchord.data.model.isEpisode
 import com.music.bitchord.data.settings.AudioQuality
 import com.music.bitchord.data.settings.LastPlayerScreen
+import com.music.bitchord.data.settings.PlayerTheme
 import com.music.bitchord.data.settings.SmartAnalysis
 import com.music.bitchord.data.settings.MixBlend
 import com.music.bitchord.data.settings.MixTransitionView
@@ -243,7 +244,8 @@ interface PlayerSettingsSource {
     /** The OnePlus-style glow progress bar on the player's seek bar; wins over [wavyProgressBar]. */
     val glowProgressBar: StateFlow<Boolean> get() = GlowProgressBarDefault
     val lastPlayerScreen: StateFlow<LastPlayerScreen>
-    val legacyMeshGradient: StateFlow<Boolean>
+    /** What the main player stands on below the artwork — see [PlayerTheme]. */
+    val playerTheme: StateFlow<PlayerTheme>
     val lyricsBlur: StateFlow<Boolean>
     val lyricsOffsetMs: StateFlow<Int>
     val lyricsSourceOrder: StateFlow<List<LyricsSource>>
