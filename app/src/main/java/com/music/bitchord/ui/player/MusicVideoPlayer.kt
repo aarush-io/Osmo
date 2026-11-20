@@ -43,6 +43,8 @@ import com.music.bitchord.data.model.Song
 import com.music.bitchord.data.model.isEpisode
 import com.music.bitchord.data.settings.AppSettings
 import com.music.bitchord.data.settings.VideoQuality
+import com.music.bitchord.playback.AudioOutputStatus
+import com.music.bitchord.playback.AudioRouting
 import com.music.bitchord.playback.ChunkedDataSource
 import com.music.bitchord.playback.toSong
 import com.music.bitchord.ui.rememberIsForeground
@@ -54,6 +56,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -120,6 +124,14 @@ object MusicVideoEngine {
 
     /** Song time minus picture time for [loadedFor]; zero until measured. */
     private var pictureOffsetMs = 0L
+
+    /**
+     * How long the sound takes to come out of the output after the audio
+     * position says it played: [AppSettings.bluetoothVideoDelayMs] while the
+     * route is Bluetooth, else zero. The picture is held back by this much, so
+     * it shows what is heard, not what was handed to the output.
+     */
+    private var outputDelayMs = 0L
     private var measureJob: Job? = null
     private var appContext: Context? = null
     private var loadJob: Job? = null
@@ -244,6 +256,22 @@ object MusicVideoEngine {
         // A song gaining its music video as a stand-in Canvas, or a fix from
         // the ⋯ menu, is followed at once too.
         scope.launch { VideoCanvases.pictures.collect { refresh() } }
+        // Headphones connected or removed mid-song, or the delay changed in
+        // Settings: line the picture up again now.
+        scope.launch {
+            combine(
+                AudioOutputStatus.current,
+                AppSettings.bluetoothVideoDelayMs,
+            ) { status, delayMs ->
+                if (status.routeKind == AudioRouting.Kind.BLUETOOTH) delayMs.toLong() else 0L
+            }.distinctUntilChanged().collect { delayMs ->
+                if (delayMs == outputDelayMs) return@collect
+                TrackLog.d(TAG, "video: output delay ${outputDelayMs}ms -> ${delayMs}ms")
+                outputDelayMs = delayMs
+                lastSeekAt = 0L
+                sync()
+            }
+        }
         scope.launch {
             CanvasAudioFixes.state.collect {
                 val song = loadedFor
@@ -395,9 +423,14 @@ object MusicVideoEngine {
         load(pictureId, standInFor)
     }
 
-    /** The picture's moment for an audio position — see [pictureOffsetMs]. */
+    /**
+     * The picture's moment for an audio position — see [pictureOffsetMs] —
+     * held back by [outputDelayMs], the time the sound still needs to reach
+     * the ears. Never before the picture's start: a paused song in its
+     * first moments would otherwise ask for a seek on every tick.
+     */
     private fun pictureTime(audioPos: Long): Long =
-        if (loadedFor == null) audioPos else audioPos - pictureOffsetMs
+        ((if (loadedFor == null) audioPos else audioPos - pictureOffsetMs) - outputDelayMs).coerceAtLeast(0L)
 
     /**
      * Lines a stand-in picture up with the song it stands in for: the
