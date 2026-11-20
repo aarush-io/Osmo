@@ -168,7 +168,7 @@ internal object DesktopDiscordRpc {
                     state = song.artist,
                     detailsUrl = watchUrl(song),
                     // No usable artwork sends none, and Discord draws the
-                    // BitChord application's icon instead.
+                    // Osmo application's icon instead.
                     largeImage = song.artworkAt(ART_PX)
                         ?.takeIf { it.startsWith("http") }
                         ?.let(RpcImage::ExternalImage),
@@ -288,7 +288,7 @@ internal object DesktopDiscordRpc {
     private const val KEY_USERNAME = "discord_username"
     private const val KEY_ENABLED = "discord_rpc_enabled"
 
-    private const val PROJECT_URL = "https://github.com/kushagrasinghx/BitChord"
+    private const val PROJECT_URL = "https://github.com/aarush-io/Osmo"
     private const val ART_PX = 480
     private const val CLIENT_VERSION = "0.0.83"
     private const val CLIENT_BUILD = "352675"

@@ -4,20 +4,20 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 /** What the packages, the launcher and the settings footer all say. */
-val appVersion: String = providers.gradleProperty("bitchord.version").orNull
+val appVersion: String = providers.gradleProperty("osmo.version").orNull
     ?.removePrefix("v")
     ?.takeIf { it.isNotBlank() }
-    ?: "1.8-beta1"
+    ?: "1.0.0"
 
 /** Which platform this build is *for*, which is the host unless told otherwise. */
 val hostIsWindows = System.getProperty("os.name").contains("Windows", ignoreCase = true)
 val hostIsLinux = System.getProperty("os.name").contains("Linux", ignoreCase = true)
 val hostIsMac = System.getProperty("os.name").contains("Mac", ignoreCase = true)
-val targetOs: String = (providers.gradleProperty("bitchord.target").orNull ?: when {
+val targetOs: String = (providers.gradleProperty("osmo.target").orNull ?: when {
     hostIsWindows -> "windows"
     hostIsLinux -> "linux"
     hostIsMac -> "macos"
-    else -> error("BitChord desktop supports Linux, Windows, and macOS only")
+    else -> error("Osmo desktop supports Linux, Windows, and macOS only")
 }).lowercase()
 
 val hostArch = System.getProperty("os.arch").lowercase()
@@ -26,7 +26,7 @@ val isArm64 = hostArch == "aarch64" || hostArch == "arm64"
 // Windows installer metadata requires MAJOR.MINOR.BUILD even though the app's public version is
 // intentionally displayed without a patch number (1.7 rather than 1.7.0).
 // The build number is the desktop version code; it also keeps "-beta1" out of the numeric installer version.
-val desktopVersionCode = 29
+val desktopVersionCode = 30
 val nativePackageVersion = appVersion.substringBefore('-').split('.').take(2).joinToString(".") + ".$desktopVersionCode"
 
 // FFmpeg decodes audio; see DesktopAudioDecoder.
@@ -36,7 +36,7 @@ val nativeClassifier = when (targetOs) {
     "windows" -> "windows-x86_64"
     "linux" -> "linux-x86_64"
     "macos" -> if (isArm64) "macosx-arm64" else "macosx-x86_64"
-    else -> error("BitChord desktop supports Linux, Windows, and macOS only")
+    else -> error("Osmo desktop supports Linux, Windows, and macOS only")
 }
 private fun localProperty(name: String): String = rootProject.file("local.properties")
     .takeIf { it.isFile }
@@ -388,7 +388,7 @@ val windowsPortableAssemble by tasks.registering {
     group = "distribution"
     description = "Lays out a Windows-runnable folder: application jars, Windows natives, launcher."
     dependsOn(tasks.named("jar"))
-    val stage = windowsPortableDir.map { it.dir("BitChord") }
+    val stage = windowsPortableDir.map { it.dir("Osmo") }
     val appJar = tasks.named<Jar>("jar").flatMap { it.archiveFile }
     val runtime = configurations.named("runtimeClasspath")
     val version = appVersion
@@ -417,19 +417,19 @@ val windowsPortableAssemble by tasks.registering {
             val name = if (group.isNullOrBlank()) artifact.file.name else "$group.${artifact.file.name}"
             artifact.file.copyTo(File(lib, name), overwrite = true)
         }
-        appJar.get().asFile.copyTo(File(lib, "bitchord-app.jar"), overwrite = true)
+        appJar.get().asFile.copyTo(File(lib, "osmo-app.jar"), overwrite = true)
 
         // `lib\*` rather than a spelled-out classpath: the wildcard is what keeps this working when
         // a dependency is added, and the JVM is what expands it.
-        File(target, "BitChord.bat").writeText(
+        File(target, "Osmo.bat").writeText(
             buildString {
                 appendLine("@echo off")
                 appendLine("setlocal")
-                appendLine("rem BitChord, portable. Needs a Java 21+ runtime on PATH or in JAVA_HOME.")
+                appendLine("rem Osmo, portable. Needs a Java 21+ runtime on PATH or in JAVA_HOME.")
                 appendLine("set \"HERE=%~dp0\"")
                 appendLine("set \"RUNNER=java\"")
                 appendLine("if defined JAVA_HOME set \"RUNNER=%JAVA_HOME%\\bin\\java\"")
-                append("\"%RUNNER%\" -Dbitchord.version=$version")
+                append("\"%RUNNER%\" -Dosmo.version=$version")
                 if (moduleIndex.isNotBlank()) append(" -Dbitchord.module.index=$moduleIndex")
                 if (lastfmKey.isNotBlank() && lastfmSharedSecret.isNotBlank()) {
                     append(" -Dbitchord.lastfm.key=$lastfmKey -Dbitchord.lastfm.secret=$lastfmSharedSecret")
@@ -447,7 +447,7 @@ val windowsPortableAssemble by tasks.registering {
         }
         val problems = buildList {
             if (!holds("com/music/bitchord/desktop/MainKt.class")) {
-                add("the BitChord desktop entry point is missing")
+                add("the Osmo desktop entry point is missing")
             }
             if (!holds("androidx/compose/runtime/Composer.class")) {
                 add("the Compose runtime is missing")
@@ -483,7 +483,7 @@ val windowsPortable by tasks.registering(Zip::class) {
     description = "Zips the portable Windows folder for copying to a Windows machine."
     dependsOn(windowsPortableAssemble)
     from(windowsPortableDir)
-    archiveFileName.set("BitChord-$appVersion-windows-portable.zip")
+    archiveFileName.set("Osmo-$appVersion-windows-portable.zip")
     destinationDirectory.set(layout.buildDirectory.dir("distributions"))
     doLast { logger.lifecycle("windowsPortable: ${archiveFile.get().asFile.absolutePath}") }
 }
@@ -498,7 +498,7 @@ compose.desktop {
         mainClass = composeMainClass
         jvmArgs("-Xmx512m")
         jvmArgs("-XX:+UseG1GC", "-XX:G1PeriodicGCInterval=20000", "-XX:G1PeriodicGCSystemLoadThreshold=0")
-        jvmArgs("-Dbitchord.version=$appVersion")
+        jvmArgs("-Dosmo.version=$appVersion")
         if (desktopModuleIndexUrl.isNotBlank()) {
             jvmArgs("-Dbitchord.module.index=$desktopModuleIndexUrl")
         }
@@ -525,11 +525,11 @@ compose.desktop {
                 TargetFormat.Deb,
                 TargetFormat.Rpm,
             )
-            packageName = "BitChord"
+            packageName = "Osmo"
             packageVersion = nativePackageVersion
-            description = if (targetOs == "windows") "BitChord" else "Aesthetic YouTube Music client"
-            vendor = "BitChord contributors"
-            copyright = "Copyright © 2026 BitChord contributors"
+            description = if (targetOs == "windows") "Osmo" else "Aesthetic YouTube Music client"
+            vendor = "Osmo contributors"
+            copyright = "Copyright © 2026 Osmo contributors"
 
             modules(
                 "java.base",
@@ -557,9 +557,9 @@ compose.desktop {
 
             macOS {
                 iconFile.set(project.file("packaging/icons/AppIcon.icns"))
-                bundleID = "com.music.bitchord"
+                bundleID = "io.aarush.osmo"
                 appCategory = "public.app-category.music"
-                dockName = "BitChord"
+                dockName = "Osmo"
                 infoPlist {
                     extraKeysRawXml = """
                         <key>NSRequiresAquaSystemAppearance</key>
@@ -579,7 +579,7 @@ compose.desktop {
             windows {
                 iconFile.set(project.file("packaging/icons/AppIcon.ico"))
                 upgradeUuid = "8f3c1d24-6a2b-4f5e-9c17-2b8d54e0a913"
-                menuGroup = "BitChord"
+                menuGroup = "Osmo"
                 shortcut = true
                 dirChooser = false
                 perUserInstall = true

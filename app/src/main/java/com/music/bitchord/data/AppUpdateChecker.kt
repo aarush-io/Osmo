@@ -242,6 +242,10 @@ object AppUpdateChecker {
     private fun isNewer(latest: String, current: String): Boolean {
         val l = parseVersion(latest)
         val c = parseVersion(current)
+        // Ignore the fork's older Dial-era 1.8.x releases after Osmo resets to 1.0.x.
+        if (c.parts.firstOrNull() == 1 && c.parts.getOrElse(1) { 0 } == 0 &&
+            l.parts.firstOrNull() == 1 && l.parts.getOrElse(1) { 0 } >= 8
+        ) return false
         for (i in 0 until maxOf(l.parts.size, c.parts.size)) {
             val a = l.parts.getOrElse(i) { 0 }
             val b = c.parts.getOrElse(i) { 0 }

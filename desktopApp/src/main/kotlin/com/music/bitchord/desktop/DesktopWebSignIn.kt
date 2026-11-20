@@ -158,7 +158,7 @@ internal object DesktopWebSignIn {
             if (result.isSuccess) DesktopTrackLog.log("sign-in: ${service.name} session captured in the sign-in window")
             stage.close()
             discard()
-            // BitChord keeps its own copy of the session; the window's goes with it.
+            // Osmo keeps its own copy of the session; the window's goes with it.
             DesktopWebCookies.reset()
             finish(result)
         }

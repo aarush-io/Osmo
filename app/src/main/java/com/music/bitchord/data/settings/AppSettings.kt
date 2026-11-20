@@ -594,7 +594,7 @@ object AppSettings {
     /**
      * The country YouTube Music gets recommendations, charts and new releases
      * for: an ISO 3166 code such as "DE". Blank — the default — is automatic,
-     * the value Dial always sent before this setting. See
+     * the value inferred from the app language before this setting. See
      * [com.music.bitchord.data.ContentCountry].
      */
     val contentCountry = MutableStateFlow("")

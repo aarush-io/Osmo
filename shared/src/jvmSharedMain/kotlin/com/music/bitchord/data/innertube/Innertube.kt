@@ -84,7 +84,7 @@ object Innertube {
         get() = com.music.bitchord.data.ContentCountry.chosenOrNull() ?: automaticRegion
 
     /**
-     * The `gl` Dial sent before the country setting, from the app language
+     * The `gl` region inferred before the country setting, from the app language
      * only. Stream resolution and play reports keep it, whatever country is chosen.
      */
     val automaticRegion: String

@@ -11,7 +11,7 @@ import java.util.prefs.Preferences
 /**
  * Counts this PC toward the live open-app figure while the window is showing,
  * minimized included. Closed to the tray, it stops counting, the same as a
- * phone with BitChord in the background.
+ * phone with Osmo in the background.
  */
 internal object DesktopPresence {
     private const val KEY_INSTALL_ID = "presence_install_id"

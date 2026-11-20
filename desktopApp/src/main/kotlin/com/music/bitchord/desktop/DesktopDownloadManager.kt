@@ -12,7 +12,7 @@ import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
 
-/** Downloads resolved audio into the user's own BitChord folder. */
+/** Downloads resolved audio into the user's own Osmo folder. */
 object DesktopDownloadManager {
     private val activeJobs = ConcurrentHashMap<String, Job>()
 

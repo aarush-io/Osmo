@@ -667,7 +667,7 @@ fun SettingsScreen(
                 //
                 // Greyed rather than hidden where the device can't decode E-AC-3.
                 // A missing row reads as a feature the app doesn't have; a disabled
-                // one with a reason under it is the difference between "BitChord
+                // one with a reason under it is the difference between "Osmo
                 // has no Atmos" and "this phone has no Dolby decoder", and only the
                 // second is true. The stored preference is left untouched either
                 // way — see [AppSettings.dolbyAtmos].
@@ -4071,7 +4071,7 @@ private const val REPO_URL = "https://github.com/aarush-io/Osmo"
 private const val MIN_CHECK_SPIN_MS = 1_100L
 
 /**
- * The foot of the main settings page: Home's pixel "DIAL", large,
+ * The foot of the main settings page: Home's pixel "OSMO", large,
  * the version and a link to the repository under it, a frosted glass button
  * that checks for an update, and the 3x4 mark, small, below that. The mark
  * runs Home's refresh spinner for as long as the check takes.
@@ -4114,9 +4114,9 @@ private fun SettingsColophon(version: String, onShowUpdate: () -> Unit) {
     ) {
         Text(
             modifier = logoTap,
-            // Just the pixel "DIAL" from Home's title, set larger than it
+            // Just the pixel "OSMO" wordmark, set larger than it
             // ever is there, rather than the whole app name.
-            text = "DIAL",
+            text = "OSMO",
             color = dialColor,
             fontFamily = Tiny5Lcd,
             fontWeight = FontWeight.W400,

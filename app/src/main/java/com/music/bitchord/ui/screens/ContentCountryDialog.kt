@@ -101,7 +101,7 @@ internal fun ContentCountryDialog(
         if (query.isBlank()) {
             CountryRow(
                 label = stringResource(R.string.content_country_automatic),
-                // What automatic means today: the country Dial sends when
+                // What automatic means today: the country inferred by the app when
                 // nothing is chosen, which follows the app language.
                 detail = ContentCountry.displayName(Innertube.automaticRegion, displayLocale),
                 selected = selected.isBlank(),

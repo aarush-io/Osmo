@@ -33,9 +33,9 @@ internal object DesktopUpdateChecker {
     )
 
     private const val LATEST_RELEASE_URL =
-        "https://api.github.com/repos/kushagrasinghx/BitChord/releases/latest"
+        "https://api.github.com/repos/aarush-io/Osmo/releases/latest"
 
-    val currentVersion: String = System.getProperty("bitchord.version") ?: "1.8-beta1"
+    val currentVersion: String = System.getProperty("osmo.version") ?: "1.0.0"
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -66,8 +66,8 @@ internal object DesktopUpdateChecker {
     }.getOrNull()
 
     /**
-     * The release names its files `BitChord-<version>-windows-x64-setup.exe` and
-     * `BitChord-<version>-linux-x86_64.AppImage` (see .github/workflows/release.yml); match on the
+     * The release names its files `Osmo-<version>-windows-x64-setup.exe` and
+     * `Osmo-<version>-linux-x86_64.AppImage` (see .github/workflows/release.yml); match on the
      * platform part so a version change does not matter.
      */
     private fun installerUrl(release: JsonObject): String? {
@@ -99,6 +99,11 @@ internal object DesktopUpdateChecker {
     internal fun isNewer(latest: String, current: String): Boolean {
         val l = parse(latest)
         val c = parse(current)
+        // Osmo starts a fresh 1.0 version line while the fork still has legacy
+        // 1.8.x Dial-era releases. They are not upgrades over Osmo 1.0.x.
+        if (c.parts.firstOrNull() == 1 && c.parts.getOrElse(1) { 0 } == 0 &&
+            l.parts.firstOrNull() == 1 && l.parts.getOrElse(1) { 0 } >= 8
+        ) return false
         for (i in 0 until maxOf(l.parts.size, c.parts.size)) {
             val a = l.parts.getOrElse(i) { 0 }
             val b = c.parts.getOrElse(i) { 0 }

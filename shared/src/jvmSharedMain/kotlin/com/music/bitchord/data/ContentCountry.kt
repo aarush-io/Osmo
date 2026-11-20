@@ -7,8 +7,8 @@ import java.util.Locale
  * location, Country).
  *
  * YouTube Music sends Home, Explore, charts, new releases and radios for the
- * country in the `gl` field of each request context. Before this setting, Dial
- * always sent "US" (or "TW" / "SG" for Chinese), whatever the phone's country.
+ * country in the `gl` field of each request context. Before this setting, the
+ * app always sent "US" (or "TW" / "SG" for Chinese), whatever the phone's country.
  * Null keeps that automatic value.
  *
  * Stream resolution does not use the chosen country (see

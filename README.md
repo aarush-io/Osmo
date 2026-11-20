@@ -1,6 +1,9 @@
 <div align="center">
 
-<h1>Osmo</h1>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/osmo-logo-dark.svg">
+  <img alt="Osmo" src="docs/osmo-logo-light.svg" width="480">
+</picture>
 
 ### Your music, in focus
 
@@ -12,7 +15,7 @@
 </div>
 
 > [!NOTE]
-> Osmo builds on [Dial](https://github.com/steeben/Dial), itself based on [BitChord](https://github.com/kushagrasinghx/BitChord) by [kushagrasinghx](https://github.com/kushagrasinghx). The GPL-3.0 license and upstream history are retained. Everything from BitChord (Hi-Res audio, crossfade, word-synced lyrics, Spotify, scrobbling and more) is still here. For BitChord's full feature list, see its [original README](https://github.com/kushagrasinghx/BitChord#features).
+> Osmo continues the GPL-3.0-licensed [upstream music player](https://github.com/steeben/Dial), itself based on [BitChord](https://github.com/kushagrasinghx/BitChord) by [kushagrasinghx](https://github.com/kushagrasinghx). The upstream history is retained. Everything from BitChord (Hi-Res audio, crossfade, word-synced lyrics, Spotify, scrobbling and more) is still here. For BitChord's full feature list, see its [original README](https://github.com/kushagrasinghx/BitChord#features).
 
 > [!IMPORTANT]
 > Not affiliated with, endorsed by, or connected to YouTube or Google in any way. Use it at your own discretion.
@@ -51,6 +54,26 @@ And more, on top of everything BitChord already does.
 
 ---
 
+## Screenshots
+
+These screenshots come from [Dial's repository](https://github.com/steeben/Dial) and show the shared app interface.
+
+<div align="center">
+
+<img src="docs/screenshots/home-dials.jpg" width="100%" alt="Home: speed dial in light and dark themes, mixes, and pinned artists" />
+
+<img src="docs/screenshots/library.jpg" width="100%" alt="Library: For You, library views, songs, and song details" />
+
+<img src="docs/screenshots/pages-wide.jpg" width="100%" alt="Pages: a playlist, an album, and an artist" />
+
+<img src="docs/screenshots/player.jpg" width="100%" alt="Player: now playing, Canvas, queue, and video with lyrics" />
+
+<img src="docs/screenshots/customize.jpg" width="100%" alt="Customize: home, app icons, progress styles, and appearance settings" />
+
+</div>
+
+---
+
 ## Install and updates
 
 Download the latest APK from the [Osmo Releases](https://github.com/aarush-io/Osmo/releases) page. Each release has four APK files:
@@ -72,7 +95,7 @@ To build it yourself, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Credits
 
-This project builds on [Dial](https://github.com/steeben/Dial) and [BitChord](https://github.com/kushagrasinghx/BitChord) and their contributors. The lyrics providers, audio sources and other dependencies are credited in BitChord's [upstream README](https://github.com/kushagrasinghx/BitChord#features). The uploaded-songs fix draws on how [Metrolist](https://github.com/MetrolistGroup/Metrolist) and its InnerTube library handle uploads.
+This project builds on the [upstream music player](https://github.com/steeben/Dial), [BitChord](https://github.com/kushagrasinghx/BitChord) and their contributors. The lyrics providers, audio sources and other dependencies are credited in BitChord's [upstream README](https://github.com/kushagrasinghx/BitChord#features). The uploaded-songs fix draws on how [Metrolist](https://github.com/MetrolistGroup/Metrolist) and its InnerTube library handle uploads.
 
 If you like BitChord, consider [supporting its author](https://github.com/kushagrasinghx/BitChord#support).
 

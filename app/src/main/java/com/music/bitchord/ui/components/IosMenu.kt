@@ -127,7 +127,7 @@ val IosMenuWidth = 256.dp
 /**
  * The menu's material, without its contents.
  *
- * With Liquid Glass on, it is Dial's liquid glass, sampling [backdrop] (the
+ * With Liquid Glass on, it is Osmo's liquid glass, sampling [backdrop] (the
  * app's pages, or the player's own) and following the user's Liquid Glass
  * options — transparency, tint and blur. With it off, it is the frosted slab
  * iOS draws: [hazeState] blurred under a translucent fill when there is a page
