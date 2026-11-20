@@ -50,6 +50,7 @@ import androidx.compose.material.icons.rounded.Backup
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.AutoAwesome
 import com.music.bitchord.data.settings.AppStyle
+import androidx.compose.material.icons.rounded.Bluetooth
 import androidx.compose.material.icons.rounded.BlurOn
 import androidx.compose.material.icons.rounded.Brightness4
 import androidx.compose.material.icons.rounded.Cached
@@ -322,6 +323,7 @@ fun SettingsScreen(
     val canvasOverCellular by AppSettings.canvasOverCellular.collectAsStateWithLifecycle()
     val videoQualityWifi by AppSettings.videoQualityWifi.collectAsStateWithLifecycle()
     val videoQualityMobile by AppSettings.videoQualityMobile.collectAsStateWithLifecycle()
+    val bluetoothVideoDelayMs by AppSettings.bluetoothVideoDelayMs.collectAsStateWithLifecycle()
     val fullBleedArtwork by AppSettings.fullBleedArtwork.collectAsStateWithLifecycle()
     val playerTheme by AppSettings.playerTheme.collectAsStateWithLifecycle()
     val syncedLyrics by AppSettings.syncedLyrics.collectAsStateWithLifecycle()
@@ -1747,6 +1749,29 @@ fun SettingsScreen(
                         modifier = Modifier.padding(start = TEXT_INSET, end = ROW_INSET, bottom = 14.dp),
                     )
                 }
+            }
+            val bluetoothVideoDelayTitle = stringResource(R.string.bluetooth_video_delay)
+            row(
+                bluetoothVideoDelayTitle, "bluetooth", "delay", "latency", "sync", "lip sync", "video",
+                "headphones", "earbuds", "audio", "late",
+            ) {
+                SliderRow(
+                    icon = Icons.Rounded.Bluetooth,
+                    title = bluetoothVideoDelayTitle,
+                    subtitle = stringResource(R.string.bluetooth_video_delay_subtitle),
+                    value = if (bluetoothVideoDelayMs == 0) {
+                        stringResource(R.string.off)
+                    } else {
+                        "$bluetoothVideoDelayMs ms"
+                    },
+                    sliderValue = bluetoothVideoDelayMs.toFloat(),
+                    onSliderValue = { value ->
+                        AppSettings.setBluetoothVideoDelayMs((value / 10f).roundToInt() * 10)
+                    },
+                    valueRange = 0f..AppSettings.MAX_BLUETOOTH_VIDEO_DELAY_MS.toFloat(),
+                    // 10 ms stops.
+                    steps = AppSettings.MAX_BLUETOOTH_VIDEO_DELAY_MS / 10 - 1,
+                )
             }
             val staticBackgroundTitle = stringResource(R.string.static_background)
             row(staticBackgroundTitle, "background", "colour", "color", "ambient", "blobs", "animation", "still", "move") {
